@@ -1,0 +1,252 @@
+openapi: 3.0.3
+info:
+  title: AccountBox - Accounts API
+  description: 账号管理API，支持CRUD、软删除和分页查询
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api
+
+paths:
+  /accounts:
+    get:
+      summary: 获取账号列表（分页，可按网站过滤）
+      operationId: listAccounts
+      tags:
+        - Accounts
+      parameters:
+        - name: websiteId
+          in: query
+          description: 网站ID（过滤条件）
+          required: false
+          schema:
+            type: integer
+        - name: pageNumber
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedAccountResponse'
+
+    post:
+      summary: 创建账号
+      operationId: createAccount
+      tags:
+        - Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+  /accounts/{id}:
+    get:
+      summary: 获取账号详情
+      operationId: getAccount
+      tags:
+        - Accounts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+    put:
+      summary: 更新账号
+      operationId: updateAccount
+      tags:
+        - Accounts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccountRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+    delete:
+      summary: 软删除账号（移入回收站）
+      operationId: softDeleteAccount
+      tags:
+        - Accounts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+components:
+  schemas:
+    AccountResponse:
+      type: object
+      required:
+        - id
+        - websiteId
+        - username
+        - password
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+          example: 1
+        websiteId:
+          type: integer
+          example: 1
+        websiteName:
+          type: string
+          description: 所属网站显示名（冗余字段，方便展示）
+          example: GitHub
+        username:
+          type: string
+          maxLength: 255
+          example: john.doe@example.com
+        password:
+          type: string
+          description: 解密后的密码（传输时需HTTPS保护）
+          example: MyP@ssw0rd!
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+          example: 工作账号
+        tags:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: 主账号,重要
+        isDeleted:
+          type: boolean
+          example: false
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateAccountRequest:
+      type: object
+      required:
+        - websiteId
+        - username
+        - password
+      properties:
+        websiteId:
+          type: integer
+          example: 1
+        username:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: john.doe@example.com
+        password:
+          type: string
+          minLength: 1
+          example: MyP@ssw0rd!
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+          example: 工作账号
+        tags:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: 主账号,重要
+
+    UpdateAccountRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 255
+        password:
+          type: string
+          minLength: 1
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+        tags:
+          type: string
+          maxLength: 500
+          nullable: true
+
+    PagedAccountResponse:
+      type: object
+      required:
+        - items
+        - totalCount
+        - pageNumber
+        - pageSize
+        - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountResponse'
+        totalCount:
+          type: integer
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+
+security:
+  - VaultSession: []

@@ -1,0 +1,148 @@
+openapi: 3.0.3
+info:
+  title: AccountBox - RecycleBin API
+  description: 回收站API，支持查看、恢复和永久删除软删除的账号
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api
+
+paths:
+  /recycle-bin:
+    get:
+      summary: 获取回收站账号列表（分页）
+      operationId: listDeletedAccounts
+      tags:
+        - RecycleBin
+      parameters:
+        - name: websiteId
+          in: query
+          description: 按网站过滤（可选）
+          required: false
+          schema:
+            type: integer
+        - name: pageNumber
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedDeletedAccountResponse'
+
+    delete:
+      summary: 清空回收站（强二次确认）
+      operationId: emptyRecycleBin
+      tags:
+        - RecycleBin
+      parameters:
+        - name: confirmed
+          in: query
+          description: 是否确认清空
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '204':
+          description: 清空成功
+        '400':
+          description: 未确认
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /recycle-bin/{id}/restore:
+    post:
+      summary: 恢复账号
+      operationId: restoreAccount
+      tags:
+        - RecycleBin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 恢复成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+
+  /recycle-bin/{id}:
+    delete:
+      summary: 永久删除账号
+      operationId: permanentlyDeleteAccount
+      tags:
+        - RecycleBin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+components:
+  schemas:
+    PagedDeletedAccountResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeletedAccountResponse'
+        totalCount:
+          type: integer
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+
+    DeletedAccountResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        websiteId:
+          type: integer
+        websiteName:
+          type: string
+        username:
+          type: string
+        deletedAt:
+          type: string
+          format: date-time
+
+    AccountResponse:
+      type: object
+      description: 恢复后的完整账号信息（参考accounts.yaml）
+
+    ErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        message:
+          type: string
+
+security:
+  - VaultSession: []

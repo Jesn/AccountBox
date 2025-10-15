@@ -1,0 +1,99 @@
+openapi: 3.0.3
+info:
+  title: AccountBox - Search API
+  description: 全文搜索API，支持在网站和账号中搜索
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api
+
+paths:
+  /search:
+    get:
+      summary: 全文搜索（回车触发，后端分页）
+      operationId: search
+      tags:
+        - Search
+      parameters:
+        - name: query
+          in: query
+          description: 搜索关键词（自动去除首尾空格，大小写不敏感）
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: pageNumber
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 搜索成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResultResponse'
+
+components:
+  schemas:
+    SearchResultResponse:
+      type: object
+      required:
+        - items
+        - totalCount
+        - pageNumber
+        - pageSize
+        - totalPages
+        - query
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResultItem'
+        totalCount:
+          type: integer
+          description: 匹配的总记录数
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+        query:
+          type: string
+          description: 实际执行的搜索关键词（已处理）
+
+    SearchResultItem:
+      type: object
+      description: 搜索结果项（仅包含账号，不包含软删除记录）
+      properties:
+        accountId:
+          type: integer
+        websiteId:
+          type: integer
+        websiteName:
+          type: string
+        websiteDomain:
+          type: string
+        username:
+          type: string
+        tags:
+          type: string
+        matchedFields:
+          type: array
+          items:
+            type: string
+            enum: [username, notes, tags, websiteName, websiteDomain]
+          description: 匹配的字段列表
+
+security:
+  - VaultSession: []

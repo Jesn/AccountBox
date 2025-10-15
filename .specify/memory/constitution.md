@@ -150,6 +150,7 @@ src/
 - Footer (optional): references to issues, breaking changes
 
 **Commit Examples**:
+- git commit的内容用中文
 ```bash
 # After completing T001 (backend structure setup)
 git add . && git commit -m "chore[setup]: create backend project structure
