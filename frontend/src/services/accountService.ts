@@ -48,30 +48,25 @@ class AccountService {
       params.append('websiteId', websiteId.toString())
     }
 
-    const response = await apiClient.get<ApiResponse<PagedResult<AccountResponse>>>(
+    return await apiClient.get<PagedResult<AccountResponse>>(
       `${this.baseUrl}?${params.toString()}`
     )
-    return response.data!
   }
 
   async getById(id: number): Promise<ApiResponse<AccountResponse>> {
-    const response = await apiClient.get<ApiResponse<AccountResponse>>(`${this.baseUrl}/${id}`)
-    return response.data!
+    return await apiClient.get<AccountResponse>(`${this.baseUrl}/${id}`)
   }
 
   async create(request: CreateAccountRequest): Promise<ApiResponse<AccountResponse>> {
-    const response = await apiClient.post<ApiResponse<AccountResponse>>(this.baseUrl, request)
-    return response.data!
+    return await apiClient.post<AccountResponse>(this.baseUrl, request)
   }
 
   async update(id: number, request: UpdateAccountRequest): Promise<ApiResponse<AccountResponse>> {
-    const response = await apiClient.put<ApiResponse<AccountResponse>>(`${this.baseUrl}/${id}`, request)
-    return response.data!
+    return await apiClient.put<AccountResponse>(`${this.baseUrl}/${id}`, request)
   }
 
   async delete(id: number): Promise<ApiResponse<{ message: string }>> {
-    const response = await apiClient.delete<ApiResponse<{ message: string }>>(`${this.baseUrl}/${id}`)
-    return response.data!
+    return await apiClient.delete<{ message: string }>(`${this.baseUrl}/${id}`)
   }
 }
 

@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback } from 'react'
+import { createContext, useState, useCallback, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { apiClient } from '@/services/apiClient'
 
@@ -26,14 +26,30 @@ export interface VaultProviderProps {
  * Vault Provider 组件
  */
 export const VaultProvider = ({ children }: VaultProviderProps) => {
-  const [isUnlocked, setIsUnlocked] = useState(false)
-  const [vaultSessionId, setVaultSessionId] = useState<string | null>(null)
+  // 从 localStorage 恢复 session
+  const [isUnlocked, setIsUnlocked] = useState(() => {
+    const savedSession = localStorage.getItem('vaultSessionId')
+    return !!savedSession
+  })
+  const [vaultSessionId, setVaultSessionId] = useState<string | null>(() => {
+    return localStorage.getItem('vaultSessionId')
+  })
+
+  // 组件挂载时恢复 session 到 apiClient
+  useEffect(() => {
+    const savedSession = localStorage.getItem('vaultSessionId')
+    if (savedSession) {
+      apiClient.setVaultSession(savedSession)
+    }
+  }, [])
 
   const unlock = useCallback((sessionId: string) => {
     setVaultSessionId(sessionId)
     setIsUnlocked(true)
     // 设置 API 客户端的会话 ID
     apiClient.setVaultSession(sessionId)
+    // 持久化到 localStorage
+    localStorage.setItem('vaultSessionId', sessionId)
   }, [])
 
   const lock = useCallback(() => {
@@ -41,6 +57,8 @@ export const VaultProvider = ({ children }: VaultProviderProps) => {
     setIsUnlocked(false)
     // 清除 API 客户端的会话 ID
     apiClient.setVaultSession(null)
+    // 清除 localStorage
+    localStorage.removeItem('vaultSessionId')
   }, [])
 
   const value: VaultContextType = {

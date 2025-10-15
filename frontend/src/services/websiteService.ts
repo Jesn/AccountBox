@@ -34,35 +34,29 @@ class WebsiteService {
   private readonly baseUrl = '/api/websites'
 
   async getAll(pageNumber: number = 1, pageSize: number = 10): Promise<ApiResponse<PagedResult<WebsiteResponse>>> {
-    const response = await apiClient.get<ApiResponse<PagedResult<WebsiteResponse>>>(
+    return await apiClient.get<PagedResult<WebsiteResponse>>(
       `${this.baseUrl}?pageNumber=${pageNumber}&pageSize=${pageSize}`
     )
-    return response.data!
   }
 
   async getById(id: number): Promise<ApiResponse<WebsiteResponse>> {
-    const response = await apiClient.get<ApiResponse<WebsiteResponse>>(`${this.baseUrl}/${id}`)
-    return response.data!
+    return await apiClient.get<WebsiteResponse>(`${this.baseUrl}/${id}`)
   }
 
   async create(request: CreateWebsiteRequest): Promise<ApiResponse<WebsiteResponse>> {
-    const response = await apiClient.post<ApiResponse<WebsiteResponse>>(this.baseUrl, request)
-    return response.data!
+    return await apiClient.post<WebsiteResponse>(this.baseUrl, request)
   }
 
   async update(id: number, request: UpdateWebsiteRequest): Promise<ApiResponse<WebsiteResponse>> {
-    const response = await apiClient.put<ApiResponse<WebsiteResponse>>(`${this.baseUrl}/${id}`, request)
-    return response.data!
+    return await apiClient.put<WebsiteResponse>(`${this.baseUrl}/${id}`, request)
   }
 
   async delete(id: number): Promise<ApiResponse<{ message: string }>> {
-    const response = await apiClient.delete<ApiResponse<{ message: string }>>(`${this.baseUrl}/${id}`)
-    return response.data!
+    return await apiClient.delete<{ message: string }>(`${this.baseUrl}/${id}`)
   }
 
   async getAccountCount(id: number): Promise<ApiResponse<AccountCountResponse>> {
-    const response = await apiClient.get<ApiResponse<AccountCountResponse>>(`${this.baseUrl}/${id}/accounts/count`)
-    return response.data!
+    return await apiClient.get<AccountCountResponse>(`${this.baseUrl}/${id}/accounts/count`)
   }
 }
 

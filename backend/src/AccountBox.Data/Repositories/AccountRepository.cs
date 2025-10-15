@@ -60,10 +60,12 @@ public class AccountRepository
 
     /// <summary>
     /// 根据 ID 获取账号
+    /// 注意:包括软删除的账号,以便查看回收站中的项目详情
     /// </summary>
     public async Task<Account?> GetByIdAsync(int id)
     {
         return await _context.Accounts
+            .IgnoreQueryFilters() // 包括软删除的记录
             .AsNoTracking()
             .Include(a => a.Website)
             .FirstOrDefaultAsync(a => a.Id == id);

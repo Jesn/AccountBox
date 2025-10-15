@@ -16,6 +16,7 @@ namespace AccountBox.Api.Tests;
 /// 密码重试限制测试
 /// 验证防暴力破解机制
 /// </summary>
+[Collection("VaultService Tests")]
 public class PasswordRetryLimitTests : IDisposable
 {
     private readonly AccountBoxDbContext _context;
@@ -23,6 +24,9 @@ public class PasswordRetryLimitTests : IDisposable
 
     public PasswordRetryLimitTests()
     {
+        // 清除静态状态以避免测试间污染
+        VaultService.ResetFailedAttemptsForTesting();
+
         var options = new DbContextOptionsBuilder<AccountBoxDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
@@ -189,6 +193,9 @@ public class PasswordRetryLimitTests : IDisposable
 
     public void Dispose()
     {
+        // 清理测试后的静态状态
+        VaultService.ResetFailedAttemptsForTesting();
+
         _context.Database.EnsureDeleted();
         _context.Dispose();
     }

@@ -231,12 +231,12 @@ public class AccountService
     /// </summary>
     private AccountResponse MapToResponse(Data.Entities.Account account, byte[] vaultKey)
     {
-        // 解密密码
+        // 解密密码 - 注意参数顺序: (ciphertext, key, iv, tag)
         var decryptedPassword = _encryptionService.Decrypt(
             account.PasswordEncrypted,
+            vaultKey,
             account.PasswordIV,
-            account.PasswordTag,
-            vaultKey);
+            account.PasswordTag);
         var password = Encoding.UTF8.GetString(decryptedPassword);
 
         // 解密备注（如果存在）
@@ -245,9 +245,9 @@ public class AccountService
         {
             var decryptedNotes = _encryptionService.Decrypt(
                 account.NotesEncrypted,
+                vaultKey,
                 account.NotesIV,
-                account.NotesTag,
-                vaultKey);
+                account.NotesTag);
             notes = Encoding.UTF8.GetString(decryptedNotes);
         }
 

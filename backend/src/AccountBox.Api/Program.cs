@@ -100,3 +100,6 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+
+// 使 Program 类对测试项目可见
+public partial class Program { }

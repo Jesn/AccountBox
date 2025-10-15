@@ -17,6 +17,7 @@ namespace AccountBox.Api.Tests;
 /// VaultController 集成测试
 /// 测试完整的 initialize → unlock → lock → changePassword 流程
 /// </summary>
+[Collection("VaultService Tests")]
 public class VaultControllerIntegrationTests : IDisposable
 {
     private readonly AccountBoxDbContext _context;
@@ -24,6 +25,9 @@ public class VaultControllerIntegrationTests : IDisposable
 
     public VaultControllerIntegrationTests()
     {
+        // 清除静态状态以避免测试间污染
+        VaultService.ResetFailedAttemptsForTesting();
+
         // 使用内存数据库进行测试
         var options = new DbContextOptionsBuilder<AccountBoxDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -287,6 +291,9 @@ public class VaultControllerIntegrationTests : IDisposable
 
     public void Dispose()
     {
+        // 清理测试后的静态状态
+        VaultService.ResetFailedAttemptsForTesting();
+
         _context.Database.EnsureDeleted();
         _context.Dispose();
     }

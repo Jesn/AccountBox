@@ -67,7 +67,7 @@ public class AccountServiceTests : IDisposable
         });
         await _context.SaveChangesAsync();
 
-        _mockEncryption.Setup(e => e.Decrypt(encryptedPassword, iv, tag, _testVaultKey))
+        _mockEncryption.Setup(e => e.Decrypt(encryptedPassword, _testVaultKey, iv, tag))
             .Returns(Encoding.UTF8.GetBytes("mypassword"));
 
         // Act
@@ -110,9 +110,9 @@ public class AccountServiceTests : IDisposable
         _context.Accounts.Add(account);
         await _context.SaveChangesAsync();
 
-        _mockEncryption.Setup(e => e.Decrypt(encryptedPassword, iv, tag, _testVaultKey))
+        _mockEncryption.Setup(e => e.Decrypt(encryptedPassword, _testVaultKey, iv, tag))
             .Returns(Encoding.UTF8.GetBytes("secretpass"));
-        _mockEncryption.Setup(e => e.Decrypt(encryptedNotes, iv, tag, _testVaultKey))
+        _mockEncryption.Setup(e => e.Decrypt(encryptedNotes, _testVaultKey, iv, tag))
             .Returns(Encoding.UTF8.GetBytes("my notes"));
 
         // Act
@@ -157,9 +157,9 @@ public class AccountServiceTests : IDisposable
             _testVaultKey))
             .Returns((encryptedNotes, iv, tag));
 
-        _mockEncryption.Setup(e => e.Decrypt(encryptedPassword, iv, tag, _testVaultKey))
+        _mockEncryption.Setup(e => e.Decrypt(encryptedPassword, _testVaultKey, iv, tag))
             .Returns(Encoding.UTF8.GetBytes("plainpassword"));
-        _mockEncryption.Setup(e => e.Decrypt(encryptedNotes, iv, tag, _testVaultKey))
+        _mockEncryption.Setup(e => e.Decrypt(encryptedNotes, _testVaultKey, iv, tag))
             .Returns(Encoding.UTF8.GetBytes("plain notes"));
 
         // Act
@@ -216,7 +216,7 @@ public class AccountServiceTests : IDisposable
             It.Is<byte[]>(b => Encoding.UTF8.GetString(b) == "newpassword"),
             _testVaultKey))
             .Returns((newEncrypted, newIv, newTag));
-        _mockEncryption.Setup(e => e.Decrypt(newEncrypted, newIv, newTag, _testVaultKey))
+        _mockEncryption.Setup(e => e.Decrypt(newEncrypted, _testVaultKey, newIv, newTag))
             .Returns(Encoding.UTF8.GetBytes("newpassword"));
 
         // Act
@@ -282,7 +282,7 @@ public class AccountServiceTests : IDisposable
 
         _mockEncryption.Setup(e => e.Encrypt(It.IsAny<byte[]>(), _testVaultKey))
             .Returns((encrypted, iv, tag));
-        _mockEncryption.Setup(e => e.Decrypt(encrypted, iv, tag, _testVaultKey))
+        _mockEncryption.Setup(e => e.Decrypt(encrypted, _testVaultKey, iv, tag))
             .Returns(Encoding.UTF8.GetBytes("pass"));
 
         // Act

@@ -10,7 +10,7 @@ class ApiClient {
   private client: AxiosInstance
   private vaultSessionId: string | null = null
 
-  constructor(baseURL: string = 'http://localhost:5000') {
+  constructor(baseURL: string = '') {
     this.client = axios.create({
       baseURL,
       timeout: 30000,

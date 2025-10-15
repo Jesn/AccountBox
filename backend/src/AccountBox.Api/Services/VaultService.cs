@@ -88,8 +88,20 @@ public class VaultService
 
         await _keySlotRepository.CreateAsync(keySlot);
 
+        // 解密 VaultKey 以创建会话
+        // Initialize 返回的是加密的 VaultKey,我们需要解密后才能用于会话
+        var vaultKey = _vaultManager.Unlock(
+            request.MasterPassword,
+            encryptedVaultKey,
+            vaultKeyIV,
+            vaultKeyTag,
+            argon2Salt,
+            argon2Iterations,
+            argon2MemorySize,
+            argon2Parallelism);
+
         // 创建会话
-        var session = CreateSession(encryptedVaultKey);
+        var session = CreateSession(vaultKey);
 
         return new VaultSessionResponse
         {
@@ -365,6 +377,23 @@ public class VaultService
         {
             const string key = "unlock";
             _failedAttempts.Remove(key);
+        }
+    }
+
+    /// <summary>
+    /// 仅供测试使用：重置所有失败尝试计数器和会话
+    /// 清除静态状态以避免测试间的状态污染
+    /// </summary>
+    internal static void ResetFailedAttemptsForTesting()
+    {
+        lock (_attemptLock)
+        {
+            _failedAttempts.Clear();
+        }
+
+        lock (_sessionLock)
+        {
+            _sessions.Clear();
         }
     }
 }
