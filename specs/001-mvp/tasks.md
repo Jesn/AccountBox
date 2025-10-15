@@ -48,15 +48,15 @@
 
 ### 数据库基础设施
 
-- [ ] **T012** [P] [Foundation] 创建KeySlot实体：`backend/src/AccountBox.Data/Entities/KeySlot.cs`（字段：Id, EncryptedVaultKey, VaultKeyIV, VaultKeyTag, Argon2Salt, Argon2Iterations, Argon2MemorySize, Argon2Parallelism, CreatedAt, UpdatedAt）
-- [ ] **T013** [P] [Foundation] 创建Website实体：`backend/src/AccountBox.Data/Entities/Website.cs`（字段：Id, Domain, DisplayName, Tags, CreatedAt, UpdatedAt）
-- [ ] **T014** [P] [Foundation] 创建Account实体：`backend/src/AccountBox.Data/Entities/Account.cs`（字段：Id, WebsiteId, Username, PasswordEncrypted, PasswordIV, PasswordTag, Notes, NotesEncrypted, NotesIV, NotesTag, Tags, IsDeleted, DeletedAt, CreatedAt, UpdatedAt）
-- [ ] **T015** [Foundation] 配置EF Core DbContext：`backend/src/AccountBox.Data/DbContext/AccountBoxDbContext.cs`（依赖T012, T013, T014；包含DbSet、全局查询过滤器、触发器配置）
-- [ ] **T016** [P] [Foundation] 配置KeySlot实体映射：`backend/src/AccountBox.Data/Configurations/KeySlotConfiguration.cs`（主键约束Id=1，种子数据）
-- [ ] **T017** [P] [Foundation] 配置Website实体映射：`backend/src/AccountBox.Data/Configurations/WebsiteConfiguration.cs`（索引、长度约束、关系）
-- [ ] **T018** [P] [Foundation] 配置Account实体映射：`backend/src/AccountBox.Data/Configurations/AccountConfiguration.cs`（索引、软删除过滤器、外键级联）
-- [ ] **T019** [Foundation] 创建初始EF Core迁移：`backend/src/AccountBox.Data/Migrations/`（依赖T015-T018；运行完整命令：`dotnet ef migrations add Initial --project AccountBox.Data --startup-project AccountBox.Api --context AccountBoxDbContext`）
-- [ ] **T020** [P] [Foundation] 配置SQLite FTS5全文搜索虚拟表SQL脚本：`backend/src/AccountBox.Data/Scripts/CreateFTS.sql`
+- [x] **T012** [P] [Foundation] 创建KeySlot实体：`backend/src/AccountBox.Data/Entities/KeySlot.cs`（字段：Id, EncryptedVaultKey, VaultKeyIV, VaultKeyTag, Argon2Salt, Argon2Iterations, Argon2MemorySize, Argon2Parallelism, CreatedAt, UpdatedAt）
+- [x] **T013** [P] [Foundation] 创建Website实体：`backend/src/AccountBox.Data/Entities/Website.cs`（字段：Id, Domain, DisplayName, Tags, CreatedAt, UpdatedAt）
+- [x] **T014** [P] [Foundation] 创建Account实体：`backend/src/AccountBox.Data/Entities/Account.cs`（字段：Id, WebsiteId, Username, PasswordEncrypted, PasswordIV, PasswordTag, Notes, NotesEncrypted, NotesIV, NotesTag, Tags, IsDeleted, DeletedAt, CreatedAt, UpdatedAt）
+- [x] **T015** [Foundation] 配置EF Core DbContext：`backend/src/AccountBox.Data/DbContext/AccountBoxDbContext.cs`（依赖T012, T013, T014；包含DbSet、全局查询过滤器、触发器配置）
+- [x] **T016** [P] [Foundation] 配置KeySlot实体映射：`backend/src/AccountBox.Data/Configurations/KeySlotConfiguration.cs`（主键约束Id=1，种子数据）
+- [x] **T017** [P] [Foundation] 配置Website实体映射：`backend/src/AccountBox.Data/Configurations/WebsiteConfiguration.cs`（索引、长度约束、关系）
+- [x] **T018** [P] [Foundation] 配置Account实体映射：`backend/src/AccountBox.Data/Configurations/AccountConfiguration.cs`（索引、软删除过滤器、外键级联）
+- [x] **T019** [Foundation] 创建初始EF Core迁移：`backend/src/AccountBox.Data/Migrations/`（依赖T015-T018；运行完整命令：`dotnet ef migrations add Initial --project AccountBox.Data --startup-project AccountBox.Api --context AccountBoxDbContext`）
+- [x] **T020** [P] [Foundation] 配置SQLite FTS5全文搜索虚拟表SQL脚本：`backend/src/AccountBox.Data/Scripts/CreateFTS.sql`
 
 ### API基础设施
 
