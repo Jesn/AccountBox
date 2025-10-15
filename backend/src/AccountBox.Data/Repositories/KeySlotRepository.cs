@@ -76,7 +76,15 @@ public class KeySlotRepository
             throw new ArgumentException("KeySlot Id must be 1", nameof(keySlot));
         }
 
-        _context.KeySlots.Update(keySlot);
+        // 先获取已跟踪的实体（如果存在），然后更新
+        var existing = await _context.KeySlots.FindAsync(1);
+        if (existing == null)
+        {
+            throw new InvalidOperationException("KeySlot does not exist");
+        }
+
+        // 更新属性
+        _context.Entry(existing).CurrentValues.SetValues(keySlot);
         await _context.SaveChangesAsync();
     }
 }
