@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ChangeMasterPasswordDialog } from '@/components/vault/ChangeMasterPasswordDialog'
 import { CreateWebsiteDialog } from '@/components/websites/CreateWebsiteDialog'
 import { EditWebsiteDialog } from '@/components/websites/EditWebsiteDialog'
+import { DeleteWebsiteDialog } from '@/components/websites/DeleteWebsiteDialog'
 import { WebsiteList } from '@/components/websites/WebsiteList'
 import { Lock, Plus } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
@@ -21,6 +22,7 @@ export function WebsitesPage() {
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false)
   const [showCreateWebsiteDialog, setShowCreateWebsiteDialog] = useState(false)
   const [showEditWebsiteDialog, setShowEditWebsiteDialog] = useState(false)
+  const [showDeleteWebsiteDialog, setShowDeleteWebsiteDialog] = useState(false)
   const [selectedWebsite, setSelectedWebsite] = useState<WebsiteResponse | null>(null)
   const [websites, setWebsites] = useState<WebsiteResponse[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -83,8 +85,13 @@ export function WebsitesPage() {
   }
 
   const handleDeleteWebsite = (website: WebsiteResponse) => {
-    // TODO: 实现删除网站功能
-    console.log('删除网站:', website)
+    setSelectedWebsite(website)
+    setShowDeleteWebsiteDialog(true)
+  }
+
+  const handleDeleteWebsiteSuccess = () => {
+    // 删除成功后重新加载列表
+    loadWebsites()
   }
 
   return (
@@ -144,6 +151,13 @@ export function WebsitesPage() {
         open={showEditWebsiteDialog}
         onOpenChange={setShowEditWebsiteDialog}
         onSuccess={handleEditWebsiteSuccess}
+        website={selectedWebsite}
+      />
+
+      <DeleteWebsiteDialog
+        open={showDeleteWebsiteDialog}
+        onOpenChange={setShowDeleteWebsiteDialog}
+        onSuccess={handleDeleteWebsiteSuccess}
         website={selectedWebsite}
       />
     </div>

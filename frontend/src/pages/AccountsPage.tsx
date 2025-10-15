@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { AccountList } from '@/components/accounts/AccountList'
 import { CreateAccountDialog } from '@/components/accounts/CreateAccountDialog'
 import { EditAccountDialog } from '@/components/accounts/EditAccountDialog'
+import { DeleteAccountDialog } from '@/components/accounts/DeleteAccountDialog'
 import { ArrowLeft, Plus } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 
@@ -26,6 +27,7 @@ export function AccountsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false)
   const [showEditAccountDialog, setShowEditAccountDialog] = useState(false)
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
   const [selectedAccount, setSelectedAccount] = useState<AccountResponse | null>(null)
   const pageSize = 10
 
@@ -86,8 +88,13 @@ export function AccountsPage() {
   }
 
   const handleDeleteAccount = (account: AccountResponse) => {
-    // TODO: 实现删除账号功能
-    console.log('删除账号:', account)
+    setSelectedAccount(account)
+    setShowDeleteAccountDialog(true)
+  }
+
+  const handleDeleteAccountSuccess = () => {
+    // 删除成功后重新加载列表
+    loadAccounts()
   }
 
   return (
@@ -157,6 +164,13 @@ export function AccountsPage() {
             open={showEditAccountDialog}
             onOpenChange={setShowEditAccountDialog}
             onSuccess={handleEditAccountSuccess}
+            account={selectedAccount}
+          />
+
+          <DeleteAccountDialog
+            open={showDeleteAccountDialog}
+            onOpenChange={setShowDeleteAccountDialog}
+            onSuccess={handleDeleteAccountSuccess}
             account={selectedAccount}
           />
         </>
