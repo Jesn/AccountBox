@@ -1,0 +1,107 @@
+using AccountBox.Api.Services;
+using AccountBox.Core.Models;
+using AccountBox.Core.Models.Account;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AccountBox.Api.Controllers;
+
+/// <summary>
+/// Account API 控制器
+/// 提供账号管理的 REST API 端点
+/// </summary>
+[ApiController]
+[Route("api/accounts")]
+public class AccountController : ControllerBase
+{
+    private readonly AccountService _accountService;
+
+    public AccountController(AccountService accountService)
+    {
+        _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
+    }
+
+    /// <summary>
+    /// 从 HttpContext.Items 获取 VaultKey（由 VaultSessionMiddleware 设置）
+    /// </summary>
+    private byte[] GetVaultKey()
+    {
+        if (!HttpContext.Items.TryGetValue("VaultKey", out var vaultKeyObj) || vaultKeyObj is not byte[] vaultKey)
+        {
+            throw new UnauthorizedAccessException("Vault key not found in session");
+        }
+
+        return vaultKey;
+    }
+
+    /// <summary>
+    /// 获取分页账号列表
+    /// GET /api/accounts?pageNumber=1&pageSize=10&websiteId=1
+    /// </summary>
+    [HttpGet]
+    public async Task<ActionResult<ApiResponse<PagedResult<AccountResponse>>>> GetPaged(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] int? websiteId = null)
+    {
+        var vaultKey = GetVaultKey();
+        var result = await _accountService.GetPagedAsync(pageNumber, pageSize, websiteId, vaultKey);
+        return Ok(ApiResponse<PagedResult<AccountResponse>>.Ok(result));
+    }
+
+    /// <summary>
+    /// 根据 ID 获取账号
+    /// GET /api/accounts/{id}
+    /// </summary>
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ApiResponse<AccountResponse>>> GetById(int id)
+    {
+        var vaultKey = GetVaultKey();
+        var account = await _accountService.GetByIdAsync(id, vaultKey);
+        if (account == null)
+        {
+            return NotFound(ApiResponse<AccountResponse>.Fail("NOT_FOUND", $"Account with ID {id} not found"));
+        }
+
+        return Ok(ApiResponse<AccountResponse>.Ok(account));
+    }
+
+    /// <summary>
+    /// 创建账号
+    /// POST /api/accounts
+    /// </summary>
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<AccountResponse>>> Create([FromBody] CreateAccountRequest request)
+    {
+        var vaultKey = GetVaultKey();
+        var created = await _accountService.CreateAsync(request, vaultKey);
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = created.Id },
+            ApiResponse<AccountResponse>.Ok(created));
+    }
+
+    /// <summary>
+    /// 更新账号
+    /// PUT /api/accounts/{id}
+    /// </summary>
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ApiResponse<AccountResponse>>> Update(
+        int id,
+        [FromBody] UpdateAccountRequest request)
+    {
+        var vaultKey = GetVaultKey();
+        var updated = await _accountService.UpdateAsync(id, request, vaultKey);
+        return Ok(ApiResponse<AccountResponse>.Ok(updated));
+    }
+
+    /// <summary>
+    /// 软删除账号（移入回收站）
+    /// DELETE /api/accounts/{id}
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<ApiResponse<object>>> Delete(int id)
+    {
+        await _accountService.SoftDeleteAsync(id);
+        return Ok(ApiResponse<object>.Ok(new { message = "Account moved to recycle bin successfully" }));
+    }
+}

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
+using AccountBox.Api.Services;
 using AccountBox.Core.Models;
 
 namespace AccountBox.Api.Middleware;
@@ -44,6 +45,7 @@ public class ExceptionMiddleware
 
         var (statusCode, errorCode, message) = exception switch
         {
+            TooManyAttemptsException tooManyEx => (HttpStatusCode.TooManyRequests, "TOO_MANY_ATTEMPTS", tooManyEx.Message),
             ArgumentNullException => (HttpStatusCode.BadRequest, "MISSING_ARGUMENT", exception.Message),
             ArgumentException => (HttpStatusCode.BadRequest, "INVALID_ARGUMENT", exception.Message),
             KeyNotFoundException => (HttpStatusCode.NotFound, "NOT_FOUND", exception.Message),

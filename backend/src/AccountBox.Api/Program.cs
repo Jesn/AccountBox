@@ -37,9 +37,13 @@ builder.Services.AddScoped<IVaultManager, VaultManager>();
 
 // 配置依赖注入 - 仓储层
 builder.Services.AddScoped<KeySlotRepository>();
+builder.Services.AddScoped<WebsiteRepository>();
+builder.Services.AddScoped<AccountRepository>();
 
 // 配置依赖注入 - 业务服务层
 builder.Services.AddScoped<VaultService>();
+builder.Services.AddScoped<WebsiteService>();
+builder.Services.AddScoped<AccountService>();
 
 // 配置控制器
 builder.Services.AddControllers();

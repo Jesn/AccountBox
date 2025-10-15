@@ -18,6 +18,12 @@ public class VaultService
     private static readonly Dictionary<string, VaultSession> _sessions = new();
     private static readonly object _sessionLock = new();
 
+    // 密码重试限制（防止暴力破解）
+    private static readonly Dictionary<string, FailedAttempt> _failedAttempts = new();
+    private static readonly object _attemptLock = new();
+    private const int MaxFailedAttempts = 5;
+    private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(30);
+
     public VaultService(
         IVaultManager vaultManager,
         KeySlotRepository keySlotRepository)
@@ -107,6 +113,9 @@ public class VaultService
             throw new ArgumentException("Master password cannot be empty", nameof(request));
         }
 
+        // 检查是否被锁定
+        CheckIfLockedOut();
+
         // 获取 KeySlot
         var keySlot = await _keySlotRepository.GetAsync();
         if (keySlot == null)
@@ -114,25 +123,37 @@ public class VaultService
             throw new InvalidOperationException("Vault is not initialized");
         }
 
-        // 使用 VaultManager 解锁
-        var vaultKey = _vaultManager.Unlock(
-            request.MasterPassword,
-            keySlot.EncryptedVaultKey,
-            keySlot.VaultKeyIV,
-            keySlot.VaultKeyTag,
-            keySlot.Argon2Salt,
-            keySlot.Argon2Iterations,
-            keySlot.Argon2MemorySize,
-            keySlot.Argon2Parallelism);
-
-        // 创建会话
-        var session = CreateSession(vaultKey);
-
-        return new VaultSessionResponse
+        try
         {
-            SessionId = session.SessionId,
-            ExpiresAt = session.ExpiresAt
-        };
+            // 使用 VaultManager 解锁
+            var vaultKey = _vaultManager.Unlock(
+                request.MasterPassword,
+                keySlot.EncryptedVaultKey,
+                keySlot.VaultKeyIV,
+                keySlot.VaultKeyTag,
+                keySlot.Argon2Salt,
+                keySlot.Argon2Iterations,
+                keySlot.Argon2MemorySize,
+                keySlot.Argon2Parallelism);
+
+            // 解锁成功，清除失败记录
+            ClearFailedAttempts();
+
+            // 创建会话
+            var session = CreateSession(vaultKey);
+
+            return new VaultSessionResponse
+            {
+                SessionId = session.SessionId,
+                ExpiresAt = session.ExpiresAt
+            };
+        }
+        catch (System.Security.Cryptography.CryptographicException)
+        {
+            // 解锁失败，记录失败次数
+            RecordFailedAttempt();
+            throw; // 重新抛出异常
+        }
     }
 
     /// <summary>
@@ -272,5 +293,91 @@ public class VaultService
         public string SessionId { get; set; } = null!;
         public byte[] VaultKey { get; set; } = null!;
         public DateTime ExpiresAt { get; set; }
+    }
+
+    /// <summary>
+    /// 失败尝试记录
+    /// </summary>
+    private class FailedAttempt
+    {
+        public int Count { get; set; }
+        public DateTime? LockoutUntil { get; set; }
+    }
+
+    /// <summary>
+    /// 检查是否被锁定
+    /// </summary>
+    private void CheckIfLockedOut()
+    {
+        lock (_attemptLock)
+        {
+            const string key = "unlock"; // 全局锁定键（单用户应用）
+
+            if (_failedAttempts.TryGetValue(key, out var attempt))
+            {
+                if (attempt.LockoutUntil.HasValue && attempt.LockoutUntil.Value > DateTime.UtcNow)
+                {
+                    var remainingTime = attempt.LockoutUntil.Value - DateTime.UtcNow;
+                    throw new TooManyAttemptsException(
+                        $"Too many failed attempts. Please try again in {Math.Ceiling(remainingTime.TotalMinutes)} minutes.",
+                        attempt.LockoutUntil.Value);
+                }
+
+                // 锁定期已过，清除记录
+                if (attempt.LockoutUntil.HasValue && attempt.LockoutUntil.Value <= DateTime.UtcNow)
+                {
+                    _failedAttempts.Remove(key);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 记录失败尝试
+    /// </summary>
+    private void RecordFailedAttempt()
+    {
+        lock (_attemptLock)
+        {
+            const string key = "unlock";
+
+            if (!_failedAttempts.TryGetValue(key, out var attempt))
+            {
+                attempt = new FailedAttempt { Count = 0 };
+                _failedAttempts[key] = attempt;
+            }
+
+            attempt.Count++;
+
+            if (attempt.Count >= MaxFailedAttempts)
+            {
+                attempt.LockoutUntil = DateTime.UtcNow.Add(LockoutDuration);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 清除失败尝试记录
+    /// </summary>
+    private void ClearFailedAttempts()
+    {
+        lock (_attemptLock)
+        {
+            const string key = "unlock";
+            _failedAttempts.Remove(key);
+        }
+    }
+}
+
+/// <summary>
+/// 尝试次数过多异常
+/// </summary>
+public class TooManyAttemptsException : Exception
+{
+    public DateTime LockoutUntil { get; }
+
+    public TooManyAttemptsException(string message, DateTime lockoutUntil) : base(message)
+    {
+        LockoutUntil = lockoutUntil;
     }
 }
