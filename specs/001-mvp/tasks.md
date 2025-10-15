@@ -95,11 +95,11 @@
 
 ### 前端实现 (US6)
 
-- [ ] **T036** [P] [US6] 创建VaultService API客户端：`frontend/src/services/vaultService.ts`（调用initialize, unlock, lock, changePassword, getStatus端点）
-- [ ] **T037** [P] [US6] 创建InitializePage组件：`frontend/src/pages/InitializePage.tsx`（首次设置主密码，调用initialize API）
-- [ ] **T038** [P] [US6] 创建UnlockPage组件：`frontend/src/pages/UnlockPage.tsx`（输入主密码解锁，调用unlock API，更新VaultContext）
-- [ ] **T039** [P] [US6] 创建ChangeMasterPasswordDialog组件：`frontend/src/components/vault/ChangeMasterPasswordDialog.tsx`（输入旧密码和新密码，调用changePassword API）
-- [ ] **T040** [US6] 实现应用启动流程：`frontend/src/App.tsx`（依赖T036；检查getStatus，未初始化显示InitializePage，已初始化未解锁显示UnlockPage，已解锁显示主界面）
+- [x] **T036** [P] [US6] 创建VaultService API客户端：`frontend/src/services/vaultService.ts`（调用initialize, unlock, lock, changePassword, getStatus端点）
+- [x] **T037** [P] [US6] 创建InitializePage组件：`frontend/src/pages/InitializePage.tsx`（首次设置主密码，调用initialize API，表单验证）
+- [x] **T038** [P] [US6] 创建UnlockPage组件：`frontend/src/pages/UnlockPage.tsx`（输入主密码解锁，调用unlock API，更新VaultContext）
+- [x] **T039** [P] [US6] 创建ChangeMasterPasswordDialog组件：`frontend/src/components/vault/ChangeMasterPasswordDialog.tsx`（输入旧密码和新密码，调用changePassword API，成功后跳转解锁页）
+- [x] **T040** [US6] 实现应用启动流程：`frontend/src/App.tsx`（依赖T036；检查getStatus，未初始化显示InitializePage，已初始化未解锁显示UnlockPage，已解锁显示WebsitesPage；路由守卫）
 
 ### 测试 (US6)
 

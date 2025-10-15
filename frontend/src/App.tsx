@@ -1,23 +1,89 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { VaultProvider } from '@/contexts/VaultContext'
+import { vaultService } from '@/services/vaultService'
+import { InitializePage } from '@/pages/InitializePage'
+import { UnlockPage } from '@/pages/UnlockPage'
+import { WebsitesPage } from '@/pages/WebsitesPage'
+import { useVault } from '@/hooks/useVault'
 
-function App() {
-  const [count, setCount] = useState(0)
+/**
+ * 应用启动流程路由守卫
+ */
+function AppRouter() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [isInitialized, setIsInitialized] = useState(false)
+  const { isUnlocked } = useVault()
+
+  useEffect(() => {
+    // 检查 Vault 状态
+    const checkStatus = async () => {
+      try {
+        const response = await vaultService.getStatus()
+        if (response.success && response.data) {
+          setIsInitialized(response.data.isInitialized)
+        }
+      } catch (err) {
+        console.error('Failed to check vault status:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkStatus()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600 mx-auto"></div>
+          <p className="text-gray-600">正在加载...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          AccountBox MVP
-        </h1>
-        <p className="text-gray-600 mb-8">账号管理系统 - 开发中</p>
-        <button
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count: {count}
-        </button>
-      </div>
-    </div>
+    <Routes>
+      {/* 未初始化：显示初始化页面 */}
+      {!isInitialized && (
+        <>
+          <Route path="/initialize" element={<InitializePage />} />
+          <Route path="*" element={<Navigate to="/initialize" replace />} />
+        </>
+      )}
+
+      {/* 已初始化但未解锁：显示解锁页面 */}
+      {isInitialized && !isUnlocked && (
+        <>
+          <Route path="/unlock" element={<UnlockPage />} />
+          <Route path="*" element={<Navigate to="/unlock" replace />} />
+        </>
+      )}
+
+      {/* 已解锁：显示主应用 */}
+      {isInitialized && isUnlocked && (
+        <>
+          <Route path="/websites" element={<WebsitesPage />} />
+          <Route path="/" element={<Navigate to="/websites" replace />} />
+          <Route path="*" element={<Navigate to="/websites" replace />} />
+        </>
+      )}
+    </Routes>
+  )
+}
+
+/**
+ * 应用根组件
+ */
+function App() {
+  return (
+    <VaultProvider>
+      <BrowserRouter>
+        <AppRouter />
+      </BrowserRouter>
+    </VaultProvider>
   )
 }
 
