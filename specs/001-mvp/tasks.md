@@ -40,11 +40,11 @@
 
 ### 加密基础设施（US6 - 本地加密存储）
 
-- [ ] **T007** [P] [Foundation-US6] 实现Argon2id KDF服务：`backend/src/AccountBox.Security/KeyDerivation/Argon2Service.cs`（支持密钥派生、参数配置）
-- [ ] **T008** [P] [Foundation-US6] 实现AES-256-GCM加密服务：`backend/src/AccountBox.Security/Encryption/AesGcmEncryptionService.cs`（加密、解密、IV和Tag生成）
-- [ ] **T009** [Foundation-US6] 实现VaultManager（信封加密管理）：`backend/src/AccountBox.Security/VaultManager/VaultManager.cs`（依赖T007, T008；初始化VaultKey、解锁、锁定、修改主密码）
-- [ ] **T010** [P] [Foundation-US6] 创建IEncryptionService接口：`backend/src/AccountBox.Core/Interfaces/IEncryptionService.cs`
-- [ ] **T011** [P] [Foundation-US6] 创建IVaultManager接口：`backend/src/AccountBox.Core/Interfaces/IVaultManager.cs`
+- [x] **T007** [P] [Foundation-US6] 实现Argon2id KDF服务：`backend/src/AccountBox.Security/KeyDerivation/Argon2Service.cs`（支持密钥派生、参数配置）
+- [x] **T008** [P] [Foundation-US6] 实现AES-256-GCM加密服务：`backend/src/AccountBox.Security/Encryption/AesGcmEncryptionService.cs`（加密、解密、IV和Tag生成）
+- [x] **T009** [Foundation-US6] 实现VaultManager（信封加密管理）：`backend/src/AccountBox.Security/VaultManager/VaultManager.cs`（依赖T007, T008；初始化VaultKey、解锁、锁定、修改主密码）
+- [x] **T010** [P] [Foundation-US6] 创建IEncryptionService接口：`backend/src/AccountBox.Core/Interfaces/IEncryptionService.cs`
+- [x] **T011** [P] [Foundation-US6] 创建IVaultManager接口：`backend/src/AccountBox.Core/Interfaces/IVaultManager.cs`
 
 ### 数据库基础设施
 
