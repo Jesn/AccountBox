@@ -27,6 +27,9 @@ export interface PagedResponse<T> {
   hasNextPage: boolean
 }
 
+// PagedResult 是 PagedResponse 的别名（兼容后端命名）
+export type PagedResult<T> = PagedResponse<T>
+
 // Website 实体
 export interface Website {
   id: number
