@@ -6,6 +6,7 @@ import { vaultService } from '@/services/vaultService'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChangeMasterPasswordDialog } from '@/components/vault/ChangeMasterPasswordDialog'
+import { CreateWebsiteDialog } from '@/components/websites/CreateWebsiteDialog'
 import { Lock, Plus } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 import type { WebsiteResponse } from '@/services/websiteService'
@@ -17,6 +18,7 @@ export function WebsitesPage() {
   const { lock } = useVault()
   const navigate = useNavigate()
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false)
+  const [showCreateWebsiteDialog, setShowCreateWebsiteDialog] = useState(false)
   const [websites, setWebsites] = useState<WebsiteResponse[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -58,6 +60,11 @@ export function WebsitesPage() {
     navigate('/unlock')
   }
 
+  const handleCreateWebsiteSuccess = () => {
+    // 创建成功后重新加载列表
+    loadWebsites()
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl">
@@ -74,7 +81,7 @@ export function WebsitesPage() {
               <Lock className="mr-2 h-4 w-4" />
               锁定
             </Button>
-            <Button>
+            <Button onClick={() => setShowCreateWebsiteDialog(true)}>
               <Plus className="mr-2 h-4 w-4" />
               添加网站
             </Button>
@@ -94,7 +101,7 @@ export function WebsitesPage() {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-4">还没有添加任何网站</p>
-              <Button>
+              <Button onClick={() => setShowCreateWebsiteDialog(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 添加第一个网站
               </Button>
@@ -158,6 +165,12 @@ export function WebsitesPage() {
         open={showChangePasswordDialog}
         onOpenChange={setShowChangePasswordDialog}
         onSuccess={handleChangePasswordSuccess}
+      />
+
+      <CreateWebsiteDialog
+        open={showCreateWebsiteDialog}
+        onOpenChange={setShowCreateWebsiteDialog}
+        onSuccess={handleCreateWebsiteSuccess}
       />
     </div>
   )
