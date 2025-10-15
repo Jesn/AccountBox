@@ -123,27 +123,27 @@
 
 ### 后端实现 (US1)
 
-- [ ] **T047** [P] [US1] 创建WebsiteRepository：`backend/src/AccountBox.Data/Repositories/WebsiteRepository.cs`（CRUD、分页查询、账号统计；默认排序：按CreatedAt降序）
-- [ ] **T048** [P] [US1] 创建AccountRepository：`backend/src/AccountBox.Data/Repositories/AccountRepository.cs`（CRUD、分页查询、软删除支持、按WebsiteId过滤；默认排序：按Username字母序）
-- [ ] **T049** [P] [US1] 创建Website相关DTOs：`backend/src/AccountBox.Core/Models/Website/`（WebsiteResponse, CreateWebsiteRequest, UpdateWebsiteRequest, AccountCountResponse）
-- [ ] **T050** [P] [US1] 创建Account相关DTOs：`backend/src/AccountBox.Core/Models/Account/`（AccountResponse, CreateAccountRequest, UpdateAccountRequest）
-- [ ] **T051** [US1] 实现WebsiteService：`backend/src/AccountBox.Core/Services/WebsiteService.cs`（依赖T047；CRUD逻辑、分页、业务验证）
-- [ ] **T052** [US1] 实现AccountService：`backend/src/AccountBox.Core/Services/AccountService.cs`（依赖T048, IEncryptionService；CRUD逻辑、密码加密/解密、分页）
-- [ ] **T053** [US1] 实现WebsiteController：`backend/src/AccountBox.Api/Controllers/WebsiteController.cs`（依赖T051；端点：GET /api/websites, POST /api/websites, GET /api/websites/{id}, PUT /api/websites/{id}, DELETE /api/websites/{id}, GET /api/websites/{id}/accounts/count）
-- [ ] **T054** [US1] 实现AccountController：`backend/src/AccountBox.Api/Controllers/AccountController.cs`（依赖T052；端点：GET /api/accounts, POST /api/accounts, GET /api/accounts/{id}, PUT /api/accounts/{id}, DELETE /api/accounts/{id}）
+- [x] **T047** [P] [US1] 创建WebsiteRepository：`backend/src/AccountBox.Data/Repositories/WebsiteRepository.cs`（CRUD、分页查询、账号统计；默认排序：按CreatedAt降序）
+- [x] **T048** [P] [US1] 创建AccountRepository：`backend/src/AccountBox.Data/Repositories/AccountRepository.cs`（CRUD、分页查询、软删除支持、按WebsiteId过滤；默认排序：按Username字母序）
+- [x] **T049** [P] [US1] 创建Website相关DTOs：`backend/src/AccountBox.Core/Models/Website/`（WebsiteResponse, CreateWebsiteRequest, UpdateWebsiteRequest, AccountCountResponse）
+- [x] **T050** [P] [US1] 创建Account相关DTOs：`backend/src/AccountBox.Core/Models/Account/`（AccountResponse, CreateAccountRequest, UpdateAccountRequest）
+- [x] **T051** [US1] 实现WebsiteService：`backend/src/AccountBox.Api/Services/WebsiteService.cs`（已移至Api层避免循环依赖；CRUD逻辑、分页、业务验证）
+- [x] **T052** [US1] 实现AccountService：`backend/src/AccountBox.Api/Services/AccountService.cs`（已移至Api层；依赖T048, IEncryptionService；CRUD逻辑、密码加密/解密、分页）
+- [x] **T053** [US1] 实现WebsiteController：`backend/src/AccountBox.Api/Controllers/WebsiteController.cs`（依赖T051；端点：GET /api/websites, POST /api/websites, GET /api/websites/{id}, PUT /api/websites/{id}, DELETE /api/websites/{id}, GET /api/websites/{id}/accounts/count）
+- [x] **T054** [US1] 实现AccountController：`backend/src/AccountBox.Api/Controllers/AccountController.cs`（依赖T052；端点：GET /api/accounts, POST /api/accounts, GET /api/accounts/{id}, PUT /api/accounts/{id}, DELETE /api/accounts/{id}）
 
 ### 前端实现 (US1)
 
-- [ ] **T055** [P] [US1] 创建WebsiteService API客户端：`frontend/src/services/websiteService.ts`（调用websites相关端点）
-- [ ] **T056** [P] [US1] 创建AccountService API客户端：`frontend/src/services/accountService.ts`（调用accounts相关端点）
+- [x] **T055** [P] [US1] 创建WebsiteService API客户端：`frontend/src/services/websiteService.ts`（调用websites相关端点）
+- [x] **T056** [P] [US1] 创建AccountService API客户端：`frontend/src/services/accountService.ts`（调用accounts相关端点）
 - [ ] **T057** [P] [US1] 创建WebsiteList组件：`frontend/src/components/websites/WebsiteList.tsx`（展示网站列表、分页、排序）
 - [ ] **T058** [P] [US1] 创建CreateWebsiteDialog组件：`frontend/src/components/websites/CreateWebsiteDialog.tsx`（shadcn/ui Dialog，表单验证）
 - [ ] **T059** [P] [US1] 创建EditWebsiteDialog组件：`frontend/src/components/websites/EditWebsiteDialog.tsx`（shadcn/ui Dialog，表单验证）
 - [ ] **T060** [P] [US1] 创建AccountList组件：`frontend/src/components/accounts/AccountList.tsx`（展示某网站下账号列表、分页）
 - [ ] **T061** [P] [US1] 创建CreateAccountDialog组件：`frontend/src/components/accounts/CreateAccountDialog.tsx`（shadcn/ui Dialog，表单验证，密码字段）
 - [ ] **T062** [P] [US1] 创建EditAccountDialog组件：`frontend/src/components/accounts/EditAccountDialog.tsx`（shadcn/ui Dialog，表单验证）
-- [ ] **T063** [P] [US1] 创建Pagination组件：`frontend/src/components/common/Pagination.tsx`（通用分页组件，显示页码、上一页/下一页按钮）
-- [ ] **T064** [US1] 创建WebsitesPage主页面：`frontend/src/pages/WebsitesPage.tsx`（依赖T057, T058, T059；集成列表和对话框）
+- [x] **T063** [P] [US1] 创建Pagination组件：`frontend/src/components/common/Pagination.tsx`（通用分页组件，显示页码、上一页/下一页按钮）
+- [x] **T064** [US1] 创建WebsitesPage主页面：`frontend/src/pages/WebsitesPage.tsx`（依赖T057, T058, T059；集成列表和对话框；已部分实现，集成了网站列表展示和分页）
 - [ ] **T065** [US1] 创建AccountsPage详情页面：`frontend/src/pages/AccountsPage.tsx`（依赖T060, T061, T062；显示某网站的账号，集成列表和对话框）
 
 ### 测试 (US1)
