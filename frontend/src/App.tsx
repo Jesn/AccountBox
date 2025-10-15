@@ -5,6 +5,7 @@ import { vaultService } from '@/services/vaultService'
 import { InitializePage } from '@/pages/InitializePage'
 import { UnlockPage } from '@/pages/UnlockPage'
 import { WebsitesPage } from '@/pages/WebsitesPage'
+import { AccountsPage } from '@/pages/AccountsPage'
 import { useVault } from '@/hooks/useVault'
 
 /**
@@ -66,6 +67,7 @@ function AppRouter() {
       {isInitialized && isUnlocked && (
         <>
           <Route path="/websites" element={<WebsitesPage />} />
+          <Route path="/websites/:websiteId/accounts" element={<AccountsPage />} />
           <Route path="/" element={<Navigate to="/websites" replace />} />
           <Route path="*" element={<Navigate to="/websites" replace />} />
         </>
