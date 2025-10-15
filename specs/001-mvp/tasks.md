@@ -136,7 +136,7 @@
 
 - [x] **T055** [P] [US1] 创建WebsiteService API客户端：`frontend/src/services/websiteService.ts`（调用websites相关端点）
 - [x] **T056** [P] [US1] 创建AccountService API客户端：`frontend/src/services/accountService.ts`（调用accounts相关端点）
-- [ ] **T057** [P] [US1] 创建WebsiteList组件：`frontend/src/components/websites/WebsiteList.tsx`（展示网站列表、分页、排序）
+- [x] **T057** [P] [US1] 创建WebsiteList组件：`frontend/src/components/websites/WebsiteList.tsx`（展示网站列表、分页、排序）
 - [x] **T058** [P] [US1] 创建CreateWebsiteDialog组件：`frontend/src/components/websites/CreateWebsiteDialog.tsx`（shadcn/ui Dialog，表单验证）
 - [x] **T059** [P] [US1] 创建EditWebsiteDialog组件：`frontend/src/components/websites/EditWebsiteDialog.tsx`（shadcn/ui Dialog，表单验证）
 - [x] **T060** [P] [US1] 创建AccountList组件：`frontend/src/components/accounts/AccountList.tsx`（展示某网站下账号列表、分页）
