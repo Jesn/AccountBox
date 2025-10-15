@@ -141,7 +141,7 @@
 - [x] **T059** [P] [US1] 创建EditWebsiteDialog组件：`frontend/src/components/websites/EditWebsiteDialog.tsx`（shadcn/ui Dialog，表单验证）
 - [x] **T060** [P] [US1] 创建AccountList组件：`frontend/src/components/accounts/AccountList.tsx`（展示某网站下账号列表、分页）
 - [x] **T061** [P] [US1] 创建CreateAccountDialog组件：`frontend/src/components/accounts/CreateAccountDialog.tsx`（shadcn/ui Dialog，表单验证，密码字段）
-- [ ] **T062** [P] [US1] 创建EditAccountDialog组件：`frontend/src/components/accounts/EditAccountDialog.tsx`（shadcn/ui Dialog，表单验证）
+- [x] **T062** [P] [US1] 创建EditAccountDialog组件：`frontend/src/components/accounts/EditAccountDialog.tsx`（shadcn/ui Dialog，表单验证）
 - [x] **T063** [P] [US1] 创建Pagination组件：`frontend/src/components/common/Pagination.tsx`（通用分页组件，显示页码、上一页/下一页按钮）
 - [x] **T064** [US1] 创建WebsitesPage主页面：`frontend/src/pages/WebsitesPage.tsx`（依赖T057, T058, T059；集成列表和对话框；已部分实现，集成了网站列表展示和分页）
 - [x] **T065** [US1] 创建AccountsPage详情页面：`frontend/src/pages/AccountsPage.tsx`（依赖T060, T061, T062；显示某网站的账号，集成列表和对话框）
