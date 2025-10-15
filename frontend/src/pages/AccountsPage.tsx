@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { AccountList } from '@/components/accounts/AccountList'
 import { CreateAccountDialog } from '@/components/accounts/CreateAccountDialog'
+import { EditAccountDialog } from '@/components/accounts/EditAccountDialog'
 import { ArrowLeft, Plus } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 
@@ -24,6 +25,8 @@ export function AccountsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false)
+  const [showEditAccountDialog, setShowEditAccountDialog] = useState(false)
+  const [selectedAccount, setSelectedAccount] = useState<AccountResponse | null>(null)
   const pageSize = 10
 
   useEffect(() => {
@@ -73,8 +76,13 @@ export function AccountsPage() {
   }
 
   const handleEditAccount = (account: AccountResponse) => {
-    // TODO: 实现编辑账号功能 (T062)
-    console.log('编辑账号:', account)
+    setSelectedAccount(account)
+    setShowEditAccountDialog(true)
+  }
+
+  const handleEditAccountSuccess = () => {
+    // 编辑成功后重新加载列表
+    loadAccounts()
   }
 
   const handleDeleteAccount = (account: AccountResponse) => {
@@ -137,12 +145,21 @@ export function AccountsPage() {
       </div>
 
       {websiteId && (
-        <CreateAccountDialog
-          open={showCreateAccountDialog}
-          onOpenChange={setShowCreateAccountDialog}
-          onSuccess={handleCreateAccountSuccess}
-          websiteId={parseInt(websiteId)}
-        />
+        <>
+          <CreateAccountDialog
+            open={showCreateAccountDialog}
+            onOpenChange={setShowCreateAccountDialog}
+            onSuccess={handleCreateAccountSuccess}
+            websiteId={parseInt(websiteId)}
+          />
+
+          <EditAccountDialog
+            open={showEditAccountDialog}
+            onOpenChange={setShowEditAccountDialog}
+            onSuccess={handleEditAccountSuccess}
+            account={selectedAccount}
+          />
+        </>
       )}
     </div>
   )
