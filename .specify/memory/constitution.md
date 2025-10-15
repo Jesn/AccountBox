@@ -1,24 +1,25 @@
 <!--
 Sync Impact Report:
-- Version change: 1.0.0 → 1.1.0
+- Version change: 1.1.0 → 1.2.0
 - Modified principles:
-  * V. Git Commit Standards → Enhanced with mandatory per-task commit requirement
+  * V. Git Commit Standards → Enhanced with mandatory Chinese language requirement for commit messages
 - Changes made:
-  * Strengthened Principle V to require commits IMMEDIATELY after each task completion
-  * Added explicit workflow: update tasks.md → mark task complete → commit all related changes
-  * Clarified that task completion is NOT final until committed to git
-  * Emphasized atomic commits aligned with task boundaries
+  * Added MANDATORY requirement that all commit messages MUST be written in Chinese (简体中文)
+  * Clarified that type keywords remain in English (feat, fix, etc.) per Conventional Commits standard
+  * Updated commit examples to demonstrate Chinese descriptions and bodies
+  * Maintained existing per-task commit workflow requirements
 - Templates requiring updates:
   * ✅ plan-template.md - No changes needed (constitution check already references this)
-  * ✅ spec-template.md - No changes needed (user story driven, commit strategy is implementation detail)
-  * ✅ tasks-template.md - Already mentions "Commit after each task or logical group" (line 246) - ALIGNED
-  * ✅ commands/*.md - No agent-specific references
+  * ✅ spec-template.md - No changes needed (user story driven, commit language is implementation detail)
+  * ✅ tasks-template.md - Already mentions "Commit after each task" (line 246) - Language not specified, ALIGNED
+  * ✅ commands/*.md - No agent-specific references found
 - Follow-up TODOs: None
 - Rationale for MINOR version bump:
   * This is a materially expanded guidance on existing Principle V
+  * Adds mandatory language requirement that affects all development workflow
   * Does not remove or redefine existing principles (not MAJOR)
-  * Adds mandatory workflow requirement that affects development process (not just a clarification, so not PATCH)
-  * Enhances governance of when commits must occur (from "when tasks complete" to "immediately after each task")
+  * Enhances governance beyond clarification (not just PATCH)
+  * Standardizes communication language for Chinese-speaking team
 -->
 
 # AccountBox Constitution
@@ -127,53 +128,84 @@ src/
 **Repository Rules**:
 - `.git` directory files are PROHIBITED from modification
 
+**Commit Message Language** (MANDATORY):
+- All commit messages MUST be written in Chinese (简体中文)
+- Exception: Conventional Commit type keywords MUST remain in English (`feat`, `fix`, `docs`, etc.)
+- Description, body, and footer MUST use Chinese for maximum clarity within the Chinese-speaking team
+- English technical terms (e.g., API names, variable names, error codes) MAY be preserved as-is within Chinese text
+
 **Per-Task Commit Requirement** (MANDATORY):
 - IMMEDIATELY after completing EACH task, the following workflow MUST be executed:
   1. Update `specs/[###-feature-name]/tasks.md` to mark the task as complete (change `[ ]` to `[x]`)
   2. Stage all related changes: `git add .`
-  3. Commit with descriptive message following Conventional Commits format
+  3. Commit with descriptive message following Conventional Commits format (in Chinese)
   4. Task completion is NOT considered final until changes are committed to git
 
 **Commit Convention**:
-- MUST follow Conventional Commits format:
+- MUST follow Conventional Commits format with Chinese descriptions:
   ```
-  <type>[optional scope]: <description>
+  <type>[optional scope]: <中文描述>
 
-  [optional body]
+  [可选的详细说明正文，使用中文]
 
-  [optional footer(s)]
+  [可选的页脚，使用中文]
   ```
-- Valid types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`, `build`, `revert`
+- Valid types (English keywords): `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`, `build`, `revert`
 - Scope: optional but recommended (e.g., `[api]`, `[ui]`, `[auth]`, `[crypto]`, `[setup]`)
-- Description: concise summary in imperative mood (e.g., "add feature" not "added feature")
-- Body (optional): detailed explanation for complex changes
-- Footer (optional): references to issues, breaking changes
+- Description: 使用中文简洁描述，采用祈使语气（例如："添加功能"而非"已添加功能"）
+- Body (optional): 使用中文详细说明复杂变更
+- Footer (optional): 引用问题编号、破坏性变更说明，使用中文
 
 **Commit Examples**:
-- git commit的内容用中文
 ```bash
-# After completing T001 (backend structure setup)
-git add . && git commit -m "chore[setup]: create backend project structure
+# 完成 T001（后端结构搭建）后
+git add . && git commit -m "chore[setup]: 创建后端项目结构
 
-- Created AccountBox.Api, Core, Data, Security projects
-- Organized under backend/src/ directory
+- 创建 AccountBox.Api、Core、Data、Security 项目
+- 组织在 backend/src/ 目录下
 
-Closes T001"
+完成 T001"
 
-# After completing T007 (Argon2 implementation)
-git add . && git commit -m "feat[crypto]: implement Argon2id key derivation service
+# 完成 T007（Argon2 实现）后
+git add . && git commit -m "feat[crypto]: 实现 Argon2id 密钥派生服务
 
-- Added Argon2Service with configurable parameters
-- Memory: 64MB, Iterations: 4, Parallelism: 2
-- Supports key derivation for master password hashing
+- 添加 Argon2Service 并支持可配置参数
+- 内存：64MB，迭代次数：4，并行度：2
+- 支持主密码哈希的密钥派生
 
-Closes T007"
+完成 T007"
+
+# 完成前端组件后
+git add . && git commit -m "feat[ui]: 实现网站列表分页组件
+
+- 创建 WebsiteList 组件展示网站卡片
+- 集成 Pagination 组件支持分页
+- 添加加载状态和空状态处理
+
+完成 T057"
+
+# 修复 Bug
+git add . && git commit -m "fix[api]: 修复账号解密时的空指针异常
+
+当备注字段为空时，解密逻辑会抛出 NullReferenceException。
+现在添加空值检查，仅在备注存在时才进行解密。
+
+关闭 #123"
+
+# 文档更新
+git add . && git commit -m "docs: 更新 API 文档说明加密流程
+
+- 添加信封加密架构图
+- 说明 Argon2id 参数选择依据
+- 补充密码重试限制说明"
 ```
 
 **Rationale**:
+- Chinese commit messages enhance team communication efficiency for native Chinese speakers
+- Prevents language barrier and reduces misinterpretation of technical changes
+- Conventional Commit types remain English for tool compatibility (automated changelog, semantic versioning)
 - Per-task commits create atomic, traceable changes aligned with task boundaries
 - Immediate commits prevent work loss and enable precise rollback if needed
-- Conventional Commits enable automated changelog generation and semantic versioning
 - Clear commit history allows easy identification of when/why changes were made
 - Task-commit alignment enables accurate progress tracking and code archaeology
 
@@ -242,4 +274,4 @@ Closes T007"
 
 ---
 
-**Version**: 1.1.0 | **Ratified**: 2025-10-15 | **Last Amended**: 2025-10-15
+**Version**: 1.2.0 | **Ratified**: 2025-10-15 | **Last Amended**: 2025-10-15
