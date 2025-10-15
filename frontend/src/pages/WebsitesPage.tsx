@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChangeMasterPasswordDialog } from '@/components/vault/ChangeMasterPasswordDialog'
 import { CreateWebsiteDialog } from '@/components/websites/CreateWebsiteDialog'
+import { EditWebsiteDialog } from '@/components/websites/EditWebsiteDialog'
 import { Lock, Plus } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 import type { WebsiteResponse } from '@/services/websiteService'
@@ -19,6 +20,8 @@ export function WebsitesPage() {
   const navigate = useNavigate()
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false)
   const [showCreateWebsiteDialog, setShowCreateWebsiteDialog] = useState(false)
+  const [showEditWebsiteDialog, setShowEditWebsiteDialog] = useState(false)
+  const [selectedWebsite, setSelectedWebsite] = useState<WebsiteResponse | null>(null)
   const [websites, setWebsites] = useState<WebsiteResponse[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -62,6 +65,16 @@ export function WebsitesPage() {
 
   const handleCreateWebsiteSuccess = () => {
     // 创建成功后重新加载列表
+    loadWebsites()
+  }
+
+  const handleEditWebsite = (website: WebsiteResponse) => {
+    setSelectedWebsite(website)
+    setShowEditWebsiteDialog(true)
+  }
+
+  const handleEditWebsiteSuccess = () => {
+    // 编辑成功后重新加载列表
     loadWebsites()
   }
 
@@ -139,7 +152,11 @@ export function WebsitesPage() {
                         >
                           查看账号
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditWebsite(website)}
+                        >
                           编辑
                         </Button>
                         <Button variant="destructive" size="sm">
@@ -171,6 +188,13 @@ export function WebsitesPage() {
         open={showCreateWebsiteDialog}
         onOpenChange={setShowCreateWebsiteDialog}
         onSuccess={handleCreateWebsiteSuccess}
+      />
+
+      <EditWebsiteDialog
+        open={showEditWebsiteDialog}
+        onOpenChange={setShowEditWebsiteDialog}
+        onSuccess={handleEditWebsiteSuccess}
+        website={selectedWebsite}
       />
     </div>
   )
