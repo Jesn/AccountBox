@@ -60,12 +60,12 @@
 
 ### API基础设施
 
-- [ ] **T021** [P] [Foundation] 配置ASP.NET Core中间件管道：`backend/src/AccountBox.Api/Program.cs`（CORS、异常处理、路由、Swagger）
-- [ ] **T022** [P] [Foundation] 实现全局异常处理中间件：`backend/src/AccountBox.Api/Middleware/ExceptionMiddleware.cs`（捕获异常、返回标准ErrorResponse）
-- [ ] **T023** [P] [Foundation] 创建ErrorResponse DTO：`backend/src/AccountBox.Core/Models/ErrorResponse.cs`（字段：ErrorCode, Message, Details）
-- [ ] **T023a** [P] [Foundation] 创建ApiResponse<T> DTO：`backend/src/AccountBox.Core/Models/ApiResponse.cs`（字段：Success, Data, Error, Timestamp；符合宪法III要求的统一API响应格式）
-- [ ] **T024** [P] [Foundation] 创建PagedResult<T> DTO：`backend/src/AccountBox.Core/Models/PagedResult.cs`（字段：Items, TotalCount, PageNumber, PageSize, TotalPages）
-- [ ] **T025** [P] [Foundation] 配置依赖注入容器：`backend/src/AccountBox.Api/Program.cs`（注册服务、仓储、加密服务、VaultManager）
+- [x] **T021** [P] [Foundation] 配置ASP.NET Core中间件管道：`backend/src/AccountBox.Api/Program.cs`（CORS、异常处理、路由、Swagger）
+- [x] **T022** [P] [Foundation] 实现全局异常处理中间件：`backend/src/AccountBox.Api/Middleware/ExceptionMiddleware.cs`（捕获异常、返回标准ErrorResponse）
+- [x] **T023** [P] [Foundation] 创建ErrorResponse DTO：`backend/src/AccountBox.Core/Models/ErrorResponse.cs`（字段：ErrorCode, Message, Details）
+- [x] **T023a** [P] [Foundation] 创建ApiResponse<T> DTO：`backend/src/AccountBox.Core/Models/ApiResponse.cs`（字段：Success, Data, Error, Timestamp；符合宪法III要求的统一API响应格式）
+- [x] **T024** [P] [Foundation] 创建PagedResult<T> DTO：`backend/src/AccountBox.Core/Models/PagedResult.cs`（字段：Items, TotalCount, PageNumber, PageSize, TotalPages）
+- [x] **T025** [P] [Foundation] 配置依赖注入容器：`backend/src/AccountBox.Api/Program.cs`（注册服务、仓储、加密服务、VaultManager）
 
 ### 前端基础设施
 
