@@ -69,11 +69,11 @@
 
 ### 前端基础设施
 
-- [ ] **T026** [P] [Foundation] 创建API客户端基类：`frontend/src/services/apiClient.ts`（axios配置、请求拦截器、响应拦截器、错误处理）
-- [ ] **T027** [P] [Foundation] 创建VaultContext：`frontend/src/contexts/VaultContext.tsx`（管理isUnlocked, vaultKey, unlock, lock状态）
-- [ ] **T028** [P] [Foundation] 创建useVault Hook：`frontend/src/hooks/useVault.ts`（封装VaultContext访问）
-- [ ] **T029** [P] [Foundation] 创建通用类型定义：`frontend/src/types/common.ts`（PagedResponse, ErrorResponse, Website, Account等接口）
-- [ ] **T030** [P] [Foundation] 配置shadcn/ui基础组件：运行`npx shadcn-ui@latest init`并添加完整组件清单：alert, badge, button, card, checkbox, dialog, input, label, radio-group, select, separator, slider, switch, table, textarea, toast
+- [x] **T026** [P] [Foundation] 创建API客户端基类：`frontend/src/services/apiClient.ts`（axios配置、请求拦截器、响应拦截器、错误处理）
+- [x] **T027** [P] [Foundation] 创建VaultContext：`frontend/src/contexts/VaultContext.tsx`（管理isUnlocked, vaultKey, unlock, lock状态）
+- [x] **T028** [P] [Foundation] 创建useVault Hook：`frontend/src/hooks/useVault.ts`（封装VaultContext访问）
+- [x] **T029** [P] [Foundation] 创建通用类型定义：`frontend/src/types/common.ts`（PagedResponse, ErrorResponse, Website, Account等接口）
+- [x] **T030** [P] [Foundation] 配置shadcn/ui基础组件：运行`npx shadcn-ui@latest init`并添加完整组件清单：alert, badge, button, card, checkbox, dialog, input, label, radio-group, select, separator, slider, switch, table, textarea, toast
 
 **Checkpoint**: 基础设施就绪 - 用户故事实现现在可以并行开始
 
