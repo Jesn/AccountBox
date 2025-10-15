@@ -1,6 +1,8 @@
 using AccountBox.Api.Middleware;
+using AccountBox.Api.Services;
 using AccountBox.Core.Interfaces;
 using AccountBox.Data.DbContext;
+using AccountBox.Data.Repositories;
 using AccountBox.Security.Encryption;
 using AccountBox.Security.KeyDerivation;
 using AccountBox.Security.VaultManager;
@@ -34,10 +36,10 @@ builder.Services.AddSingleton<IEncryptionService, AesGcmEncryptionService>();
 builder.Services.AddScoped<IVaultManager, VaultManager>();
 
 // 配置依赖注入 - 仓储层
-// TODO: 在后续任务中添加仓储注册
+builder.Services.AddScoped<KeySlotRepository>();
 
 // 配置依赖注入 - 业务服务层
-// TODO: 在后续任务中添加服务注册
+builder.Services.AddScoped<VaultService>();
 
 // 配置控制器
 builder.Services.AddControllers();
@@ -48,6 +50,9 @@ var app = builder.Build();
 
 // 全局异常处理中间件（必须在最前面）
 app.UseMiddleware<ExceptionMiddleware>();
+
+// Vault 会话验证中间件（在 CORS 之后，路由之前）
+app.UseMiddleware<VaultSessionMiddleware>();
 
 // CORS 中间件
 app.UseCors();

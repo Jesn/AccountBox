@@ -87,11 +87,11 @@
 
 ### 后端实现 (US6)
 
-- [ ] **T031** [P] [US6] 创建VaultService业务逻辑：`backend/src/AccountBox.Core/Services/VaultService.cs`（依赖IVaultManager, KeySlot仓储；实现Initialize, Unlock, Lock, ChangeMasterPassword）
-- [ ] **T032** [P] [US6] 创建KeySlotRepository：`backend/src/AccountBox.Data/Repositories/KeySlotRepository.cs`（CRUD操作，确保单例约束）
-- [ ] **T033** [P] [US6] 创建Vault相关DTOs：`backend/src/AccountBox.Core/Models/Vault/`（InitializeVaultRequest, UnlockVaultRequest, ChangeMasterPasswordRequest, VaultSessionResponse, VaultStatusResponse）
-- [ ] **T034** [US6] 实现VaultController：`backend/src/AccountBox.Api/Controllers/VaultController.cs`（依赖T031；端点：POST /api/vault/initialize, POST /api/vault/unlock, POST /api/vault/lock, POST /api/vault/change-password, GET /api/vault/status）
-- [ ] **T035** [P] [US6] 实现会话管理中间件：`backend/src/AccountBox.Api/Middleware/VaultSessionMiddleware.cs`（验证X-Vault-Session头，确保VaultKey已解锁）
+- [x] **T031** [P] [US6] 创建VaultService业务逻辑：`backend/src/AccountBox.Api/Services/VaultService.cs`（依赖IVaultManager, KeySlot仓储；实现Initialize, Unlock, Lock, ChangeMasterPassword；内存会话管理）
+- [x] **T032** [P] [US6] 创建KeySlotRepository：`backend/src/AccountBox.Data/Repositories/KeySlotRepository.cs`（CRUD操作，确保单例约束）
+- [x] **T033** [P] [US6] 创建Vault相关DTOs：`backend/src/AccountBox.Core/Models/Vault/`（InitializeVaultRequest, UnlockVaultRequest, ChangeMasterPasswordRequest, VaultSessionResponse, VaultStatusResponse）
+- [x] **T034** [US6] 实现VaultController：`backend/src/AccountBox.Api/Controllers/VaultController.cs`（依赖T031；端点：POST /api/vault/initialize, POST /api/vault/unlock, POST /api/vault/lock, POST /api/vault/change-password, GET /api/vault/status）
+- [x] **T035** [P] [US6] 实现会话管理中间件：`backend/src/AccountBox.Api/Middleware/VaultSessionMiddleware.cs`（验证X-Vault-Session头，确保VaultKey已解锁；白名单机制）
 
 ### 前端实现 (US6)
 
