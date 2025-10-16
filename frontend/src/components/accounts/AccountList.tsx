@@ -67,8 +67,12 @@ export function AccountList({ accounts, onEdit, onDelete }: AccountListProps) {
             <TableHead className="h-10">密码</TableHead>
             <TableHead className="hidden md:table-cell h-10">标签</TableHead>
             <TableHead className="hidden lg:table-cell h-10">备注</TableHead>
-            <TableHead className="hidden xl:table-cell h-10">创建时间</TableHead>
-            <TableHead className="hidden xl:table-cell h-10">更新时间</TableHead>
+            <TableHead className="hidden xl:table-cell h-10">
+              创建时间
+            </TableHead>
+            <TableHead className="hidden xl:table-cell h-10">
+              更新时间
+            </TableHead>
             <TableHead className="text-right h-10">操作</TableHead>
           </TableRow>
         </TableHeader>

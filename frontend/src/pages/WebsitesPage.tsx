@@ -157,18 +157,21 @@ export function WebsitesPage() {
         </div>
 
         {/* 搜索无结果提示 */}
-        {!isLoading && searchQuery && filteredWebsites.length === 0 && websites.length > 0 && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <p className="text-gray-600 mb-4">
-                未找到匹配 "{searchQuery}" 的网站
-              </p>
-              <Button variant="outline" onClick={() => setSearchQuery('')}>
-                清空搜索
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+        {!isLoading &&
+          searchQuery &&
+          filteredWebsites.length === 0 &&
+          websites.length > 0 && (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <p className="text-gray-600 mb-4">
+                  未找到匹配 "{searchQuery}" 的网站
+                </p>
+                <Button variant="outline" onClick={() => setSearchQuery('')}>
+                  清空搜索
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
         {/* 网站列表和分页 */}
         {(!searchQuery || filteredWebsites.length > 0) && (

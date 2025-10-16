@@ -84,14 +84,21 @@ export function WebsiteList({
               >
                 {website.displayName || website.domain}
               </TableCell>
-              <TableCell className="max-w-xs truncate py-2 px-3" title={website.domain}>
+              <TableCell
+                className="max-w-xs truncate py-2 px-3"
+                title={website.domain}
+              >
                 {website.domain}
               </TableCell>
               <TableCell className="hidden md:table-cell py-2 px-3">
                 {website.tags || '-'}
               </TableCell>
-              <TableCell className="py-2 px-3">{website.activeAccountCount}</TableCell>
-              <TableCell className="py-2 px-3">{website.deletedAccountCount}</TableCell>
+              <TableCell className="py-2 px-3">
+                {website.activeAccountCount}
+              </TableCell>
+              <TableCell className="py-2 px-3">
+                {website.deletedAccountCount}
+              </TableCell>
               <TableCell className="text-right py-2 px-3">
                 <div className="flex gap-2 justify-end">
                   <Button

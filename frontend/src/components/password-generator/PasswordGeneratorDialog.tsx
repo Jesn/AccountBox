@@ -42,7 +42,8 @@ export function PasswordGeneratorDialog({
   const [excludeAmbiguous, setExcludeAmbiguous] = useState(false)
 
   const [generatedPassword, setGeneratedPassword] = useState('')
-  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null)
+  const [passwordStrength, setPasswordStrength] =
+    useState<PasswordStrength | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
 
@@ -105,7 +106,14 @@ export function PasswordGeneratorDialog({
       generatePassword()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [length, includeUppercase, includeLowercase, includeNumbers, includeSymbols, excludeAmbiguous])
+  }, [
+    length,
+    includeUppercase,
+    includeLowercase,
+    includeNumbers,
+    includeSymbols,
+    excludeAmbiguous,
+  ])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -260,7 +268,11 @@ export function PasswordGeneratorDialog({
             <RefreshCw className="mr-2 h-4 w-4" />
             重新生成
           </Button>
-          <Button type="button" onClick={handleAccept} disabled={!generatedPassword}>
+          <Button
+            type="button"
+            onClick={handleAccept}
+            disabled={!generatedPassword}
+          >
             使用此密码
           </Button>
         </DialogFooter>
