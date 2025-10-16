@@ -30,7 +30,7 @@ export function WebsitesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
-  const pageSize = 10
+  const pageSize = 15
 
   const loadWebsites = useCallback(async () => {
     setIsLoading(true)

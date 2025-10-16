@@ -64,35 +64,35 @@ export function WebsiteList({
   // 网站列表 - 表格视图
   return (
     <div className="rounded-md border overflow-x-auto">
-      <Table>
+      <Table className="text-sm">
         <TableHeader>
           <TableRow>
-            <TableHead>显示名</TableHead>
-            <TableHead>域名</TableHead>
-            <TableHead className="hidden md:table-cell">标签</TableHead>
-            <TableHead>活跃账号</TableHead>
-            <TableHead>回收站</TableHead>
-            <TableHead className="text-right">操作</TableHead>
+            <TableHead className="h-10">显示名</TableHead>
+            <TableHead className="h-10">域名</TableHead>
+            <TableHead className="hidden md:table-cell h-10">标签</TableHead>
+            <TableHead className="h-10">活跃账号</TableHead>
+            <TableHead className="h-10">回收站</TableHead>
+            <TableHead className="text-right h-10">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {websites.map((website) => (
             <TableRow key={website.id}>
               <TableCell
-                className="font-medium max-w-xs truncate"
+                className="font-medium max-w-xs truncate py-2 px-3"
                 title={website.displayName || website.domain}
               >
                 {website.displayName || website.domain}
               </TableCell>
-              <TableCell className="max-w-xs truncate" title={website.domain}>
+              <TableCell className="max-w-xs truncate py-2 px-3" title={website.domain}>
                 {website.domain}
               </TableCell>
-              <TableCell className="hidden md:table-cell">
+              <TableCell className="hidden md:table-cell py-2 px-3">
                 {website.tags || '-'}
               </TableCell>
-              <TableCell>{website.activeAccountCount}</TableCell>
-              <TableCell>{website.deletedAccountCount}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="py-2 px-3">{website.activeAccountCount}</TableCell>
+              <TableCell className="py-2 px-3">{website.deletedAccountCount}</TableCell>
+              <TableCell className="text-right py-2 px-3">
                 <div className="flex gap-2 justify-end">
                   <Button
                     variant="outline"
