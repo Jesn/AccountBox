@@ -8,6 +8,7 @@ import { WebsitesPage } from '@/pages/WebsitesPage'
 import { AccountsPage } from '@/pages/AccountsPage'
 import { RecycleBinPage } from '@/pages/RecycleBinPage'
 import { SearchPage } from '@/pages/SearchPage'
+import { ApiKeysPage } from '@/pages/ApiKeysPage'
 import { useVault } from '@/hooks/useVault'
 
 /**
@@ -75,6 +76,7 @@ function AppRouter() {
           />
           <Route path="/recycle-bin" element={<RecycleBinPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/api-keys" element={<ApiKeysPage />} />
           <Route path="/" element={<Navigate to="/websites" replace />} />
           <Route path="*" element={<Navigate to="/websites" replace />} />
         </>
