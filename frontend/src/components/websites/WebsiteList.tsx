@@ -63,13 +63,13 @@ export function WebsiteList({
 
   // 网站列表 - 表格视图
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>显示名</TableHead>
             <TableHead>域名</TableHead>
-            <TableHead>标签</TableHead>
+            <TableHead className="hidden md:table-cell">标签</TableHead>
             <TableHead>活跃账号</TableHead>
             <TableHead>回收站</TableHead>
             <TableHead className="text-right">操作</TableHead>
@@ -82,7 +82,9 @@ export function WebsiteList({
                 {website.displayName || website.domain}
               </TableCell>
               <TableCell>{website.domain}</TableCell>
-              <TableCell>{website.tags || '-'}</TableCell>
+              <TableCell className="hidden md:table-cell">
+                {website.tags || '-'}
+              </TableCell>
               <TableCell>{website.activeAccountCount}</TableCell>
               <TableCell>{website.deletedAccountCount}</TableCell>
               <TableCell className="text-right">
