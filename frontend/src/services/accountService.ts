@@ -57,12 +57,20 @@ class AccountService {
     return await apiClient.get<AccountResponse>(`${this.baseUrl}/${id}`)
   }
 
-  async create(request: CreateAccountRequest): Promise<ApiResponse<AccountResponse>> {
+  async create(
+    request: CreateAccountRequest
+  ): Promise<ApiResponse<AccountResponse>> {
     return await apiClient.post<AccountResponse>(this.baseUrl, request)
   }
 
-  async update(id: number, request: UpdateAccountRequest): Promise<ApiResponse<AccountResponse>> {
-    return await apiClient.put<AccountResponse>(`${this.baseUrl}/${id}`, request)
+  async update(
+    id: number,
+    request: UpdateAccountRequest
+  ): Promise<ApiResponse<AccountResponse>> {
+    return await apiClient.put<AccountResponse>(
+      `${this.baseUrl}/${id}`,
+      request
+    )
   }
 
   async delete(id: number): Promise<ApiResponse<{ message: string }>> {

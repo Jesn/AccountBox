@@ -6,6 +6,8 @@ import { InitializePage } from '@/pages/InitializePage'
 import { UnlockPage } from '@/pages/UnlockPage'
 import { WebsitesPage } from '@/pages/WebsitesPage'
 import { AccountsPage } from '@/pages/AccountsPage'
+import { RecycleBinPage } from '@/pages/RecycleBinPage'
+import { SearchPage } from '@/pages/SearchPage'
 import { useVault } from '@/hooks/useVault'
 
 /**
@@ -67,7 +69,12 @@ function AppRouter() {
       {isInitialized && isUnlocked && (
         <>
           <Route path="/websites" element={<WebsitesPage />} />
-          <Route path="/websites/:websiteId/accounts" element={<AccountsPage />} />
+          <Route
+            path="/websites/:websiteId/accounts"
+            element={<AccountsPage />}
+          />
+          <Route path="/recycle-bin" element={<RecycleBinPage />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/" element={<Navigate to="/websites" replace />} />
           <Route path="*" element={<Navigate to="/websites" replace />} />
         </>

@@ -6,6 +6,7 @@
 export interface ErrorResponse {
   errorCode: string
   message: string
+  code?: string // 添加 code 字段以支持某些错误场景
   details?: unknown
 }
 
@@ -46,7 +47,7 @@ export interface Account {
   websiteId: number
   username: string
   password: string // 前端显示的解密后密码
-  notes?: string   // 前端显示的解密后备注
+  notes?: string // 前端显示的解密后备注
   tags?: string
   isDeleted: boolean
   deletedAt?: string

@@ -1,4 +1,5 @@
 using AccountBox.Api.Services;
+using AccountBox.Core.Exceptions;
 using AccountBox.Core.Models;
 using AccountBox.Core.Models.Website;
 using Microsoft.AspNetCore.Mvc;
@@ -77,14 +78,43 @@ public class WebsiteController : ControllerBase
     }
 
     /// <summary>
-    /// 删除网站
-    /// DELETE /api/websites/{id}
+    /// 删除网站（级联删除保护）
+    /// DELETE /api/websites/{id}?confirmed=false
     /// </summary>
     [HttpDelete("{id}")]
-    public async Task<ActionResult<ApiResponse<object>>> Delete(int id)
+    public async Task<ActionResult<ApiResponse<object>>> Delete(
+        int id,
+        [FromQuery] bool confirmed = false)
     {
-        await _websiteService.DeleteAsync(id);
-        return Ok(ApiResponse<object>.Ok(new { message = "Website deleted successfully" }));
+        try
+        {
+            await _websiteService.DeleteAsync(id, confirmed);
+            return Ok(ApiResponse<object>.Ok(new { message = "Website deleted successfully" }));
+        }
+        catch (ActiveAccountsExistException ex)
+        {
+            // 409 Conflict: 网站下还有活跃账号
+            return Conflict(ApiResponse<object>.Fail(
+                "ACTIVE_ACCOUNTS_EXIST",
+                ex.Message,
+                new
+                {
+                    websiteId = ex.WebsiteId,
+                    activeAccountCount = ex.ActiveAccountCount
+                }));
+        }
+        catch (ConfirmationRequiredException ex)
+        {
+            // 409 Conflict: 需要用户确认删除（回收站中有账号）
+            return Conflict(ApiResponse<object>.Fail(
+                "CONFIRMATION_REQUIRED",
+                ex.Message,
+                new
+                {
+                    websiteId = ex.WebsiteId,
+                    deletedAccountCount = ex.DeletedAccountCount
+                }));
+        }
     }
 
     /// <summary>

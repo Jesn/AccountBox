@@ -29,6 +29,11 @@ namespace AccountBox.Data.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ExtendedData")
+                        .IsRequired()
+                        .HasMaxLength(10240)
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
@@ -58,6 +63,9 @@ namespace AccountBox.Data.Migrations
                     b.Property<byte[]>("PasswordTag")
                         .IsRequired()
                         .HasColumnType("BLOB");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Tags")
                         .HasMaxLength(2000)
@@ -89,6 +97,68 @@ namespace AccountBox.Data.Migrations
                     b.HasIndex("WebsiteId", "IsDeleted");
 
                     b.ToTable("Accounts", (string)null);
+                });
+
+            modelBuilder.Entity("AccountBox.Data.Entities.ApiKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("KeyHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("KeyPlaintext")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastUsedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ScopeType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("VaultId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KeyPlaintext")
+                        .IsUnique();
+
+                    b.HasIndex("VaultId");
+
+                    b.ToTable("ApiKeys");
+                });
+
+            modelBuilder.Entity("AccountBox.Data.Entities.ApiKeyWebsiteScope", b =>
+                {
+                    b.Property<int>("ApiKeyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ApiKeyId", "WebsiteId");
+
+                    b.HasIndex("WebsiteId");
+
+                    b.ToTable("ApiKeyWebsiteScopes");
                 });
 
             modelBuilder.Entity("AccountBox.Data.Entities.KeySlot", b =>
@@ -185,6 +255,41 @@ namespace AccountBox.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Website");
+                });
+
+            modelBuilder.Entity("AccountBox.Data.Entities.ApiKey", b =>
+                {
+                    b.HasOne("AccountBox.Data.Entities.KeySlot", "Vault")
+                        .WithMany()
+                        .HasForeignKey("VaultId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vault");
+                });
+
+            modelBuilder.Entity("AccountBox.Data.Entities.ApiKeyWebsiteScope", b =>
+                {
+                    b.HasOne("AccountBox.Data.Entities.ApiKey", "ApiKey")
+                        .WithMany("ApiKeyWebsiteScopes")
+                        .HasForeignKey("ApiKeyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AccountBox.Data.Entities.Website", "Website")
+                        .WithMany()
+                        .HasForeignKey("WebsiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ApiKey");
+
+                    b.Navigation("Website");
+                });
+
+            modelBuilder.Entity("AccountBox.Data.Entities.ApiKey", b =>
+                {
+                    b.Navigation("ApiKeyWebsiteScopes");
                 });
 
             modelBuilder.Entity("AccountBox.Data.Entities.Website", b =>

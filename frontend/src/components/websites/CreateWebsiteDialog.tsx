@@ -124,7 +124,9 @@ export function CreateWebsiteDialog({
                 id="tags"
                 placeholder="工作, 重要"
                 value={tags}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setTags(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  setTags(e.target.value)
+                }
                 disabled={isSubmitting}
                 rows={3}
               />

@@ -39,11 +39,20 @@ builder.Services.AddScoped<IVaultManager, VaultManager>();
 builder.Services.AddScoped<KeySlotRepository>();
 builder.Services.AddScoped<WebsiteRepository>();
 builder.Services.AddScoped<AccountRepository>();
+builder.Services.AddScoped<SearchRepository>();
 
 // 配置依赖注入 - 业务服务层
 builder.Services.AddScoped<VaultService>();
 builder.Services.AddScoped<WebsiteService>();
 builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<RecycleBinService>();
+builder.Services.AddScoped<SearchService>();
+builder.Services.AddScoped<AccountBox.Core.Services.PasswordGeneratorService>();
+builder.Services.AddScoped<AccountBox.Core.Services.IApiKeyService, ApiKeyService>();
+builder.Services.AddScoped<ApiKeysManagementService>();
+
+// HTTP Context Accessor（用于获取当前Vault ID）
+builder.Services.AddHttpContextAccessor();
 
 // 配置控制器
 builder.Services.AddControllers();

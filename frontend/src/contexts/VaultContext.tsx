@@ -16,7 +16,9 @@ export interface VaultContextType {
  * Vault Context
  * 管理应用的加密状态和会话
  */
-export const VaultContext = createContext<VaultContextType | undefined>(undefined)
+export const VaultContext = createContext<VaultContextType | undefined>(
+  undefined
+)
 
 export interface VaultProviderProps {
   children: ReactNode
@@ -35,13 +37,36 @@ export const VaultProvider = ({ children }: VaultProviderProps) => {
     return localStorage.getItem('vaultSessionId')
   })
 
-  // 组件挂载时恢复 session 到 apiClient
+  const lock = useCallback(() => {
+    setVaultSessionId(null)
+    setIsUnlocked(false)
+    // 清除 API 客户端的会话 ID
+    apiClient.setVaultSession(null)
+    // 清除 localStorage
+    localStorage.removeItem('vaultSessionId')
+  }, [])
+
+  // 组件挂载时恢复 session 到 apiClient 并设置 401 回调
   useEffect(() => {
     const savedSession = localStorage.getItem('vaultSessionId')
     if (savedSession) {
       apiClient.setVaultSession(savedSession)
     }
-  }, [])
+
+    // 设置 401 未授权回调
+    apiClient.setOnUnauthorized(() => {
+      console.log('Session expired or invalid, redirecting to unlock page...')
+      // 清空缓存
+      lock()
+      // 跳转到解锁页面
+      window.location.href = '/unlock'
+    })
+
+    // 清理函数
+    return () => {
+      apiClient.setOnUnauthorized(null)
+    }
+  }, [lock])
 
   const unlock = useCallback((sessionId: string) => {
     setVaultSessionId(sessionId)
@@ -50,15 +75,6 @@ export const VaultProvider = ({ children }: VaultProviderProps) => {
     apiClient.setVaultSession(sessionId)
     // 持久化到 localStorage
     localStorage.setItem('vaultSessionId', sessionId)
-  }, [])
-
-  const lock = useCallback(() => {
-    setVaultSessionId(null)
-    setIsUnlocked(false)
-    // 清除 API 客户端的会话 ID
-    apiClient.setVaultSession(null)
-    // 清除 localStorage
-    localStorage.removeItem('vaultSessionId')
   }, [])
 
   const value: VaultContextType = {

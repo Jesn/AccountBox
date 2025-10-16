@@ -87,7 +87,8 @@ export function DeleteAccountDialog({
                 {account?.websiteDomain}
               </p>
               <p>
-                <span className="font-semibold">用户名:</span> {account?.username}
+                <span className="font-semibold">用户名:</span>{' '}
+                {account?.username}
               </p>
               {account?.notes && (
                 <p>
@@ -101,7 +102,8 @@ export function DeleteAccountDialog({
 
           <div className="mt-4 rounded-md bg-blue-50 p-4 border border-blue-200">
             <p className="text-sm text-blue-800">
-              💡 提示: 这是软删除操作，账号将被移至回收站。您可以在回收站中恢复此账号，或永久删除。
+              💡 提示:
+              这是软删除操作，账号将被移至回收站。您可以在回收站中恢复此账号，或永久删除。
             </p>
           </div>
 

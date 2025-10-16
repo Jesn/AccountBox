@@ -1,3 +1,6 @@
+using AccountBox.Core.Enums;
+using System.ComponentModel.DataAnnotations;
+
 namespace AccountBox.Data.Entities;
 
 /// <summary>
@@ -60,6 +63,19 @@ public class Account
     /// 标签（JSON 数组，用于分类和过滤）
     /// </summary>
     public string? Tags { get; set; }
+
+    /// <summary>
+    /// 账号状态（Active/Disabled）
+    /// </summary>
+    [Required]
+    public AccountStatus Status { get; set; } = AccountStatus.Active;
+
+    /// <summary>
+    /// 扩展字段（JSON键值对，10KB限制）
+    /// </summary>
+    [Required]
+    [MaxLength(10240, ErrorMessage = "扩展字段不能超过10KB")]
+    public string ExtendedData { get; set; } = "{}";
 
     /// <summary>
     /// 软删除标志

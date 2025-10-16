@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { websiteService } from '@/services/websiteService'
-import type { UpdateWebsiteRequest, WebsiteResponse } from '@/services/websiteService'
+import type {
+  UpdateWebsiteRequest,
+  WebsiteResponse,
+} from '@/services/websiteService'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -133,7 +136,9 @@ export function EditWebsiteDialog({
                 id="edit-tags"
                 placeholder="工作, 重要"
                 value={tags}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setTags(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  setTags(e.target.value)
+                }
                 disabled={isSubmitting}
                 rows={3}
               />

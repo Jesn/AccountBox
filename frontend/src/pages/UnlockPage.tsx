@@ -5,7 +5,13 @@ import { useVault } from '@/hooks/useVault'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 /**
@@ -45,13 +51,25 @@ export function UnlockPage() {
 
         if (errorCode === 'AUTHENTICATION_FAILED') {
           setError('主密码错误，请重试')
+        } else if (errorCode === 'TOO_MANY_ATTEMPTS') {
+          setError(errorMessage || '尝试次数过多，请稍后再试')
         } else {
           setError(errorMessage || '解锁失败，请重试')
         }
       }
-    } catch (err) {
-      setError('网络错误，请检查后端服务是否启动')
+    } catch (err: any) {
+      // 处理 API 客户端抛出的错误
       console.error('Unlock error:', err)
+
+      if (err?.errorCode === 'AUTHENTICATION_FAILED') {
+        setError('主密码错误，请重试')
+      } else if (err?.errorCode === 'TOO_MANY_ATTEMPTS') {
+        setError(err?.message || '尝试次数过多，请稍后再试')
+      } else if (err?.errorCode === 'NETWORK_ERROR') {
+        setError('网络错误，请检查后端服务是否启动')
+      } else {
+        setError(err?.message || '解锁失败，请重试')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -62,9 +80,7 @@ export function UnlockPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">AccountBox 已锁定</CardTitle>
-          <CardDescription>
-            请输入主密码以解锁
-          </CardDescription>
+          <CardDescription>请输入主密码以解锁</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -88,11 +104,7 @@ export function UnlockPage() {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? '正在解锁...' : '解锁'}
             </Button>
 

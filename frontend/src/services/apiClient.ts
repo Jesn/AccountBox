@@ -9,6 +9,7 @@ import type { ApiResponse, ErrorResponse } from '@/types/common'
 class ApiClient {
   private client: AxiosInstance
   private vaultSessionId: string | null = null
+  private onUnauthorizedCallback: (() => void) | null = null
 
   constructor(baseURL: string = '') {
     this.client = axios.create({
@@ -39,6 +40,22 @@ class ApiClient {
         return response
       },
       (error: AxiosError<ApiResponse<unknown>>) => {
+        // 检查是否是 401 错误
+        if (error.response?.status === 401) {
+          // 获取请求的 URL
+          const requestUrl = error.config?.url || ''
+
+          // 认证端点的 401 错误应该由调用方处理，不触发自动跳转
+          // 这些端点包括：/api/vault/unlock, /api/vault/initialize
+          const isAuthEndpoint =
+            requestUrl.includes('/api/vault/unlock') ||
+            requestUrl.includes('/api/vault/initialize')
+
+          // 只有非认证端点的 401 才触发未授权回调（跳转到解锁页面）
+          if (!isAuthEndpoint && this.onUnauthorizedCallback) {
+            this.onUnauthorizedCallback()
+          }
+        }
         return this.handleError(error)
       }
     )
@@ -52,9 +69,19 @@ class ApiClient {
   }
 
   /**
+   * 设置未授权回调（当收到 401 错误时调用）
+   */
+  setOnUnauthorized(callback: (() => void) | null) {
+    this.onUnauthorizedCallback = callback
+  }
+
+  /**
    * GET 请求
    */
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async get<T>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
     const response = await this.client.get<ApiResponse<T>>(url, config)
     return response.data
   }
@@ -86,7 +113,10 @@ class ApiClient {
   /**
    * DELETE 请求
    */
-  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async delete<T>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
     const response = await this.client.delete<ApiResponse<T>>(url, config)
     return response.data
   }

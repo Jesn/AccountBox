@@ -1,0 +1,480 @@
+openapi: 3.0.3
+info:
+  title: AccountBox API密钥管理与外部API服务
+  version: 1.0.0
+  description: |
+    为AccountBox添加API密钥管理和外部API服务能力。
+
+    **功能模块**:
+    1. API密钥管理（/api/api-keys）
+    2. 外部API服务（/api/external，需API密钥认证）
+
+    **认证方式**:
+    - 内部API：使用现有认证机制（Session/JWT）
+    - 外部API：使用X-API-Key请求头
+
+servers:
+  - url: http://localhost:5093
+    description: 本地开发环境
+
+tags:
+  - name: API Keys
+    description: API密钥管理（内部使用）
+  - name: External API
+    description: 外部API服务（需API密钥认证）
+
+paths:
+  # ========== API密钥管理 ==========
+  /api/api-keys:
+    get:
+      tags: [API Keys]
+      summary: 获取API密钥列表
+      description: 返回当前用户的所有API密钥（包含明文）
+      responses:
+        '200':
+          description: 成功获取密钥列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_ApiKeyList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [API Keys]
+      summary: 创建API密钥
+      description: 生成新的API密钥，支持选择作用域
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyRequest'
+      responses:
+        '201':
+          description: 成功创建API密钥
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_ApiKey'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/api-keys/{id}:
+    delete:
+      tags: [API Keys]
+      summary: 删除API密钥
+      description: 删除指定的API密钥，后续使用该密钥的API调用将返回401
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 成功删除
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ========== 外部API：账号管理 ==========
+  /api/external/accounts:
+    post:
+      tags: [External API]
+      summary: 创建账号
+      description: 通过API创建新账号，密码不能为空但无需强度验证
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: 成功创建账号
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Account'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/external/accounts/{id}:
+    delete:
+      tags: [External API]
+      summary: 删除账号
+      description: 将账号移入回收站（软删除）
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 成功删除
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/external/accounts/{id}/status:
+    put:
+      tags: [External API]
+      summary: 启用/禁用账号
+      description: 改变账号的启用状态
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [Active, Disabled]
+                  example: Disabled
+      responses:
+        '200':
+          description: 成功更新状态
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Account'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/external/websites/{websiteId}/accounts:
+    get:
+      tags: [External API]
+      summary: 获取账号列表
+      description: 获取指定网站的账号列表，支持按状态过滤
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: websiteId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          description: 过滤账号状态
+          schema:
+            type: string
+            enum: [Active, Disabled]
+      responses:
+        '200':
+          description: 成功获取列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_AccountList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/external/websites/{websiteId}/accounts/random:
+    get:
+      tags: [External API]
+      summary: 随机获取启用账号
+      description: 从指定网站的启用账号中随机返回一个
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: websiteId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回随机账号
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Account'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: 该网站没有可用的启用账号
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API密钥认证（格式："sk_" + 32位字符）
+
+  schemas:
+    # ========== 通用响应 ==========
+    ApiResponse_ApiKey:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ApiKey'
+
+    ApiResponse_ApiKeyList:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiKey'
+
+    ApiResponse_Account:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Account'
+
+    ApiResponse_AccountList:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
+
+    ApiResponse_Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [message]
+          properties:
+            message:
+              type: string
+              example: "API密钥无权访问该网站"
+            code:
+              type: string
+              example: "FORBIDDEN"
+
+    # ========== API密钥 ==========
+    ApiKey:
+      type: object
+      required: [id, name, key, scopeType, createdAt]
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "爬虫脚本密钥"
+        key:
+          type: string
+          description: 密钥明文（可随时查看）
+          example: "sk_abcdefghijklmnopqrstuvwxyz123456"
+        scopeType:
+          type: string
+          enum: [All, Specific]
+          example: "Specific"
+        scopeWebsites:
+          type: array
+          description: 当scopeType=Specific时，包含允许访问的网站列表
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+          example:
+            - id: 1
+              name: "GitHub"
+            - id: 3
+              name: "Gmail"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-10-16T10:30:00Z"
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-10-16T15:45:00Z"
+
+    CreateApiKeyRequest:
+      type: object
+      required: [name, scopeType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "测试密钥"
+        scopeType:
+          type: string
+          enum: [All, Specific]
+          example: "Specific"
+        websiteIds:
+          type: array
+          description: 当scopeType=Specific时必填
+          items:
+            type: integer
+          example: [1, 3, 5]
+
+    # ========== 账号 ==========
+    Account:
+      type: object
+      required: [id, websiteId, username, status, createdAt]
+      properties:
+        id:
+          type: integer
+          example: 42
+        websiteId:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: "user@example.com"
+        password:
+          type: string
+          description: 密码（已解密）
+          example: "MyP@ssw0rd"
+        status:
+          type: string
+          enum: [Active, Disabled]
+          example: "Active"
+        extendedData:
+          type: object
+          description: 扩展字段（键值对）
+          additionalProperties: true
+          example:
+            email: "user@example.com"
+            phone: "+86 138****1234"
+            securityQuestion: "母亲的姓名"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["工作", "重要"]
+        notes:
+          type: string
+          example: "测试账号"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateAccountRequest:
+      type: object
+      required: [websiteId, username, password]
+      properties:
+        websiteId:
+          type: integer
+          example: 1
+        username:
+          type: string
+          minLength: 1
+          example: "newuser@example.com"
+        password:
+          type: string
+          minLength: 1
+          description: 不能为空，但无需强度验证
+          example: "123"
+        extendedData:
+          type: object
+          description: 扩展字段（可选，最大10KB）
+          additionalProperties: true
+          example:
+            email: "newuser@example.com"
+            registrationDate: "2025-10-16"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["API创建"]
+        notes:
+          type: string
+          example: "通过API创建的账号"
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse_Error'
+          example:
+            error:
+              message: "密码不能为空"
+              code: "VALIDATION_ERROR"
+
+    Unauthorized:
+      description: 未认证或API密钥无效
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse_Error'
+          example:
+            error:
+              message: "Invalid API key"
+              code: "UNAUTHORIZED"
+
+    Forbidden:
+      description: API密钥无权访问该资源
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse_Error'
+          example:
+            error:
+              message: "API密钥无权访问该网站"
+              code: "FORBIDDEN"
+
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse_Error'
+          example:
+            error:
+              message: "账号不存在"
+              code: "NOT_FOUND"

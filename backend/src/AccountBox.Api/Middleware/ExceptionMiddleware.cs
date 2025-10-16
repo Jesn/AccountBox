@@ -50,9 +50,9 @@ public class ExceptionMiddleware
             ArgumentException => (HttpStatusCode.BadRequest, "INVALID_ARGUMENT", exception.Message),
             KeyNotFoundException => (HttpStatusCode.NotFound, "NOT_FOUND", exception.Message),
             UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "UNAUTHORIZED", exception.Message),
-            CryptographicException => (HttpStatusCode.Unauthorized, "AUTHENTICATION_FAILED", "Invalid credentials or corrupted data"),
+            CryptographicException => (HttpStatusCode.Unauthorized, "AUTHENTICATION_FAILED", "主密码错误或数据已损坏"),
             InvalidOperationException => (HttpStatusCode.Conflict, "INVALID_OPERATION", exception.Message),
-            _ => (HttpStatusCode.InternalServerError, "INTERNAL_ERROR", "An unexpected error occurred")
+            _ => (HttpStatusCode.InternalServerError, "INTERNAL_ERROR", "发生了意外错误")
         };
 
         context.Response.StatusCode = (int)statusCode;

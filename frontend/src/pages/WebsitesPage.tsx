@@ -11,7 +11,7 @@ import { CreateWebsiteDialog } from '@/components/websites/CreateWebsiteDialog'
 import { EditWebsiteDialog } from '@/components/websites/EditWebsiteDialog'
 import { DeleteWebsiteDialog } from '@/components/websites/DeleteWebsiteDialog'
 import { WebsiteList } from '@/components/websites/WebsiteList'
-import { Lock, Plus, Trash2, Search, X } from 'lucide-react'
+import { Lock, Plus, Trash2, Search as SearchIcon, X } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 import type { WebsiteResponse } from '@/services/websiteService'
 
@@ -115,6 +115,10 @@ export function WebsitesPage() {
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold">网站管理</h1>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate('/search')}>
+              <SearchIcon className="mr-2 h-4 w-4" />
+              全局搜索
+            </Button>
             <Button variant="outline" onClick={() => navigate('/recycle-bin')}>
               <Trash2 className="mr-2 h-4 w-4" />
               回收站
@@ -138,7 +142,7 @@ export function WebsitesPage() {
 
         {/* 搜索框 */}
         <div className="mb-4 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             type="text"
             placeholder="搜索网站（域名或显示名称）"

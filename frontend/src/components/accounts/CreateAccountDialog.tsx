@@ -13,7 +13,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Eye, EyeOff } from 'lucide-react'
+import { PasswordGeneratorDialog } from '@/components/password-generator/PasswordGeneratorDialog'
+import { Eye, EyeOff, KeyRound } from 'lucide-react'
 
 interface CreateAccountDialogProps {
   open: boolean
@@ -39,6 +40,7 @@ export function CreateAccountDialog({
   const [tags, setTags] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPasswordGenerator, setShowPasswordGenerator] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,108 +100,127 @@ export function CreateAccountDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>添加账号</DialogTitle>
-            <DialogDescription>
-              为该网站添加新的账号信息
-            </DialogDescription>
-          </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>添加账号</DialogTitle>
+              <DialogDescription>为该网站添加新的账号信息</DialogDescription>
+            </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="username">
-                用户名 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="username"
-                placeholder="用户名或邮箱"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={isSubmitting}
-                autoFocus
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="password">
-                密码 <span className="text-red-500">*</span>
-              </Label>
-              <div className="flex gap-2">
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="username">
+                  用户名 <span className="text-red-500">*</span>
+                </Label>
                 <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="密码"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  id="username"
+                  placeholder="用户名或邮箱"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   disabled={isSubmitting}
-                  className="flex-1"
+                  autoFocus
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowPassword(!showPassword)}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="password">
+                  密码 <span className="text-red-500">*</span>
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="密码"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isSubmitting}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowPasswordGenerator(true)}
+                    disabled={isSubmitting}
+                    title="生成密码"
+                  >
+                    <KeyRound className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={isSubmitting}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="notes">备注（可选）</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="添加备注信息..."
+                  value={notes}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setNotes(e.target.value)
+                  }
                   disabled={isSubmitting}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
+                  rows={3}
+                />
               </div>
-            </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="notes">备注（可选）</Label>
-              <Textarea
-                id="notes"
-                placeholder="添加备注信息..."
-                value={notes}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setNotes(e.target.value)
-                }
-                disabled={isSubmitting}
-                rows={3}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="tags">标签（可选）</Label>
-              <Input
-                id="tags"
-                placeholder="重要, 工作"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-                {error}
+              <div className="grid gap-2">
+                <Label htmlFor="tags">标签（可选）</Label>
+                <Input
+                  id="tags"
+                  placeholder="重要, 工作"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  disabled={isSubmitting}
+                />
               </div>
-            )}
-          </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
-              取消
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? '创建中...' : '创建'}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+              {error && (
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+                  {error}
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
+                取消
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? '创建中...' : '创建'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <PasswordGeneratorDialog
+        open={showPasswordGenerator}
+        onOpenChange={setShowPasswordGenerator}
+        onAccept={(generatedPassword) => {
+          setPassword(generatedPassword)
+          setShowPassword(true) // 自动显示生成的密码
+        }}
+      />
+    </>
   )
 }

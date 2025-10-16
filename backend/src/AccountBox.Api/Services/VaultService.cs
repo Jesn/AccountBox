@@ -66,7 +66,9 @@ public class VaultService
         // 检查是否已初始化
         if (await _keySlotRepository.ExistsAsync())
         {
-            throw new InvalidOperationException("Vault is already initialized");
+            throw new InvalidOperationException(
+                "Vault 已经初始化过了。请使用解锁功能而不是初始化。" +
+                "如果您想重新初始化，请先删除现有数据库或联系管理员。");
         }
 
         // 使用 VaultManager 初始化
@@ -331,7 +333,7 @@ public class VaultService
                 {
                     var remainingTime = attempt.LockoutUntil.Value - DateTime.UtcNow;
                     throw new TooManyAttemptsException(
-                        $"Too many failed attempts. Please try again in {Math.Ceiling(remainingTime.TotalMinutes)} minutes.",
+                        $"尝试次数过多，请在 {Math.Ceiling(remainingTime.TotalMinutes)} 分钟后重试",
                         attempt.LockoutUntil.Value);
                 }
 

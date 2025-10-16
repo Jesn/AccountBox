@@ -1,3 +1,4 @@
+using AccountBox.Core.Exceptions;
 using AccountBox.Core.Models;
 using AccountBox.Core.Models.Website;
 using AccountBox.Data.Entities;
@@ -98,10 +99,13 @@ public class WebsiteService
             throw new ArgumentException("Domain cannot be empty", nameof(request));
         }
 
+        var trimmedDomain = request.Domain.Trim();
         var website = new Website
         {
-            Domain = request.Domain.Trim(),
-            DisplayName = request.DisplayName?.Trim(),
+            Domain = trimmedDomain,
+            DisplayName = string.IsNullOrWhiteSpace(request.DisplayName)
+                ? trimmedDomain  // 如果没有提供显示名称，使用域名作为默认值
+                : request.DisplayName.Trim(),
             Tags = request.Tags?.Trim()
         };
 
@@ -141,8 +145,11 @@ public class WebsiteService
             throw new KeyNotFoundException($"Website with ID {id} not found");
         }
 
-        existing.Domain = request.Domain.Trim();
-        existing.DisplayName = request.DisplayName?.Trim();
+        var trimmedDomain = request.Domain.Trim();
+        existing.Domain = trimmedDomain;
+        existing.DisplayName = string.IsNullOrWhiteSpace(request.DisplayName)
+            ? trimmedDomain  // 如果没有提供显示名称，使用域名作为默认值
+            : request.DisplayName.Trim();
         existing.Tags = request.Tags?.Trim();
 
         await _websiteRepository.UpdateAsync(existing);
@@ -164,15 +171,31 @@ public class WebsiteService
     }
 
     /// <summary>
-    /// 删除网站
+    /// 删除网站（级联删除保护）
     /// </summary>
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(int id, bool confirmed = false)
     {
         if (!await _websiteRepository.ExistsAsync(id))
         {
             throw new KeyNotFoundException($"Website with ID {id} not found");
         }
 
+        // 检查活跃账号数
+        var activeAccountCount = await _websiteRepository.GetActiveAccountCountAsync(id);
+        if (activeAccountCount > 0)
+        {
+            throw new ActiveAccountsExistException(id, activeAccountCount);
+        }
+
+        // 检查回收站账号数
+        var deletedAccountCount = await _websiteRepository.GetDeletedAccountCountAsync(id);
+        if (deletedAccountCount > 0 && !confirmed)
+        {
+            throw new ConfirmationRequiredException(id, deletedAccountCount);
+        }
+
+        // 如果有回收站账号且已确认，级联删除所有账号
+        // 注意：由于数据库配置了级联删除（ON DELETE CASCADE），删除网站时会自动删除所有关联账号
         await _websiteRepository.DeleteAsync(id);
     }
 

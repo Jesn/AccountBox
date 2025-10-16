@@ -5,7 +5,13 @@ import { useVault } from '@/hooks/useVault'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 /**
@@ -66,9 +72,7 @@ export function InitializePage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">欢迎使用 AccountBox</CardTitle>
-          <CardDescription>
-            首次使用，请设置主密码
-          </CardDescription>
+          <CardDescription>首次使用，请设置主密码</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -113,11 +117,7 @@ export function InitializePage() {
               </ul>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? '正在初始化...' : '设置主密码'}
             </Button>
           </form>

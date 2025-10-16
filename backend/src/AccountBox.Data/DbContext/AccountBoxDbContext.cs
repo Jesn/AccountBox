@@ -28,6 +28,16 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
     /// </summary>
     public DbSet<Account> Accounts { get; set; } = null!;
 
+    /// <summary>
+    /// ApiKey 表
+    /// </summary>
+    public DbSet<ApiKey> ApiKeys { get; set; } = null!;
+
+    /// <summary>
+    /// ApiKeyWebsiteScope 表
+    /// </summary>
+    public DbSet<ApiKeyWebsiteScope> ApiKeyWebsiteScopes { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -37,6 +47,33 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
 
         // 全局查询过滤器：默认不查询软删除的账号
         modelBuilder.Entity<Account>().HasQueryFilter(a => !a.IsDeleted);
+
+        // ApiKey 配置
+        modelBuilder.Entity<ApiKey>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.KeyPlaintext).IsUnique();
+            entity.HasIndex(e => e.VaultId);
+            entity.Property(e => e.ScopeType).HasDefaultValue(Core.Enums.ApiKeyScopeType.All);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+
+        // ApiKeyWebsiteScope 配置（多对多关联）
+        modelBuilder.Entity<ApiKeyWebsiteScope>(entity =>
+        {
+            entity.HasKey(e => new { e.ApiKeyId, e.WebsiteId });
+            entity.HasIndex(e => e.WebsiteId);
+
+            entity.HasOne(e => e.ApiKey)
+                .WithMany(a => a.ApiKeyWebsiteScopes)
+                .HasForeignKey(e => e.ApiKeyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Website)
+                .WithMany()
+                .HasForeignKey(e => e.WebsiteId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 
     /// <summary>
