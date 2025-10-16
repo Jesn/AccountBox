@@ -1,3 +1,11 @@
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { AccountResponse } from '@/services/accountService'
@@ -15,7 +23,9 @@ interface AccountListProps {
  * 显示某网站下的账号列表，支持查看密码、复制密码、编辑和删除
  */
 export function AccountList({ accounts, onEdit, onDelete }: AccountListProps) {
-  const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(new Set())
+  const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(
+    new Set()
+  )
 
   const togglePasswordVisibility = (accountId: number) => {
     setVisiblePasswords((prev) => {
@@ -49,84 +59,102 @@ export function AccountList({ accounts, onEdit, onDelete }: AccountListProps) {
   }
 
   return (
-    <div className="grid gap-4">
-      {accounts.map((account) => (
-        <Card key={account.id}>
-          <CardContent className="p-4">
-            <div className="flex justify-between items-start">
-              <div className="flex-1 space-y-2">
-                <div>
-                  <label className="text-sm font-medium text-gray-500">用户名</label>
-                  <p className="text-base font-medium">{account.username}</p>
+    <div className="rounded-md border overflow-x-auto">
+      <Table className="text-sm">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="h-10">用户名</TableHead>
+            <TableHead className="h-10">密码</TableHead>
+            <TableHead className="hidden md:table-cell h-10">标签</TableHead>
+            <TableHead className="hidden lg:table-cell h-10">备注</TableHead>
+            <TableHead className="hidden xl:table-cell h-10">创建时间</TableHead>
+            <TableHead className="hidden xl:table-cell h-10">更新时间</TableHead>
+            <TableHead className="text-right h-10">操作</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {accounts.map((account) => (
+            <TableRow key={account.id}>
+              {/* 用户名 */}
+              <TableCell className="font-medium py-2 px-3">
+                {account.username}
+              </TableCell>
+
+              {/* 密码（可切换显示/隐藏）*/}
+              <TableCell className="py-2 px-3">
+                <div className="flex items-center gap-2">
+                  <code className="text-sm font-mono">
+                    {visiblePasswords.has(account.id)
+                      ? account.password
+                      : '••••••••'}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => togglePasswordVisibility(account.id)}
+                  >
+                    {visiblePasswords.has(account.id) ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(account.password)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
                 </div>
+              </TableCell>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-500">密码</label>
-                  <div className="flex items-center gap-2">
-                    <code className="text-base font-mono">
-                      {visiblePasswords.has(account.id)
-                        ? account.password
-                        : '••••••••'}
-                    </code>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => togglePasswordVisibility(account.id)}
-                    >
-                      {visiblePasswords.has(account.id) ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(account.password)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
+              {/* 标签 */}
+              <TableCell className="hidden md:table-cell py-2 px-3">
+                {account.tags || '-'}
+              </TableCell>
+
+              {/* 备注（截断显示）*/}
+              <TableCell
+                className="hidden lg:table-cell max-w-xs truncate py-2 px-3"
+                title={account.notes || ''}
+              >
+                {account.notes || '-'}
+              </TableCell>
+
+              {/* 创建时间 */}
+              <TableCell className="hidden xl:table-cell text-sm text-gray-500 py-2 px-3">
+                {new Date(account.createdAt).toLocaleString('zh-CN')}
+              </TableCell>
+
+              {/* 更新时间 */}
+              <TableCell className="hidden xl:table-cell text-sm text-gray-500 py-2 px-3">
+                {new Date(account.updatedAt).toLocaleString('zh-CN')}
+              </TableCell>
+
+              {/* 操作 */}
+              <TableCell className="text-right py-2 px-3">
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onEdit(account)}
+                  >
+                    编辑
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => onDelete(account)}
+                  >
+                    删除
+                  </Button>
                 </div>
-
-                {account.notes && (
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">备注</label>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                      {account.notes}
-                    </p>
-                  </div>
-                )}
-
-                {account.tags && (
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">标签</label>
-                    <p className="text-sm text-gray-600">{account.tags}</p>
-                  </div>
-                )}
-
-                <div className="flex gap-4 text-xs text-gray-500">
-                  <span>创建时间: {new Date(account.createdAt).toLocaleString('zh-CN')}</span>
-                  <span>更新时间: {new Date(account.updatedAt).toLocaleString('zh-CN')}</span>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => onEdit(account)}>
-                  编辑
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => onDelete(account)}
-                >
-                  删除
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   )
 }

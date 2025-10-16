@@ -28,8 +28,9 @@ export function AccountsPage() {
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false)
   const [showEditAccountDialog, setShowEditAccountDialog] = useState(false)
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
-  const [selectedAccount, setSelectedAccount] = useState<AccountResponse | null>(null)
-  const pageSize = 10
+  const [selectedAccount, setSelectedAccount] =
+    useState<AccountResponse | null>(null)
+  const pageSize = 15
 
   useEffect(() => {
     if (websiteId) {
@@ -140,7 +141,7 @@ export function AccountsPage() {
               onDelete={handleDeleteAccount}
             />
 
-            {totalPages > 1 && (
+            {!isLoading && accounts.length > 0 && (
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
