@@ -1,5 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import type { WebsiteResponse } from '@/services/websiteService'
 import { Plus } from 'lucide-react'
 
@@ -14,7 +22,7 @@ interface WebsiteListProps {
 
 /**
  * 网站列表组件
- * 显示网站列表卡片,支持查看账号、编辑和删除操作
+ * 以表格形式显示网站列表,支持查看账号、编辑和删除操作
  */
 export function WebsiteList({
   websites,
@@ -53,57 +61,59 @@ export function WebsiteList({
     )
   }
 
-  // 网站列表
+  // 网站列表 - 表格视图
   return (
-    <div className="grid gap-4">
-      {websites.map((website) => (
-        <Card key={website.id}>
-          <CardContent className="p-4">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold">
-                  {website.displayName || website.domain}
-                </h3>
-                <p className="text-sm text-gray-600">{website.domain}</p>
-                {website.tags && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    标签: {website.tags}
-                  </p>
-                )}
-                <div className="flex gap-4 mt-2 text-sm text-gray-500">
-                  <span>活跃账号: {website.activeAccountCount}</span>
-                  {website.deletedAccountCount > 0 && (
-                    <span>回收站: {website.deletedAccountCount}</span>
-                  )}
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>显示名</TableHead>
+            <TableHead>域名</TableHead>
+            <TableHead>标签</TableHead>
+            <TableHead>活跃账号</TableHead>
+            <TableHead>回收站</TableHead>
+            <TableHead className="text-right">操作</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {websites.map((website) => (
+            <TableRow key={website.id}>
+              <TableCell className="font-medium">
+                {website.displayName || website.domain}
+              </TableCell>
+              <TableCell>{website.domain}</TableCell>
+              <TableCell>{website.tags || '-'}</TableCell>
+              <TableCell>{website.activeAccountCount}</TableCell>
+              <TableCell>{website.deletedAccountCount}</TableCell>
+              <TableCell className="text-right">
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onViewAccounts(website.id)}
+                  >
+                    查看账号
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onEdit(website)}
+                  >
+                    编辑
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => onDelete(website)}
+                  >
+                    删除
+                  </Button>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onViewAccounts(website.id)}
-                >
-                  查看账号
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEdit(website)}
-                >
-                  编辑
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => onDelete(website)}
-                >
-                  删除
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   )
 }
