@@ -37,6 +37,7 @@ export function AccountsPage() {
       loadWebsite()
       loadAccounts()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [websiteId, currentPage])
 
   const loadWebsite = async () => {
