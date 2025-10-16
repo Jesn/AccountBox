@@ -89,20 +89,20 @@
 
 ### Backend Implementation for User Story 2
 
-- [ ] T026 [US2] 扩展 `AccountService`（或创建新的服务方法），添加 `EnableAccountAsync` 和 `DisableAccountAsync` 方法在 `backend/src/AccountBox.Api/Services/AccountService.cs`
+- [X] T026 [US2] 扩展 `AccountService`（或创建新的服务方法），添加 `EnableAccountAsync` 和 `DisableAccountAsync` 方法在 `backend/src/AccountBox.Api/Services/AccountService.cs`
 - [ ] T027 [US2] 在 `AccountsController` 中添加启用/禁用端点：
   - `PUT /api/accounts/{id}/enable` - 启用账号
   - `PUT /api/accounts/{id}/disable` - 禁用账号
-- [ ] T028 [US2] 更新 `GET /api/websites/{id}/accounts` 端点，确保返回所有账号（活跃+禁用），包含 `status` 字段
+- [X] T028 [US2] 更新 `GET /api/websites/{id}/accounts` 端点，确保返回所有账号（活跃+禁用），包含 `status` 字段
 
 ### Frontend Implementation for User Story 2
 
-- [ ] T029 [US2] 更新 `Account` 类型定义，添加 `status` 字段在 `frontend/src/types/Account.ts`
+- [X] T029 [US2] 更新 `Account` 类型定义，添加 `status` 字段在 `frontend/src/types/Account.ts`
 - [ ] T030 [P] [US2] 创建 `AccountStatusBadge` 组件在 `frontend/src/components/accounts/AccountStatusBadge.tsx`（显示状态标识，如"活跃"/"已禁用"）
-- [ ] T031 [US2] 更新 `accountService.ts`，添加 `enableAccount` 和 `disableAccount` 方法在 `frontend/src/services/accountService.ts`
-- [ ] T032 [US2] 更新账号列表组件（如 `AccountListPage` 或相关组件），集成 `AccountStatusBadge`，添加启用/禁用按钮
-- [ ] T033 [US2] 为已禁用账号添加视觉样式（如灰色背景、禁用图标），在 `frontend/src/index.css` 或组件样式中
-- [ ] T034 [US2] 更新网站详情页面，分别统计并显示活跃账号数量和禁用账号数量
+- [X] T031 [US2] 更新 `accountService.ts`，添加 `enableAccount` 和 `disableAccount` 方法在 `frontend/src/services/accountService.ts`
+- [X] T032 [US2] 更新账号列表组件（如 `AccountListPage` 或相关组件），集成 `AccountStatusBadge`，添加启用/禁用按钮
+- [X] T033 [US2] 为已禁用账号添加视觉样式（如灰色背景、禁用图标），在 `frontend/src/index.css` 或组件样式中
+- [X] T034 [US2] 更新网站详情页面，分别统计并显示活跃账号数量和禁用账号数量
 
 **Checkpoint**: 用户故事1和用户故事2应该都可以独立工作。用户可以禁用/启用账号，并在UI中看到清晰的状态标识。
 
