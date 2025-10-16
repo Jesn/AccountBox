@@ -1,15 +1,17 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useVault } from '@/hooks/useVault'
 import { websiteService } from '@/services/websiteService'
 import { vaultService } from '@/services/vaultService'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent } from '@/components/ui/card'
 import { ChangeMasterPasswordDialog } from '@/components/vault/ChangeMasterPasswordDialog'
 import { CreateWebsiteDialog } from '@/components/websites/CreateWebsiteDialog'
 import { EditWebsiteDialog } from '@/components/websites/EditWebsiteDialog'
 import { DeleteWebsiteDialog } from '@/components/websites/DeleteWebsiteDialog'
 import { WebsiteList } from '@/components/websites/WebsiteList'
-import { Lock, Plus, Trash2 } from 'lucide-react'
+import { Lock, Plus, Trash2, Search, X } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 import type { WebsiteResponse } from '@/services/websiteService'
 
@@ -30,6 +32,7 @@ export function WebsitesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
   const pageSize = 15
 
   const loadWebsites = useCallback(async () => {
@@ -46,6 +49,16 @@ export function WebsitesPage() {
       setIsLoading(false)
     }
   }, [currentPage, pageSize])
+
+  const filteredWebsites = useMemo(() => {
+    if (!searchQuery.trim()) return websites
+    const query = searchQuery.toLowerCase()
+    return websites.filter(
+      (website) =>
+        website.displayName?.toLowerCase().includes(query) ||
+        website.domain.toLowerCase().includes(query)
+    )
+  }, [websites, searchQuery])
 
   useEffect(() => {
     loadWebsites()
@@ -123,21 +136,60 @@ export function WebsitesPage() {
           </div>
         </div>
 
-        <WebsiteList
-          websites={websites}
-          isLoading={isLoading}
-          onViewAccounts={handleViewAccounts}
-          onEdit={handleEditWebsite}
-          onDelete={handleDeleteWebsite}
-          onCreateNew={() => setShowCreateWebsiteDialog(true)}
-        />
-
-        {!isLoading && websites.length > 0 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
+        {/* 搜索框 */}
+        <div className="mb-4 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="搜索网站（域名或显示名称）"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        {/* 搜索无结果提示 */}
+        {!isLoading && searchQuery && filteredWebsites.length === 0 && websites.length > 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-gray-600 mb-4">
+                未找到匹配 "{searchQuery}" 的网站
+              </p>
+              <Button variant="outline" onClick={() => setSearchQuery('')}>
+                清空搜索
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 网站列表和分页 */}
+        {(!searchQuery || filteredWebsites.length > 0) && (
+          <>
+            <WebsiteList
+              websites={filteredWebsites}
+              isLoading={isLoading}
+              onViewAccounts={handleViewAccounts}
+              onEdit={handleEditWebsite}
+              onDelete={handleDeleteWebsite}
+              onCreateNew={() => setShowCreateWebsiteDialog(true)}
+            />
+
+            {!isLoading && filteredWebsites.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            )}
+          </>
         )}
       </div>
 
