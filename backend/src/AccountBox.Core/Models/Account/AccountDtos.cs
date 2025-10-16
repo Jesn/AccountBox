@@ -18,6 +18,12 @@ public class AccountResponse
 
     public string? Notes { get; set; }
     public string? Tags { get; set; }
+
+    /// <summary>
+    /// 账号状态（Active/Disabled）
+    /// </summary>
+    public string Status { get; set; } = "Active";
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }

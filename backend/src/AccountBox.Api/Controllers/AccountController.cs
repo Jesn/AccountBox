@@ -104,4 +104,40 @@ public class AccountController : ControllerBase
         await _accountService.SoftDeleteAsync(id);
         return Ok(ApiResponse<object>.Ok(new { message = "Account moved to recycle bin successfully" }));
     }
+
+    /// <summary>
+    /// 启用账号
+    /// PUT /api/accounts/{id}/enable
+    /// </summary>
+    [HttpPut("{id}/enable")]
+    public async Task<ActionResult<ApiResponse<object>>> Enable(int id)
+    {
+        try
+        {
+            await _accountService.EnableAccountAsync(id);
+            return Ok(ApiResponse<object>.Ok(new { message = "Account enabled successfully" }));
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(ApiResponse<object>.Fail("NOT_FOUND", $"Account with ID {id} not found"));
+        }
+    }
+
+    /// <summary>
+    /// 禁用账号
+    /// PUT /api/accounts/{id}/disable
+    /// </summary>
+    [HttpPut("{id}/disable")]
+    public async Task<ActionResult<ApiResponse<object>>> Disable(int id)
+    {
+        try
+        {
+            await _accountService.DisableAccountAsync(id);
+            return Ok(ApiResponse<object>.Ok(new { message = "Account disabled successfully" }));
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(ApiResponse<object>.Fail("NOT_FOUND", $"Account with ID {id} not found"));
+        }
+    }
 }

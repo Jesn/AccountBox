@@ -49,6 +49,7 @@ export interface Account {
   password: string // 前端显示的解密后密码
   notes?: string // 前端显示的解密后备注
   tags?: string
+  status: 'Active' | 'Disabled' // 账号状态
   isDeleted: boolean
   deletedAt?: string
   createdAt: string

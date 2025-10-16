@@ -10,6 +10,7 @@ export interface AccountResponse {
   password: string
   notes?: string
   tags?: string
+  status: 'Active' | 'Disabled'
   createdAt: string
   updatedAt: string
   isDeleted: boolean
@@ -75,6 +76,14 @@ class AccountService {
 
   async delete(id: number): Promise<ApiResponse<{ message: string }>> {
     return await apiClient.delete<{ message: string }>(`${this.baseUrl}/${id}`)
+  }
+
+  async enable(id: number): Promise<ApiResponse<{ message: string }>> {
+    return await apiClient.put<{ message: string }>(`${this.baseUrl}/${id}/enable`)
+  }
+
+  async disable(id: number): Promise<ApiResponse<{ message: string }>> {
+    return await apiClient.put<{ message: string }>(`${this.baseUrl}/${id}/disable`)
   }
 }
 

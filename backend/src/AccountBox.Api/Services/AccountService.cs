@@ -227,6 +227,36 @@ public class AccountService
     }
 
     /// <summary>
+    /// 启用账号
+    /// </summary>
+    public async Task EnableAccountAsync(int id)
+    {
+        var account = await _accountRepository.GetByIdAsync(id);
+        if (account == null)
+        {
+            throw new KeyNotFoundException($"Account with ID {id} not found");
+        }
+
+        account.Status = Core.Enums.AccountStatus.Active;
+        await _accountRepository.UpdateAsync(account);
+    }
+
+    /// <summary>
+    /// 禁用账号
+    /// </summary>
+    public async Task DisableAccountAsync(int id)
+    {
+        var account = await _accountRepository.GetByIdAsync(id);
+        if (account == null)
+        {
+            throw new KeyNotFoundException($"Account with ID {id} not found");
+        }
+
+        account.Status = Core.Enums.AccountStatus.Disabled;
+        await _accountRepository.UpdateAsync(account);
+    }
+
+    /// <summary>
     /// 将 Account 实体映射到 AccountResponse DTO（解密密码和备注）
     /// </summary>
     private AccountResponse MapToResponse(Data.Entities.Account account, byte[] vaultKey)
@@ -261,6 +291,7 @@ public class AccountService
             Password = password,
             Notes = notes,
             Tags = account.Tags,
+            Status = account.Status.ToString(),
             CreatedAt = account.CreatedAt,
             UpdatedAt = account.UpdatedAt,
             IsDeleted = account.IsDeleted,

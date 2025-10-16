@@ -99,6 +99,28 @@ export function AccountsPage() {
     loadAccounts()
   }
 
+  const handleEnableAccount = async (account: AccountResponse) => {
+    try {
+      const response = await accountService.enable(account.id)
+      if (response.success) {
+        loadAccounts()
+      }
+    } catch (error) {
+      console.error('启用账号失败:', error)
+    }
+  }
+
+  const handleDisableAccount = async (account: AccountResponse) => {
+    try {
+      const response = await accountService.disable(account.id)
+      if (response.success) {
+        loadAccounts()
+      }
+    } catch (error) {
+      console.error('禁用账号失败:', error)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl">
@@ -140,6 +162,8 @@ export function AccountsPage() {
               accounts={accounts}
               onEdit={handleEditAccount}
               onDelete={handleDeleteAccount}
+              onEnable={handleEnableAccount}
+              onDisable={handleDisableAccount}
             />
 
             {!isLoading && accounts.length > 0 && (

@@ -8,21 +8,24 @@ import {
 } from '@/components/ui/table'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { AccountStatusBadge } from '@/components/accounts/AccountStatusBadge'
 import type { AccountResponse } from '@/services/accountService'
-import { Eye, EyeOff, Copy } from 'lucide-react'
+import { Eye, EyeOff, Copy, CheckCircle, XCircle } from 'lucide-react'
 import { useState } from 'react'
 
 interface AccountListProps {
   accounts: AccountResponse[]
   onEdit: (account: AccountResponse) => void
   onDelete: (account: AccountResponse) => void
+  onEnable?: (account: AccountResponse) => void
+  onDisable?: (account: AccountResponse) => void
 }
 
 /**
  * 账号列表组件
  * 显示某网站下的账号列表，支持查看密码、复制密码、编辑和删除
  */
-export function AccountList({ accounts, onEdit, onDelete }: AccountListProps) {
+export function AccountList({ accounts, onEdit, onDelete, onEnable, onDisable }: AccountListProps) {
   const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(
     new Set()
   )
@@ -65,6 +68,7 @@ export function AccountList({ accounts, onEdit, onDelete }: AccountListProps) {
           <TableRow>
             <TableHead className="h-10">用户名</TableHead>
             <TableHead className="h-10">密码</TableHead>
+            <TableHead className="h-10">状态</TableHead>
             <TableHead className="hidden md:table-cell h-10">标签</TableHead>
             <TableHead className="hidden lg:table-cell h-10">备注</TableHead>
             <TableHead className="hidden xl:table-cell h-10">
@@ -113,6 +117,11 @@ export function AccountList({ accounts, onEdit, onDelete }: AccountListProps) {
                 </div>
               </TableCell>
 
+              {/* 状态 */}
+              <TableCell className="py-2 px-3">
+                <AccountStatusBadge status={account.status} />
+              </TableCell>
+
               {/* 标签 */}
               <TableCell className="hidden md:table-cell py-2 px-3">
                 {account.tags || '-'}
@@ -138,7 +147,29 @@ export function AccountList({ accounts, onEdit, onDelete }: AccountListProps) {
 
               {/* 操作 */}
               <TableCell className="text-right py-2 px-3">
-                <div className="flex gap-2 justify-end">
+                <div className="flex gap-2 justify-end flex-wrap">
+                  {account.status === 'Disabled' && onEnable && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEnable(account)}
+                      title="启用账号"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      启用
+                    </Button>
+                  )}
+                  {account.status === 'Active' && onDisable && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDisable(account)}
+                      title="禁用账号"
+                    >
+                      <XCircle className="h-4 w-4 mr-1" />
+                      禁用
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
