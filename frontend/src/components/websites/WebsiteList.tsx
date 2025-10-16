@@ -84,10 +84,7 @@ export function WebsiteList({
               >
                 {website.displayName || website.domain}
               </TableCell>
-              <TableCell
-                className="max-w-xs truncate"
-                title={website.domain}
-              >
+              <TableCell className="max-w-xs truncate" title={website.domain}>
                 {website.domain}
               </TableCell>
               <TableCell className="hidden md:table-cell">

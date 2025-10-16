@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useVault } from '@/hooks/useVault'
 import { websiteService } from '@/services/websiteService'
@@ -19,22 +19,20 @@ import type { WebsiteResponse } from '@/services/websiteService'
 export function WebsitesPage() {
   const { lock } = useVault()
   const navigate = useNavigate()
-  const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false)
+  const [showChangePasswordDialog, setShowChangePasswordDialog] =
+    useState(false)
   const [showCreateWebsiteDialog, setShowCreateWebsiteDialog] = useState(false)
   const [showEditWebsiteDialog, setShowEditWebsiteDialog] = useState(false)
   const [showDeleteWebsiteDialog, setShowDeleteWebsiteDialog] = useState(false)
-  const [selectedWebsite, setSelectedWebsite] = useState<WebsiteResponse | null>(null)
+  const [selectedWebsite, setSelectedWebsite] =
+    useState<WebsiteResponse | null>(null)
   const [websites, setWebsites] = useState<WebsiteResponse[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const pageSize = 10
 
-  useEffect(() => {
-    loadWebsites()
-  }, [currentPage])
-
-  const loadWebsites = async () => {
+  const loadWebsites = useCallback(async () => {
     setIsLoading(true)
     try {
       const response = await websiteService.getAll(currentPage, pageSize)
@@ -47,7 +45,11 @@ export function WebsitesPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [currentPage, pageSize])
+
+  useEffect(() => {
+    loadWebsites()
+  }, [currentPage, loadWebsites])
 
   const handleLock = async () => {
     try {
@@ -100,10 +102,7 @@ export function WebsitesPage() {
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold">网站管理</h1>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/recycle-bin')}
-            >
+            <Button variant="outline" onClick={() => navigate('/recycle-bin')}>
               <Trash2 className="mr-2 h-4 w-4" />
               回收站
             </Button>
