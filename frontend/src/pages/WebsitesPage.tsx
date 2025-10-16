@@ -9,7 +9,7 @@ import { CreateWebsiteDialog } from '@/components/websites/CreateWebsiteDialog'
 import { EditWebsiteDialog } from '@/components/websites/EditWebsiteDialog'
 import { DeleteWebsiteDialog } from '@/components/websites/DeleteWebsiteDialog'
 import { WebsiteList } from '@/components/websites/WebsiteList'
-import { Lock, Plus } from 'lucide-react'
+import { Lock, Plus, Trash2 } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 import type { WebsiteResponse } from '@/services/websiteService'
 
@@ -96,10 +96,17 @@ export function WebsitesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold">网站管理</h1>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/recycle-bin')}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              回收站
+            </Button>
             <Button
               variant="outline"
               onClick={() => setShowChangePasswordDialog(true)}
