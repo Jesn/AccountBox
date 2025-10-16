@@ -69,12 +69,12 @@
 
 ### Frontend Implementation for User Story 1
 
-- [ ] T019 [P] [US1] 创建 `ApiKey` 类型定义在 `frontend/src/types/ApiKey.ts`
-- [ ] T020 [P] [US1] 创建 `apiKeyService.ts` 在 `frontend/src/services/apiKeyService.ts`（封装API调用）
-- [ ] T021 [P] [US1] 创建 `CreateApiKeyDialog` 组件在 `frontend/src/components/api-keys/CreateApiKeyDialog.tsx`（包含名称输入、作用域选择、网站多选）
-- [ ] T022 [P] [US1] 创建 `ApiKeyList` 组件在 `frontend/src/components/api-keys/ApiKeyList.tsx`（显示密钥列表，支持显示/隐藏明文、复制按钮）
-- [ ] T023 [P] [US1] 创建 `DeleteApiKeyDialog` 组件在 `frontend/src/components/api-keys/DeleteApiKeyDialog.tsx`
-- [ ] T024 [US1] 创建 `ApiKeysPage` 在 `frontend/src/pages/ApiKeysPage.tsx`，整合上述组件
+- [X] T019 [P] [US1] 创建 `ApiKey` 类型定义在 `frontend/src/types/ApiKey.ts`
+- [X] T020 [P] [US1] 创建 `apiKeyService.ts` 在 `frontend/src/services/apiKeyService.ts`（封装API调用）
+- [X] T021 [P] [US1] 创建 `CreateApiKeyDialog` 组件在 `frontend/src/components/api-keys/CreateApiKeyDialog.tsx`（包含名称输入、作用域选择、网站多选）
+- [X] T022 [P] [US1] 创建 `ApiKeyList` 组件在 `frontend/src/components/api-keys/ApiKeyList.tsx`（显示密钥列表，支持显示/隐藏明文、复制按钮）
+- [X] T023 [P] [US1] 创建 `DeleteApiKeyDialog` 组件在 `frontend/src/components/api-keys/DeleteApiKeyDialog.tsx`
+- [X] T024 [US1] 创建 `ApiKeysPage` 在 `frontend/src/pages/ApiKeysPage.tsx`，整合上述组件
 - [ ] T025 [US1] 在 `App.tsx` 中添加 `/api-keys` 路由，指向 `ApiKeysPage`
 
 **Checkpoint**: 用户故事1应该完全功能化并可独立测试。用户可以创建、查看、复制、删除API密钥。
