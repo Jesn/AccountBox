@@ -78,10 +78,18 @@ export function WebsiteList({
         <TableBody>
           {websites.map((website) => (
             <TableRow key={website.id}>
-              <TableCell className="font-medium">
+              <TableCell
+                className="font-medium max-w-xs truncate"
+                title={website.displayName || website.domain}
+              >
                 {website.displayName || website.domain}
               </TableCell>
-              <TableCell>{website.domain}</TableCell>
+              <TableCell
+                className="max-w-xs truncate"
+                title={website.domain}
+              >
+                {website.domain}
+              </TableCell>
               <TableCell className="hidden md:table-cell">
                 {website.tags || '-'}
               </TableCell>
