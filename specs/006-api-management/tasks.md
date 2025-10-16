@@ -23,8 +23,8 @@
 
 **Purpose**: 项目初始化和基础依赖配置
 
-- [ ] T001 安装 BCrypt.Net-Next 包到 `backend/src/AccountBox.Api/` 项目（用于API密钥哈希）
-- [ ] T002 [P] 在前端安装必要的依赖（如果需要新的shadcn/ui组件）
+- [X] T001 安装 BCrypt.Net-Next 包到 `backend/src/AccountBox.Api/` 项目（用于API密钥哈希）
+- [X] T002 [P] 在前端安装必要的依赖（如果需要新的shadcn/ui组件）
 
 ---
 
@@ -34,15 +34,15 @@
 
 **⚠️ CRITICAL**: 在此阶段完成之前，不能开始任何用户故事的工作
 
-- [ ] T003 [P] 创建 `AccountStatus` 枚举在 `backend/src/AccountBox.Core/Enums/AccountStatus.cs`
-- [ ] T004 [P] 创建 `ApiKeyScopeType` 枚举在 `backend/src/AccountBox.Core/Enums/ApiKeyScopeType.cs`
-- [ ] T005 扩展 `Account` 实体，添加 `Status` 和 `ExtendedData` 字段在 `backend/src/AccountBox.Core/Models/Account.cs`
-- [ ] T006 [P] 创建 `ApiKey` 实体在 `backend/src/AccountBox.Core/Models/ApiKey.cs`
-- [ ] T007 [P] 创建 `ApiKeyWebsiteScope` 实体在 `backend/src/AccountBox.Core/Models/ApiKeyWebsiteScope.cs`
-- [ ] T008 更新 `ApplicationDbContext`，添加 `DbSet<ApiKey>` 和 `DbSet<ApiKeyWebsiteScope>`，配置实体关系在 `backend/src/AccountBox.Data/ApplicationDbContext.cs`
-- [ ] T009 创建 EF Core 迁移，添加 `ApiKeys` 和 `ApiKeyWebsiteScopes` 表
-- [ ] T010 创建 EF Core 迁移，为 `Accounts` 表添加 `Status` 和 `ExtendedData` 列
-- [ ] T011 应用数据库迁移到开发数据库
+- [X] T003 [P] 创建 `AccountStatus` 枚举在 `backend/src/AccountBox.Core/Enums/AccountStatus.cs`
+- [X] T004 [P] 创建 `ApiKeyScopeType` 枚举在 `backend/src/AccountBox.Core/Enums/ApiKeyScopeType.cs`
+- [X] T005 扩展 `Account` 实体，添加 `Status` 和 `ExtendedData` 字段在 `backend/src/AccountBox.Core/Models/Account.cs`
+- [X] T006 [P] 创建 `ApiKey` 实体在 `backend/src/AccountBox.Core/Models/ApiKey.cs`
+- [X] T007 [P] 创建 `ApiKeyWebsiteScope` 实体在 `backend/src/AccountBox.Core/Models/ApiKeyWebsiteScope.cs`
+- [X] T008 更新 `ApplicationDbContext`，添加 `DbSet<ApiKey>` 和 `DbSet<ApiKeyWebsiteScope>`，配置实体关系在 `backend/src/AccountBox.Data/ApplicationDbContext.cs`
+- [X] T009 创建 EF Core 迁移，添加 `ApiKeys` 和 `ApiKeyWebsiteScopes` 表
+- [X] T010 创建 EF Core 迁移，为 `Accounts` 表添加 `Status` 和 `ExtendedData` 列
+- [X] T011 应用数据库迁移到开发数据库
 
 **Checkpoint**: 数据模型基础就绪 - 用户故事实现现在可以并行开始
 
@@ -56,16 +56,16 @@
 
 ### Backend Implementation for User Story 1
 
-- [ ] T012 [P] [US1] 创建 `IApiKeyService` 接口在 `backend/src/AccountBox.Core/Services/IApiKeyService.cs`（定义密钥生成、验证、作用域检查方法）
-- [ ] T013 [P] [US1] 创建 `ApiKeyService` 实现在 `backend/src/AccountBox.Api/Services/ApiKeyService.cs`（实现密钥生成、BCrypt哈希、作用域验证）
-- [ ] T014 [US1] 在 `Program.cs` 中注册 `IApiKeyService` 为 scoped 服务
-- [ ] T015 [P] [US1] 创建 `ApiKeyDto` 在 `backend/src/AccountBox.Api/DTOs/ApiKeyDto.cs`
-- [ ] T016 [P] [US1] 创建 `CreateApiKeyRequest` DTO 在 `backend/src/AccountBox.Api/DTOs/CreateApiKeyRequest.cs`
-- [ ] T017 [US1] 创建 `ApiKeysController` 在 `backend/src/AccountBox.Api/Controllers/ApiKeysController.cs`，实现以下端点：
+- [X] T012 [P] [US1] 创建 `IApiKeyService` 接口在 `backend/src/AccountBox.Core/Services/IApiKeyService.cs`（定义密钥生成、验证、作用域检查方法）
+- [X] T013 [P] [US1] 创建 `ApiKeyService` 实现在 `backend/src/AccountBox.Api/Services/ApiKeyService.cs`（实现密钥生成、BCrypt哈希、作用域验证）
+- [X] T014 [US1] 在 `Program.cs` 中注册 `IApiKeyService` 为 scoped 服务
+- [X] T015 [P] [US1] 创建 `ApiKeyDto` 在 `backend/src/AccountBox.Api/DTOs/ApiKeyDto.cs`
+- [X] T016 [P] [US1] 创建 `CreateApiKeyRequest` DTO 在 `backend/src/AccountBox.Api/DTOs/CreateApiKeyRequest.cs`
+- [X] T017 [US1] 创建 `ApiKeysController` 在 `backend/src/AccountBox.Api/Controllers/ApiKeysController.cs`，实现以下端点：
   - `GET /api/api-keys` - 获取密钥列表
   - `POST /api/api-keys` - 创建密钥
   - `DELETE /api/api-keys/{id}` - 删除密钥
-- [ ] T018 [US1] 为 `ApiKeysController` 添加输入验证和错误处理
+- [X] T018 [US1] 为 `ApiKeysController` 添加输入验证和错误处理
 
 ### Frontend Implementation for User Story 1
 
