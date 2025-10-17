@@ -11,7 +11,7 @@ services:
     container_name: accountbox-all-in-one
     restart: unless-stopped
     ports:
-      - "5093:5093"  # API 和前端都通过这个端口访问
+      - "5094:5093"  # API 和前端都通过这个端口访问
     volumes:
       # 持久化数据库
       - accountbox-data:/app/data
