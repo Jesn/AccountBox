@@ -14,7 +14,7 @@ namespace AccountBox.Api.Services;
 public class JwtService : IJwtService
 {
     private readonly JwtSettings _jwtSettings;
-    private final SymmetricSecurityKey _signingKey;
+    private readonly SymmetricSecurityKey _signingKey;
     private readonly JwtSecurityTokenHandler _tokenHandler;
 
     public JwtService(IOptions<JwtSettings> jwtSettings)
