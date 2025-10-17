@@ -169,13 +169,13 @@ export function WebsitesPage() {
               <Trash2 className="mr-2 h-4 w-4" />
               回收站
             </Button>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              登出
-            </Button>
             <Button onClick={() => setShowCreateWebsiteDialog(true)}>
               <Plus className="mr-2 h-4 w-4" />
               添加网站
+            </Button>
+            <Button variant="destructive" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              登出
             </Button>
           </div>
         </div>
