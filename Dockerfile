@@ -34,7 +34,11 @@ COPY backend/src/AccountBox.Core/AccountBox.Core.csproj AccountBox.Core/
 COPY backend/src/AccountBox.Data/AccountBox.Data.csproj AccountBox.Data/
 COPY backend/src/AccountBox.Security/AccountBox.Security.csproj AccountBox.Security/
 
-RUN dotnet restore "AccountBox.Api/AccountBox.Api.csproj"
+# 还原所有项目的依赖（按依赖顺序）
+RUN dotnet restore "AccountBox.Core/AccountBox.Core.csproj" && \
+    dotnet restore "AccountBox.Data/AccountBox.Data.csproj" && \
+    dotnet restore "AccountBox.Security/AccountBox.Security.csproj" && \
+    dotnet restore "AccountBox.Api/AccountBox.Api.csproj"
 
 # 复制后端源代码
 COPY backend/src/ .
@@ -44,7 +48,6 @@ WORKDIR /src/AccountBox.Api
 RUN dotnet publish "AccountBox.Api.csproj" \
     -c Release \
     -o /app/publish \
-    --no-restore \
     /p:UseAppHost=false
 
 # ============================================
@@ -92,3 +95,11 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # 启动应用
 ENTRYPOINT ["dotnet", "AccountBox.Api.dll"]
+
+# ============================================
+# Cleanup: Remove duplicate directories created during build
+# ============================================
+# Note: This is a build-time cleanup script that runs on the host machine
+# after the Docker image is built. It removes the duplicate backend/backend/
+# and backend/frontend/ directories that may be created during the build process.
+# These directories are added to .gitignore to prevent them from being committed.

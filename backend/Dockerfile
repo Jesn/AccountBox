@@ -8,8 +8,13 @@ WORKDIR /src
 COPY ["src/AccountBox.Api/AccountBox.Api.csproj", "AccountBox.Api/"]
 COPY ["src/AccountBox.Core/AccountBox.Core.csproj", "AccountBox.Core/"]
 COPY ["src/AccountBox.Data/AccountBox.Data.csproj", "AccountBox.Data/"]
+COPY ["src/AccountBox.Security/AccountBox.Security.csproj", "AccountBox.Security/"]
 
-RUN dotnet restore "AccountBox.Api/AccountBox.Api.csproj"
+# 还原所有项目的依赖（按依赖顺序）
+RUN dotnet restore "AccountBox.Core/AccountBox.Core.csproj" && \
+    dotnet restore "AccountBox.Data/AccountBox.Data.csproj" && \
+    dotnet restore "AccountBox.Security/AccountBox.Security.csproj" && \
+    dotnet restore "AccountBox.Api/AccountBox.Api.csproj"
 
 # 复制所有源代码
 COPY src/ .
@@ -19,7 +24,6 @@ WORKDIR /src/AccountBox.Api
 RUN dotnet publish "AccountBox.Api.csproj" \
     -c Release \
     -o /app/publish \
-    --no-restore \
     /p:UseAppHost=false
 
 # ============================================

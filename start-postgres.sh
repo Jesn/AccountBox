@@ -4,6 +4,7 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # 项目路径
@@ -13,9 +14,20 @@ FRONTEND_DIR="frontend"
 # 端口配置
 BACKEND_PORT=5093
 FRONTEND_PORT=5173
+POSTGRES_PORT=5432
+PGADMIN_PORT=5050
+
+# PostgreSQL 配置
+DB_PROVIDER="postgresql"
+DB_HOST="localhost"
+DB_PORT="5432"
+DB_USER="accountbox"
+DB_PASSWORD="accountbox123"
+DB_NAME="accountbox"
+CONNECTION_STRING="Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
 
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}AccountBox 项目启动脚本${NC}"
+echo -e "${GREEN}AccountBox PostgreSQL 启动脚本${NC}"
 echo -e "${GREEN}========================================${NC}"
 
 # 检查并杀掉占用端口的进程
@@ -39,6 +51,47 @@ kill_port() {
     fi
 }
 
+# 启动 PostgreSQL 容器
+start_postgres() {
+    echo -e "\n${GREEN}========================================${NC}"
+    echo -e "${GREEN}启动 PostgreSQL 容器${NC}"
+    echo -e "${GREEN}========================================${NC}"
+
+    # 检查 Docker 是否安装
+    if ! command -v docker &> /dev/null; then
+        echo -e "${RED}✗ Docker 未安装${NC}"
+        exit 1
+    fi
+
+    # 检查 Docker Compose 是否安装
+    if ! command -v docker-compose &> /dev/null; then
+        echo -e "${RED}✗ Docker Compose 未安装${NC}"
+        exit 1
+    fi
+
+    # 启动 PostgreSQL 容器
+    echo -e "${YELLOW}启动 PostgreSQL 和 pgAdmin 容器...${NC}"
+    if docker-compose -f docker-compose.postgres-test.yml up -d; then
+        echo -e "${GREEN}✓ PostgreSQL 容器已启动${NC}"
+        
+        # 等待 PostgreSQL 启动
+        echo -e "${YELLOW}等待 PostgreSQL 启动...${NC}"
+        sleep 5
+        
+        # 验证连接
+        echo -e "${YELLOW}验证数据库连接...${NC}"
+        if docker exec accountbox-postgres-test psql -U $DB_USER -d $DB_NAME -c "SELECT version();" > /dev/null 2>&1; then
+            echo -e "${GREEN}✓ PostgreSQL 连接成功${NC}"
+        else
+            echo -e "${RED}✗ PostgreSQL 连接失败${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${RED}✗ PostgreSQL 容器启动失败${NC}"
+        exit 1
+    fi
+}
+
 # 启动后端
 start_backend() {
     echo -e "\n${GREEN}========================================${NC}"
@@ -50,19 +103,6 @@ start_backend() {
 
     # 进入后端目录
     cd $BACKEND_DIR
-
-    # 检查是否需要重置数据库
-    if [ -f "accountbox.db" ]; then
-        echo -e "${YELLOW}检测到已存在数据库${NC}"
-        echo -e "${YELLOW}是否需要重置数据库？ (y/N)${NC}"
-        read -t 10 -n 1 reset_db
-        echo ""
-        if [[ $reset_db =~ ^[Yy]$ ]]; then
-            echo -e "${YELLOW}删除旧数据库...${NC}"
-            rm -f accountbox.db*
-            echo -e "${GREEN}✓ 数据库已删除${NC}"
-        fi
-    fi
 
     # 清理之前的构建
     echo -e "${YELLOW}清理之前的构建...${NC}"
@@ -79,6 +119,9 @@ start_backend() {
 
     # 应用数据库迁移
     echo -e "${YELLOW}应用数据库迁移...${NC}"
+    export DB_PROVIDER=$DB_PROVIDER
+    export CONNECTION_STRING=$CONNECTION_STRING
+
     if dotnet ef database update; then
         echo -e "${GREEN}✓ 数据库迁移成功${NC}"
     else
@@ -156,6 +199,19 @@ main() {
         exit 1
     fi
 
+    # 检查 docker-compose.postgres-test.yml 是否存在
+    if [ ! -f "docker-compose.postgres-test.yml" ]; then
+        echo -e "${RED}错误: docker-compose.postgres-test.yml 文件不存在${NC}"
+        exit 1
+    fi
+
+    # 启动 PostgreSQL
+    start_postgres
+
+    # 等待 PostgreSQL 完全启动
+    echo -e "${YELLOW}等待 PostgreSQL 完全启动...${NC}"
+    sleep 3
+
     # 启动后端
     start_backend
 
@@ -170,9 +226,6 @@ main() {
     echo -e "${YELLOW}等待服务完全启动...${NC}"
     sleep 5
 
-    # JWT认证系统已自动配置，无需额外初始化
-    echo -e "\n${GREEN}✓ JWT认证系统已配置${NC}"
-
     # 完成
     echo -e "\n${GREEN}========================================${NC}"
     echo -e "${GREEN}所有服务已启动完成！${NC}"
@@ -180,6 +233,20 @@ main() {
     echo -e "${GREEN}后端服务: http://localhost:${BACKEND_PORT}${NC}"
     echo -e "${GREEN}前端服务: http://localhost:${FRONTEND_PORT}${NC}"
     echo -e "${GREEN}Swagger API 文档: http://localhost:${BACKEND_PORT}/swagger${NC}"
+    echo -e "${GREEN}pgAdmin: http://localhost:${PGADMIN_PORT}${NC}"
+
+    # 显示 PostgreSQL 连接信息
+    echo -e "\n${BLUE}╔════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║     PostgreSQL 连接信息                 ║${NC}"
+    echo -e "${BLUE}╠════════════════════════════════════════╣${NC}"
+    echo -e "${BLUE}║                                        ║${NC}"
+    echo -e "${BLUE}║  主机: ${GREEN}${DB_HOST}${BLUE}                      ║${NC}"
+    echo -e "${BLUE}║  端口: ${GREEN}${DB_PORT}${BLUE}                        ║${NC}"
+    echo -e "${BLUE}║  用户: ${GREEN}${DB_USER}${BLUE}                    ║${NC}"
+    echo -e "${BLUE}║  密码: ${GREEN}${DB_PASSWORD}${BLUE}                ║${NC}"
+    echo -e "${BLUE}║  数据库: ${GREEN}${DB_NAME}${BLUE}                   ║${NC}"
+    echo -e "${BLUE}║                                        ║${NC}"
+    echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
 
     # 显示开发环境主密码
     echo -e "\n${YELLOW}╔════════════════════════════════════════╗${NC}"
@@ -199,7 +266,8 @@ main() {
 }
 
 # 捕获 Ctrl+C 信号
-trap 'echo -e "\n${YELLOW}正在停止所有服务...${NC}"; kill_port $BACKEND_PORT "后端"; kill_port $FRONTEND_PORT "前端"; exit 0' INT
+trap 'echo -e "\n${YELLOW}正在停止所有服务...${NC}"; kill_port $BACKEND_PORT "后端"; kill_port $FRONTEND_PORT "前端"; docker-compose -f docker-compose.postgres-test.yml down; exit 0' INT
 
 # 运行主函数
 main
+

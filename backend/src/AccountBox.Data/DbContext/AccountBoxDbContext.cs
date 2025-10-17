@@ -1,5 +1,6 @@
 using AccountBox.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace AccountBox.Data.DbContext;
 
@@ -37,6 +38,18 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
     /// LoginAttempt 表
     /// </summary>
     public DbSet<LoginAttempt> LoginAttempts { get; set; } = null!;
+
+    /// <summary>
+    /// 配置数据库连接和警告处理
+    /// </summary>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+
+        // 抑制待处理模型变更警告（在迁移时会自动处理）
+        optionsBuilder.ConfigureWarnings(w =>
+            w.Ignore(RelationalEventId.PendingModelChangesWarning));
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

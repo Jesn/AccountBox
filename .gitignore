@@ -141,5 +141,8 @@ coverage/
 *.ipr
 *.iws
 
+# Docker build artifacts (duplicate directories created during build)
+backend/backend/
+backend/frontend/
 
 .playwright-mcp/

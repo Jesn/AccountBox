@@ -90,6 +90,15 @@ public class WebsiteRepository
             throw new ArgumentNullException(nameof(website));
         }
 
+        // 检查域名是否已存在
+        var existingWebsite = await _context.Websites
+            .FirstOrDefaultAsync(w => w.Domain == website.Domain);
+
+        if (existingWebsite != null)
+        {
+            throw new InvalidOperationException($"域名 '{website.Domain}' 已存在");
+        }
+
         _context.Websites.Add(website);
         await _context.SaveChangesAsync();
 
