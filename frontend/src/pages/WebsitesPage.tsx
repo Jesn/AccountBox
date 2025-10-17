@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { websiteService } from '@/services/websiteService'
 import { searchService } from '@/services/searchService'
+import { authService } from '@/services/authService'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,7 +10,7 @@ import { CreateWebsiteDialog } from '@/components/websites/CreateWebsiteDialog'
 import { EditWebsiteDialog } from '@/components/websites/EditWebsiteDialog'
 import { DeleteWebsiteDialog } from '@/components/websites/DeleteWebsiteDialog'
 import { WebsiteList } from '@/components/websites/WebsiteList'
-import { Plus, Trash2, Search as SearchIcon, X, Key } from 'lucide-react'
+import { Plus, Trash2, Search as SearchIcon, X, Key, LogOut } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 import type { WebsiteResponse } from '@/services/websiteService'
 
@@ -149,6 +150,11 @@ export function WebsitesPage() {
     setCurrentPage(1)
   }
 
+  const handleLogout = () => {
+    authService.logout()
+    navigate('/login')
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-7xl">
@@ -162,6 +168,10 @@ export function WebsitesPage() {
             <Button variant="outline" onClick={() => navigate('/recycle-bin')}>
               <Trash2 className="mr-2 h-4 w-4" />
               回收站
+            </Button>
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              登出
             </Button>
             <Button onClick={() => setShowCreateWebsiteDialog(true)}>
               <Plus className="mr-2 h-4 w-4" />

@@ -2,6 +2,7 @@ using AccountBox.Core.Interfaces;
 using AccountBox.Core.Models.Auth;
 using AccountBox.Data.DbContext;
 using AccountBox.Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 
@@ -116,6 +117,25 @@ public class AuthController : ControllerBase
                 }
             });
         }
+    }
+
+    /// <summary>
+    /// 用户登出
+    /// </summary>
+    /// <returns>登出成功消息</returns>
+    [HttpPost("logout")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public IActionResult Logout()
+    {
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+        _logger.LogInformation("User logged out from IP {IP}", ipAddress);
+
+        return Ok(new
+        {
+            message = "登出成功"
+        });
     }
 
     /// <summary>
