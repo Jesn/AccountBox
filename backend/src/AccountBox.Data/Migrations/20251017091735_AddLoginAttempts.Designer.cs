@@ -3,6 +3,7 @@ using System;
 using AccountBox.Data.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccountBox.Data.Migrations
 {
     [DbContext(typeof(AccountBoxDbContext))]
-    partial class AccountBoxDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251017091735_AddLoginAttempts")]
+    partial class AddLoginAttempts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");

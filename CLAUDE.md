@@ -9,6 +9,7 @@ Auto-generated from all feature plans. Last updated: 2025-10-17
 - TypeScript 5.9.3（已确认自 frontend/package.json） + React 19, Vite 7, shadcn/ui, Tailwind CSS 4, axios 1.12（已存在） (003-15)
 - N/A（前端展示层优化，数据来自现有 API） (003-15)
 - BCrypt.Net-Next (API密钥哈希), ASP.NET Core 9.0 (外部API), Entity Framework Core 9.0 (006-api-management)
+- SQLite（通过Entity Framework Core,用于存储登录失败记录） (007-accountbox-web-jwt)
 
 ## Project Structure
 ```
@@ -86,10 +87,9 @@ curl -X GET 'http://localhost:5093/api/external/websites/1/accounts/random' \
 - 注释: 使用 XML 文档注释（C#）和 JSDoc（TypeScript）
 
 ## Recent Changes
+- 007-accountbox-web-jwt: Added SQLite（通过Entity Framework Core,用于存储登录失败记录）
 - 006-api-management: Added BCrypt.Net-Next, 外部API服务, API密钥管理, 账号状态管理, 扩展字段支持, 随机账号获取
 - 005-api-api-1: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
-- 003-15: Added TypeScript 5.9.3（已确认自 frontend/package.json） + React 19, Vite 7, shadcn/ui, Tailwind CSS 4, axios 1.12（已存在）
-- 002-http-localhost-5173: Added TypeScript 5.9.3 (已确认自 frontend/package.json) + React 19, Vite 7, shadcn/ui, Tailwind CSS 4, axios 1.12
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

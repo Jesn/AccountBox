@@ -33,6 +33,11 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
     /// </summary>
     public DbSet<ApiKeyWebsiteScope> ApiKeyWebsiteScopes { get; set; } = null!;
 
+    /// <summary>
+    /// LoginAttempt 表
+    /// </summary>
+    public DbSet<LoginAttempt> LoginAttempts { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -67,6 +72,23 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
                 .WithMany()
                 .HasForeignKey(e => e.WebsiteId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // LoginAttempt 配置
+        modelBuilder.Entity<LoginAttempt>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.IPAddress).HasMaxLength(45).IsRequired();
+            entity.Property(e => e.FailureReason).HasMaxLength(200);
+            entity.Property(e => e.UserAgent).HasMaxLength(500);
+
+            // 索引：用于快速查询某IP最近的失败记录
+            entity.HasIndex(e => new { e.IPAddress, e.AttemptTime })
+                .HasDatabaseName("IX_LoginAttempts_IPAddress_AttemptTime");
+
+            // 索引：用于清理旧记录
+            entity.HasIndex(e => e.AttemptTime)
+                .HasDatabaseName("IX_LoginAttempts_AttemptTime");
         });
     }
 

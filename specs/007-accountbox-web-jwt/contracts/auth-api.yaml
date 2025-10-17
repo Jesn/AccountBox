@@ -1,0 +1,227 @@
+openapi: 3.0.3
+info:
+  title: AccountBox Authentication API
+  description: JWT身份认证API,用于Web前端登录和会话管理
+  version: 1.0.0
+  contact:
+    name: AccountBox Team
+
+servers:
+  - url: http://localhost:5093/api
+    description: 开发环境（本地）
+  - url: https://accountbox.example.com/api
+    description: 生产环境
+
+tags:
+  - name: Authentication
+    description: 认证相关端点
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: 用户登录
+      description: 使用主密码进行身份认证,成功后返回JWT Token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              masterPassword: "MySecurePassword123"
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_LoginResponse'
+              example:
+                data:
+                  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  expiresAt: "2025-10-18T12:34:56Z"
+                error: null
+        '401':
+          description: 密码错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+              example:
+                data: null
+                error:
+                  code: "PASSWORD_INCORRECT"
+                  message: "密码错误,请重试"
+        '429':
+          description: 登录失败次数过多,触发冷却期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_ThrottleError'
+              example:
+                data: null
+                error:
+                  code: "TOO_MANY_ATTEMPTS"
+                  message: "登录失败次数过多,请1分钟后再试"
+                  retryAfter: 45
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+              example:
+                data: null
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "服务器内部错误,请稍后重试"
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: 用户登出
+      description: 登出当前会话（前端需要清除本地Token）
+      operationId: logout
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 登出成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Success'
+              example:
+                data:
+                  message: "登出成功"
+                error: null
+        '401':
+          description: 未认证或Token无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+              example:
+                data: null
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "认证无效,请重新登录"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Token,格式为 "Bearer {token}"
+
+  schemas:
+    # Request/Response DTOs
+    LoginRequest:
+      type: object
+      required:
+        - masterPassword
+      properties:
+        masterPassword:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: 主密码
+          example: "MySecurePassword123"
+
+    LoginResponse:
+      type: object
+      required:
+        - token
+        - expiresAt
+      properties:
+        token:
+          type: string
+          description: JWT Token字符串
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2YXVsdC11c2VyIiwianRpIjoiMTIzZTQ1NjctZTg5Yi0xMmQzLWE0NTYtNDI2NjE0MTc0MDAwIiwiaWF0IjoxNzM0NDM0ODk2LCJleHAiOjE3MzQ1MjEyOTYsImlzcyI6IkFjY291bnRCb3giLCJhdWQiOiJBY2NvdW50Qm94LVdlYiJ9.signature"
+        expiresAt:
+          type: string
+          format: date-time
+          description: Token过期时间（ISO 8601格式）
+          example: "2025-10-18T12:34:56Z"
+
+    # Unified API Response Wrapper
+    ApiResponse_LoginResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/LoginResponse'
+          nullable: true
+        error:
+          $ref: '#/components/schemas/ApiError'
+          nullable: true
+
+    ApiResponse_Success:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+          nullable: true
+        error:
+          $ref: '#/components/schemas/ApiError'
+          nullable: true
+
+    ApiResponse_Error:
+      type: object
+      properties:
+        data:
+          nullable: true
+        error:
+          $ref: '#/components/schemas/ApiError'
+
+    ApiResponse_ThrottleError:
+      type: object
+      properties:
+        data:
+          nullable: true
+        error:
+          $ref: '#/components/schemas/ThrottleError'
+
+    # Error Models
+    ApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: 错误代码
+          enum:
+            - PASSWORD_INCORRECT
+            - TOO_MANY_ATTEMPTS
+            - UNAUTHORIZED
+            - TOKEN_EXPIRED
+            - TOKEN_INVALID
+            - INTERNAL_ERROR
+          example: "PASSWORD_INCORRECT"
+        message:
+          type: string
+          description: 用户友好的错误消息
+          example: "密码错误,请重试"
+
+    ThrottleError:
+      allOf:
+        - $ref: '#/components/schemas/ApiError'
+        - type: object
+          properties:
+            retryAfter:
+              type: integer
+              description: 冷却期剩余秒数
+              example: 45
+
+# Security
+security:
+  - BearerAuth: []
