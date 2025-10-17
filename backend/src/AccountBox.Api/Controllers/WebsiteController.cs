@@ -2,6 +2,7 @@ using AccountBox.Api.Services;
 using AccountBox.Core.Exceptions;
 using AccountBox.Core.Models;
 using AccountBox.Core.Models.Website;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AccountBox.Api.Controllers;
@@ -12,6 +13,7 @@ namespace AccountBox.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/websites")]
+[Authorize]
 public class WebsiteController : ControllerBase
 {
     private readonly WebsiteService _websiteService;

@@ -1,6 +1,7 @@
 using AccountBox.Core.Models;
 using AccountBox.Core.Models.PasswordGenerator;
 using AccountBox.Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AccountBox.Api.Controllers;
@@ -11,6 +12,7 @@ namespace AccountBox.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/password-generator")]
+[Authorize]
 public class PasswordGeneratorController : ControllerBase
 {
     private readonly PasswordGeneratorService _passwordGeneratorService;

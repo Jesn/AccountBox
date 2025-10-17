@@ -1,6 +1,7 @@
 using AccountBox.Api.Services;
 using AccountBox.Core.Models;
 using AccountBox.Core.Models.RecycleBin;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AccountBox.Api.Controllers;
@@ -11,6 +12,7 @@ namespace AccountBox.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/recycle-bin")]
+[Authorize]
 public class RecycleBinController : ControllerBase
 {
     private readonly RecycleBinService _recycleBinService;

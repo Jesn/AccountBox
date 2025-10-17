@@ -1,6 +1,7 @@
 using AccountBox.Api.Services;
 using AccountBox.Core.Models;
 using AccountBox.Core.Models.Account;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AccountBox.Api.Controllers;
@@ -11,6 +12,7 @@ namespace AccountBox.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/accounts")]
+[Authorize]
 public class AccountController : ControllerBase
 {
     private readonly AccountService _accountService;
