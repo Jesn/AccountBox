@@ -54,7 +54,7 @@ start_backend() {
     # 检查是否需要重置数据库
     if [ -f "accountbox.db" ]; then
         echo -e "${YELLOW}检测到已存在数据库${NC}"
-        echo -e "${YELLOW}是否需要重置数据库并使用新密码 Test1234! ？ (y/N)${NC}"
+        echo -e "${YELLOW}是否需要重置数据库？ (y/N)${NC}"
         read -t 10 -n 1 reset_db
         echo ""
         if [[ $reset_db =~ ^[Yy]$ ]]; then
@@ -161,25 +161,8 @@ main() {
     echo -e "${YELLOW}等待服务完全启动...${NC}"
     sleep 5
 
-    # 检查是否需要初始化数据库
-    echo -e "\n${YELLOW}检查数据库初始化状态...${NC}"
-    INIT_STATUS=$(curl -s http://localhost:${BACKEND_PORT}/api/vault/status | grep -o '"isInitialized":[^,}]*' | cut -d':' -f2)
-
-    if [ "$INIT_STATUS" = "false" ]; then
-        echo -e "${YELLOW}数据库尚未初始化，正在自动初始化...${NC}"
-        INIT_RESPONSE=$(curl -s -X POST http://localhost:${BACKEND_PORT}/api/vault/initialize \
-            -H 'Content-Type: application/json' \
-            -d '{"masterPassword":"Test1234!"}')
-
-        if echo "$INIT_RESPONSE" | grep -q '"success":true'; then
-            echo -e "${GREEN}✓ 数据库初始化成功${NC}"
-        else
-            echo -e "${RED}✗ 数据库初始化失败${NC}"
-            echo -e "${RED}${INIT_RESPONSE}${NC}"
-        fi
-    else
-        echo -e "${GREEN}✓ 数据库已初始化${NC}"
-    fi
+    # JWT认证系统已自动配置，无需额外初始化
+    echo -e "\n${GREEN}✓ JWT认证系统已配置${NC}"
 
     # 完成
     echo -e "\n${GREEN}========================================${NC}"
@@ -191,12 +174,12 @@ main() {
 
     # 显示开发环境主密码
     echo -e "\n${YELLOW}╔════════════════════════════════════════╗${NC}"
-    echo -e "${YELLOW}║     开发环境测试主密码                 ║${NC}"
+    echo -e "${YELLOW}║     开发环境JWT认证信息                 ║${NC}"
     echo -e "${YELLOW}╠════════════════════════════════════════╣${NC}"
     echo -e "${YELLOW}║                                        ║${NC}"
-    echo -e "${YELLOW}║        主密码: ${GREEN}Test1234!${YELLOW}              ║${NC}"
+    echo -e "${YELLOW}║        主密码: ${GREEN}admin123${YELLOW}              ║${NC}"
     echo -e "${YELLOW}║                                        ║${NC}"
-    echo -e "${YELLOW}║  首次初始化时请使用此密码进行测试      ║${NC}"
+    echo -e "${YELLOW}║  使用此密码在前端登录页面进行登录       ║${NC}"
     echo -e "${YELLOW}║                                        ║${NC}"
     echo -e "${YELLOW}╚════════════════════════════════════════╝${NC}"
 
