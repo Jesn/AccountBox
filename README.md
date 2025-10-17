@@ -50,7 +50,7 @@ pnpm dev
 
 ```bash
 # 单镜像部署（推荐）
-docker-compose -f docker-compose.single.yml up -d
+docker-compose -f docker-compose.yml up -d
 
 # 或分离镜像部署
 docker-compose up -d
@@ -192,15 +192,17 @@ pnpm test:e2e
 
 ## 🐳 Docker 部署
 
-### 单镜像部署（推荐）
+### 本地部署
+
+#### 单镜像部署（推荐）
 
 ```bash
-docker-compose -f docker-compose.single.yml up -d
+docker-compose -f docker-compose.yml up -d
 ```
 
 访问: http://localhost:5093
 
-### 分离镜像部署
+#### 分离镜像部署
 
 ```bash
 docker-compose up -d
@@ -209,6 +211,112 @@ docker-compose up -d
 访问:
 - 前端: http://localhost:8080
 - 后端: http://localhost:5093
+
+### 线上部署
+
+使用公共镜像 `docker.cnb.cool/rich/public/accountbox` 进行部署。
+
+#### SQLite 版本
+
+```bash
+docker run -d \
+  --name accountbox \
+  -p 5093:8080 \
+  -v accountbox_data:/app/data \
+  -e ASPNETCORE_ENVIRONMENT=Production \
+  -e ASPNETCORE_URLS=http://+:8080 \
+  -e MASTER_PASSWORD=your_master_password \
+  docker.cnb.cool/rich/public/accountbox:latest
+```
+
+#### PostgreSQL 版本
+
+```bash
+docker run -d \
+  --name accountbox \
+  -p 5093:8080 \
+  -e ASPNETCORE_ENVIRONMENT=Production \
+  -e ASPNETCORE_URLS=http://+:8080 \
+  -e MASTER_PASSWORD=your_master_password \
+  -e ConnectionStrings__DefaultConnection="Host=postgres;Port=5432;Database=accountbox;Username=postgres;Password=your_password" \
+  --link postgres:postgres \
+  docker.cnb.cool/rich/public/accountbox:latest
+```
+
+#### Docker Compose 部署（推荐）
+
+**SQLite 版本** (`docker-compose.prod.yml`):
+
+```yaml
+version: '3.8'
+
+services:
+  accountbox:
+    image: docker.cnb.cool/rich/public/accountbox:latest
+    container_name: accountbox
+    ports:
+      - "5093:8080"
+    volumes:
+      - accountbox_data:/app/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - MASTER_PASSWORD=your_master_password
+    restart: unless-stopped
+
+volumes:
+  accountbox_data:
+```
+
+启动:
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+⚠️ **重要**: 请将 `your_master_password` 替换为强密码
+
+**PostgreSQL 版本** (`docker-compose.prod-pg.yml`):
+
+```yaml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: accountbox-postgres
+    environment:
+      - POSTGRES_DB=accountbox
+      - POSTGRES_PASSWORD=your_db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  accountbox:
+    image: docker.cnb.cool/rich/public/accountbox:latest
+    container_name: accountbox
+    ports:
+      - "5093:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - MASTER_PASSWORD=your_master_password
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=accountbox;Username=postgres;Password=your_db_password
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+```
+
+启动:
+```bash
+docker-compose -f docker-compose.prod-pg.yml up -d
+```
+
+⚠️ **重要**: 请将以下参数替换为强密码:
+- `your_master_password` - 应用主密码
+- `your_db_password` - PostgreSQL 数据库密码
 
 详细 Docker 部署指南请参考 [DOCKER.md](DOCKER.md)
 
