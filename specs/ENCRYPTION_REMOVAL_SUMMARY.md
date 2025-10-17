@@ -104,11 +104,11 @@ AccountBox 已从**加密存储模式**切换为**明文存储模式**，以简�
 
 ## 📚 相关文档
 
-- `/REMOVE_ENCRYPTION_PLAN.md` - 详细实施计划
-- `/REMOVE_ENCRYPTION_PROGRESS.md` - 完成进度记录
 - `/Augment-Memories.md` - 项目记忆库（已更新）
 - `/specs/006-api-management/spec.md` - 已更新规范
 - `/specs/006-api-management/plan.md` - 已更新计划
+
+**注**: 临时实施文档 `REMOVE_ENCRYPTION_PLAN.md` 和 `REMOVE_ENCRYPTION_PROGRESS.md` 已于完成后删除，所有重要信息已整合至本文档。
 
 ## ❓ 常见问题
 

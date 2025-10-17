@@ -209,8 +209,10 @@ pnpm dev
 ### Tailwind CSS问题
 - 参考: `tailwind问题处理.md`
 
-### 密码相关问题
-- 参考: `密码问题说明.md`
+### 认证相关问题
+- **Web前端认证**: 使用 JWT Token 登录 (功能007-accountbox-web-jwt)
+- **外部API认证**: 使用 API Key (X-API-Key 请求头)
+- **数据库重置**: 运行 `./reset_db.sh` 脚本
 
 ---
 
@@ -256,9 +258,7 @@ pnpm dev
   - 数据库：迁移 `20251017021759_RemoveEncryption` 已应用
   - 前端：需要移除 Vault 解锁页面和相关服务（待处理）
 - **安全建议**: 仅在可信环境使用，启用防火墙、磁盘加密、定期备份
-- **相关文档**:
-  - `REMOVE_ENCRYPTION_PLAN.md`
-  - `REMOVE_ENCRYPTION_PROGRESS.md`
+- **相关文档**: 详见 `specs/ENCRYPTION_REMOVAL_SUMMARY.md`
 
 ---
 
