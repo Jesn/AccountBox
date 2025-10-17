@@ -1,4 +1,5 @@
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
+import type { ErrorResponse } from '@/types/common';
 
 // 在生产环境（Docker容器内）使用相对路径
 // 在开发环境使用完整URL（通过Vite代理）
@@ -25,18 +26,61 @@ class AuthService {
    * @returns 登录响应（包含Token和过期时间）
    */
   async login(masterPassword: string): Promise<LoginResponse> {
-    const response = await axios.post<LoginResponse>(
-      `${API_BASE_URL}/api/auth/login`,
-      { masterPassword } as LoginRequest
-    );
+    try {
+      const response = await axios.post<LoginResponse>(
+        `${API_BASE_URL}/api/auth/login`,
+        { masterPassword } as LoginRequest
+      );
 
-    const { token, expiresAt } = response.data;
+      const { token, expiresAt } = response.data;
 
-    // 存储Token和过期时间到localStorage
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(TOKEN_EXPIRY_KEY, expiresAt);
+      // 存储Token和过期时间到localStorage
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(TOKEN_EXPIRY_KEY, expiresAt);
 
-    return response.data;
+      return response.data;
+    } catch (error) {
+      // 处理axios错误
+      const axiosError = error as AxiosError<{ error?: { code?: string; message?: string } }>;
+
+      if (axiosError.response) {
+        // 服务器返回错误响应
+        const errorData = axiosError.response.data?.error;
+
+        if (errorData) {
+          // 后端返回了结构化错误信息
+          throw {
+            errorCode: errorData.code || 'UNKNOWN_ERROR',
+            message: errorData.message || '登录失败，请稍后重试',
+          } as ErrorResponse;
+        }
+
+        // 根据HTTP状态码返回友好的错误消息
+        if (axiosError.response.status === 401) {
+          throw {
+            errorCode: 'PASSWORD_INCORRECT',
+            message: '主密码错误，请重试',
+          } as ErrorResponse;
+        }
+
+        throw {
+          errorCode: 'SERVER_ERROR',
+          message: '服务器错误，请稍后重试',
+        } as ErrorResponse;
+      } else if (axiosError.request) {
+        // 请求发送但没有收到响应
+        throw {
+          errorCode: 'NETWORK_ERROR',
+          message: '网络连接失败，请检查网络',
+        } as ErrorResponse;
+      } else {
+        // 其他错误
+        throw {
+          errorCode: 'CLIENT_ERROR',
+          message: '登录过程中发生错误，请稍后重试',
+        } as ErrorResponse;
+      }
+    }
   }
 
   /**

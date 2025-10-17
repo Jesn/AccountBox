@@ -4,6 +4,7 @@ import { recycleBinService } from '@/services/recycleBinService'
 import { Button } from '@/components/ui/button'
 import { RecycleBinList } from '@/components/recycle-bin/RecycleBinList'
 import { EmptyRecycleBinDialog } from '@/components/recycle-bin/EmptyRecycleBinDialog'
+import { PermanentDeleteDialog } from '@/components/recycle-bin/PermanentDeleteDialog'
 import Pagination from '@/components/common/Pagination'
 import { ArrowLeft, Trash2 } from 'lucide-react'
 import type { DeletedAccountResponse } from '@/services/recycleBinService'
@@ -15,6 +16,8 @@ import type { DeletedAccountResponse } from '@/services/recycleBinService'
 export function RecycleBinPage() {
   const navigate = useNavigate()
   const [showEmptyDialog, setShowEmptyDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [selectedAccount, setSelectedAccount] = useState<DeletedAccountResponse | null>(null)
   const [deletedAccounts, setDeletedAccounts] = useState<
     DeletedAccountResponse[]
   >([])
@@ -65,12 +68,12 @@ export function RecycleBinPage() {
   }
 
   const handlePermanentlyDelete = async (account: DeletedAccountResponse) => {
-    // 二次确认
-    const confirmed = window.confirm(
-      `确定要永久删除账号 "${account.username}"吗?\n\n此操作无法撤销!`
-    )
-    if (!confirmed) return
+    // 打开确认对话框
+    setSelectedAccount(account)
+    setShowDeleteDialog(true)
+  }
 
+  const handleConfirmDelete = async (account: DeletedAccountResponse) => {
     try {
       const response = await recycleBinService.permanentlyDeleteAccount(
         account.id
@@ -145,6 +148,13 @@ export function RecycleBinPage() {
         onOpenChange={setShowEmptyDialog}
         onSuccess={handleEmptySuccess}
         totalCount={totalCount}
+      />
+
+      <PermanentDeleteDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        account={selectedAccount}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   )
