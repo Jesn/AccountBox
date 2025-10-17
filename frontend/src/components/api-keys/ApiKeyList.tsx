@@ -1,42 +1,48 @@
-import { useState } from 'react';
-import type { ApiKey } from '@/types/ApiKey';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, EyeOff, Copy, Trash2 } from 'lucide-react';
+import { useState } from 'react'
+import type { ApiKey } from '@/types/ApiKey'
+import type { WebsiteResponse } from '@/services/websiteService'
+import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/common/CopyButton'
+import { Badge } from '@/components/ui/badge'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Eye, EyeOff, Trash2 } from 'lucide-react'
 
 interface ApiKeyListProps {
-  apiKeys: ApiKey[];
-  onDelete: (apiKey: ApiKey) => void;
+  apiKeys: ApiKey[]
+  websites: WebsiteResponse[]
+  onDelete: (apiKey: ApiKey) => void
 }
 
 /**
  * API密钥列表组件
  */
-export function ApiKeyList({ apiKeys, onDelete }: ApiKeyListProps) {
-  const [visibleKeys, setVisibleKeys] = useState<Set<number>>(new Set());
-  const [copiedKeyId, setCopiedKeyId] = useState<number | null>(null);
+export function ApiKeyList({ apiKeys, websites, onDelete }: ApiKeyListProps) {
+  const [visibleKeys, setVisibleKeys] = useState<Set<number>>(new Set())
+
+  // 根据网站ID获取网站名称（优先 displayName，否则使用 domain）
+  const getWebsiteName = (websiteId: number): string => {
+    const website = websites.find((w) => w.id === websiteId)
+    if (!website) return `网站#${websiteId}`
+    return website.displayName || website.domain
+  }
 
   const toggleKeyVisibility = (keyId: number) => {
     setVisibleKeys((prev) => {
-      const newSet = new Set(prev);
+      const newSet = new Set(prev)
       if (newSet.has(keyId)) {
-        newSet.delete(keyId);
+        newSet.delete(keyId)
       } else {
-        newSet.add(keyId);
+        newSet.add(keyId)
       }
-      return newSet;
-    });
-  };
-
-  const copyToClipboard = async (apiKey: ApiKey) => {
-    try {
-      await navigator.clipboard.writeText(apiKey.keyPlaintext);
-      setCopiedKeyId(apiKey.id);
-      setTimeout(() => setCopiedKeyId(null), 2000);
-    } catch (err) {
-      console.error('复制失败:', err);
-    }
-  };
+      return newSet
+    })
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('zh-CN', {
@@ -45,13 +51,13 @@ export function ApiKeyList({ apiKeys, onDelete }: ApiKeyListProps) {
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
-    });
-  };
+    })
+  }
 
   const maskKey = (key: string) => {
     // 显示前缀"sk_"和最后4个字符
-    return `${key.substring(0, 3)}${'*'.repeat(28)}${key.substring(key.length - 4)}`;
-  };
+    return `${key.substring(0, 3)}${'*'.repeat(28)}${key.substring(key.length - 4)}`
+  }
 
   if (apiKeys.length === 0) {
     return (
@@ -59,14 +65,13 @@ export function ApiKeyList({ apiKeys, onDelete }: ApiKeyListProps) {
         <p>暂无API密钥</p>
         <p className="text-sm mt-2">点击上方"创建API密钥"按钮开始创建</p>
       </div>
-    );
+    )
   }
 
   return (
     <div className="space-y-4">
       {apiKeys.map((apiKey) => {
-        const isVisible = visibleKeys.has(apiKey.id);
-        const isCopied = copiedKeyId === apiKey.id;
+        const isVisible = visibleKeys.has(apiKey.id)
 
         return (
           <Card key={apiKey.id}>
@@ -116,37 +121,45 @@ export function ApiKeyList({ apiKeys, onDelete }: ApiKeyListProps) {
                         </>
                       )}
                     </Button>
-                    <Button
+                    <CopyButton
+                      text={apiKey.keyPlaintext}
+                      successMessage="API密钥已复制到剪贴板"
                       variant="outline"
-                      size="sm"
-                      onClick={() => copyToClipboard(apiKey)}
-                    >
-                      <Copy className="h-4 w-4 mr-1" />
-                      {isCopied ? '已复制' : '复制'}
-                    </Button>
+                      showText
+                    />
                   </div>
                 </div>
                 <div className="font-mono text-sm bg-muted p-3 rounded-md break-all">
-                  {isVisible ? apiKey.keyPlaintext : maskKey(apiKey.keyPlaintext)}
+                  {isVisible
+                    ? apiKey.keyPlaintext
+                    : maskKey(apiKey.keyPlaintext)}
                 </div>
               </div>
 
               {/* 作用域信息 */}
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <span className="text-sm font-medium">作用域</span>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm">
                   {apiKey.scopeType === 'All' ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <Badge variant="default" className="bg-blue-500">
                       所有网站
-                    </span>
+                    </Badge>
                   ) : (
-                    <div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <div className="space-y-2">
+                      <Badge variant="secondary">
                         指定网站 ({apiKey.websiteIds.length}个)
-                      </span>
+                      </Badge>
                       {apiKey.websiteIds.length > 0 && (
-                        <div className="mt-2 text-xs">
-                          网站ID: {apiKey.websiteIds.join(', ')}
+                        <div className="flex flex-wrap gap-1.5">
+                          {apiKey.websiteIds.map((websiteId) => (
+                            <Badge
+                              key={websiteId}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {getWebsiteName(websiteId)}
+                            </Badge>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -155,8 +168,8 @@ export function ApiKeyList({ apiKeys, onDelete }: ApiKeyListProps) {
               </div>
             </CardContent>
           </Card>
-        );
+        )
       })}
     </div>
-  );
+  )
 }

@@ -7,7 +7,7 @@ namespace AccountBox.Api.Controllers;
 
 /// <summary>
 /// Account API 控制器
-/// 提供账号管理的 REST API 端点
+/// 提供账号管理的 REST API 端点（明文存储模式）
 /// </summary>
 [ApiController]
 [Route("api/accounts")]
@@ -21,30 +21,17 @@ public class AccountController : ControllerBase
     }
 
     /// <summary>
-    /// 从 HttpContext.Items 获取 VaultKey（由 VaultSessionMiddleware 设置）
-    /// </summary>
-    private byte[] GetVaultKey()
-    {
-        if (!HttpContext.Items.TryGetValue("VaultKey", out var vaultKeyObj) || vaultKeyObj is not byte[] vaultKey)
-        {
-            throw new UnauthorizedAccessException("Vault key not found in session");
-        }
-
-        return vaultKey;
-    }
-
-    /// <summary>
     /// 获取分页账号列表
-    /// GET /api/accounts?pageNumber=1&pageSize=10&websiteId=1
+    /// GET /api/accounts?pageNumber=1&pageSize=10&websiteId=1&searchTerm=user
     /// </summary>
     [HttpGet]
     public async Task<ActionResult<ApiResponse<PagedResult<AccountResponse>>>> GetPaged(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
-        [FromQuery] int? websiteId = null)
+        [FromQuery] int? websiteId = null,
+        [FromQuery] string? searchTerm = null)
     {
-        var vaultKey = GetVaultKey();
-        var result = await _accountService.GetPagedAsync(pageNumber, pageSize, websiteId, vaultKey);
+        var result = await _accountService.GetPagedAsync(pageNumber, pageSize, websiteId, searchTerm);
         return Ok(ApiResponse<PagedResult<AccountResponse>>.Ok(result));
     }
 
@@ -55,8 +42,7 @@ public class AccountController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<AccountResponse>>> GetById(int id)
     {
-        var vaultKey = GetVaultKey();
-        var account = await _accountService.GetByIdAsync(id, vaultKey);
+        var account = await _accountService.GetByIdAsync(id);
         if (account == null)
         {
             return NotFound(ApiResponse<AccountResponse>.Fail("NOT_FOUND", $"Account with ID {id} not found"));
@@ -72,8 +58,7 @@ public class AccountController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ApiResponse<AccountResponse>>> Create([FromBody] CreateAccountRequest request)
     {
-        var vaultKey = GetVaultKey();
-        var created = await _accountService.CreateAsync(request, vaultKey);
+        var created = await _accountService.CreateAsync(request);
         return CreatedAtAction(
             nameof(GetById),
             new { id = created.Id },
@@ -89,8 +74,7 @@ public class AccountController : ControllerBase
         int id,
         [FromBody] UpdateAccountRequest request)
     {
-        var vaultKey = GetVaultKey();
-        var updated = await _accountService.UpdateAsync(id, request, vaultKey);
+        var updated = await _accountService.UpdateAsync(id, request);
         return Ok(ApiResponse<AccountResponse>.Ok(updated));
     }
 

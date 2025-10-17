@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { apiKeyService } from '@/services/apiKeyService';
-import type { ApiKey } from '@/types/ApiKey';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react'
+import { apiKeyService } from '@/services/apiKeyService'
+import type { ApiKey } from '@/types/ApiKey'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,13 +9,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/components/ui/dialog'
 
 interface DeleteApiKeyDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  apiKey: ApiKey | null;
-  onSuccess: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  apiKey: ApiKey | null
+  onSuccess: () => void
 }
 
 /**
@@ -27,32 +27,34 @@ export function DeleteApiKeyDialog({
   apiKey,
   onSuccess,
 }: DeleteApiKeyDialogProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleDelete = async () => {
-    if (!apiKey) return;
+    if (!apiKey) return
 
-    setError(null);
-    setIsDeleting(true);
+    setError(null)
+    setIsDeleting(true)
     try {
-      await apiKeyService.delete(apiKey.id);
-      onOpenChange(false);
-      onSuccess();
+      await apiKeyService.delete(apiKey.id)
+      onOpenChange(false)
+      onSuccess()
     } catch (err: any) {
-      console.error('删除API密钥失败:', err);
-      setError(err.response?.data?.error?.message || '删除API密钥时发生错误，请重试');
+      console.error('删除API密钥失败:', err)
+      setError(
+        err.response?.data?.error?.message || '删除API密钥时发生错误，请重试'
+      )
     } finally {
-      setIsDeleting(false);
+      setIsDeleting(false)
     }
-  };
+  }
 
   const handleCancel = () => {
-    setError(null);
-    onOpenChange(false);
-  };
+    setError(null)
+    onOpenChange(false)
+  }
 
-  if (!apiKey) return null;
+  if (!apiKey) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -96,5 +98,5 @@ export function DeleteApiKeyDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

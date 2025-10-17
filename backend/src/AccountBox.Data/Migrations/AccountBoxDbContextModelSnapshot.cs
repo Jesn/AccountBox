@@ -43,26 +43,10 @@ namespace AccountBox.Data.Migrations
                         .HasMaxLength(5000)
                         .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("NotesEncrypted")
-                        .HasColumnType("BLOB");
-
-                    b.Property<byte[]>("NotesIV")
-                        .HasColumnType("BLOB");
-
-                    b.Property<byte[]>("NotesTag")
-                        .HasColumnType("BLOB");
-
-                    b.Property<byte[]>("PasswordEncrypted")
+                    b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("BLOB");
-
-                    b.Property<byte[]>("PasswordIV")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
-                    b.Property<byte[]>("PasswordTag")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
@@ -133,15 +117,13 @@ namespace AccountBox.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(0);
 
-                    b.Property<int>("VaultId")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("KeyPlaintext")
                         .IsUnique();
-
-                    b.HasIndex("VaultId");
 
                     b.ToTable("ApiKeys");
                 });
@@ -159,53 +141,6 @@ namespace AccountBox.Data.Migrations
                     b.HasIndex("WebsiteId");
 
                     b.ToTable("ApiKeyWebsiteScopes");
-                });
-
-            modelBuilder.Entity("AccountBox.Data.Entities.KeySlot", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Argon2Iterations")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Argon2MemorySize")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Argon2Parallelism")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte[]>("Argon2Salt")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("EncryptedVaultKey")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("VaultKeyIV")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
-                    b.Property<byte[]>("VaultKeyTag")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.ToTable("KeySlots", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_KeySlot_Singleton", "[Id] = 1");
-                        });
                 });
 
             modelBuilder.Entity("AccountBox.Data.Entities.Website", b =>
@@ -255,17 +190,6 @@ namespace AccountBox.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Website");
-                });
-
-            modelBuilder.Entity("AccountBox.Data.Entities.ApiKey", b =>
-                {
-                    b.HasOne("AccountBox.Data.Entities.KeySlot", "Vault")
-                        .WithMany()
-                        .HasForeignKey("VaultId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Vault");
                 });
 
             modelBuilder.Entity("AccountBox.Data.Entities.ApiKeyWebsiteScope", b =>

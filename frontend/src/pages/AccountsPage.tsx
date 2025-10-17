@@ -6,11 +6,12 @@ import type { AccountResponse } from '@/services/accountService'
 import type { WebsiteResponse } from '@/services/websiteService'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { AccountList } from '@/components/accounts/AccountList'
 import { CreateAccountDialog } from '@/components/accounts/CreateAccountDialog'
 import { EditAccountDialog } from '@/components/accounts/EditAccountDialog'
 import { DeleteAccountDialog } from '@/components/accounts/DeleteAccountDialog'
-import { ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft, Plus, Search } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 
 /**
@@ -25,6 +26,7 @@ export function AccountsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false)
   const [showEditAccountDialog, setShowEditAccountDialog] = useState(false)
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
@@ -38,7 +40,7 @@ export function AccountsPage() {
       loadAccounts()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [websiteId, currentPage])
+  }, [websiteId, currentPage, searchTerm])
 
   const loadWebsite = async () => {
     if (!websiteId) return
@@ -61,7 +63,8 @@ export function AccountsPage() {
       const response = await accountService.getAll(
         currentPage,
         pageSize,
-        parseInt(websiteId)
+        parseInt(websiteId),
+        searchTerm
       )
       if (response.success && response.data) {
         setAccounts(response.data.items as AccountResponse[])
@@ -72,6 +75,11 @@ export function AccountsPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    setCurrentPage(1) // 搜索时重置到第一页
   }
 
   const handleCreateAccountSuccess = () => {
@@ -134,7 +142,7 @@ export function AccountsPage() {
             返回网站列表
           </Button>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold">
                 {website?.displayName || website?.domain || '账号管理'}
@@ -147,6 +155,18 @@ export function AccountsPage() {
               <Plus className="mr-2 h-4 w-4" />
               添加账号
             </Button>
+          </div>
+
+          {/* 搜索框 */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Input
+              type="text"
+              placeholder="搜索用户名、标签或备注..."
+              value={searchTerm}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-10"
+            />
           </div>
         </div>
 

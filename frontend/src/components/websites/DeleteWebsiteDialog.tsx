@@ -57,7 +57,9 @@ export function DeleteWebsiteDialog({
 
     try {
       const params = confirmed ? '?confirmed=true' : ''
-      console.log(`删除网站 ID=${website.id}, confirmed=${confirmed}, params=${params}`)
+      console.log(
+        `删除网站 ID=${website.id}, confirmed=${confirmed}, params=${params}`
+      )
       const response = await websiteService.delete(website.id, params)
 
       if (response.success) {
@@ -154,8 +156,9 @@ export function DeleteWebsiteDialog({
                 🚫 无法删除
               </p>
               <p className="text-sm text-red-700">
-                该网站下还有 <span className="font-bold">{website.activeAccountCount}</span> 个活跃账号。
-                请先将所有账号删除或移至回收站后再删除网站。
+                该网站下还有{' '}
+                <span className="font-bold">{website.activeAccountCount}</span>{' '}
+                个活跃账号。 请先将所有账号删除或移至回收站后再删除网站。
               </p>
             </div>
           )}
@@ -182,7 +185,12 @@ export function DeleteWebsiteDialog({
             type="button"
             variant="destructive"
             onClick={() => handleDelete(needsConfirmation)}
-            disabled={isDeleting || (website !== null && website.activeAccountCount > 0 && !needsConfirmation)}
+            disabled={
+              isDeleting ||
+              (website !== null &&
+                website.activeAccountCount > 0 &&
+                !needsConfirmation)
+            }
           >
             {isDeleting
               ? '删除中...'

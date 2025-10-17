@@ -9,6 +9,11 @@ export interface GeneratePasswordRequest {
   includeNumbers: boolean
   includeSymbols: boolean
   excludeAmbiguous: boolean
+  uppercasePercentage: number
+  lowercasePercentage: number
+  numbersPercentage: number
+  symbolsPercentage: number
+  useCharacterDistribution: boolean
 }
 
 export interface CalculateStrengthRequest {

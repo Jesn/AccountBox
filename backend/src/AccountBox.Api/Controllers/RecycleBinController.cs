@@ -21,19 +21,6 @@ public class RecycleBinController : ControllerBase
     }
 
     /// <summary>
-    /// 从 HttpContext.Items 获取 VaultKey（由 VaultSessionMiddleware 设置）
-    /// </summary>
-    private byte[] GetVaultKey()
-    {
-        if (!HttpContext.Items.TryGetValue("VaultKey", out var vaultKeyObj) || vaultKeyObj is not byte[] vaultKey)
-        {
-            throw new UnauthorizedAccessException("Vault key not found in session");
-        }
-
-        return vaultKey;
-    }
-
-    /// <summary>
     /// 获取回收站中的分页账号列表
     /// GET /api/recycle-bin?pageNumber=1&pageSize=10&websiteId=1
     /// </summary>
@@ -43,8 +30,7 @@ public class RecycleBinController : ControllerBase
         [FromQuery] int pageSize = 10,
         [FromQuery] int? websiteId = null)
     {
-        var vaultKey = GetVaultKey();
-        var result = await _recycleBinService.GetDeletedAccountsAsync(pageNumber, pageSize, websiteId, vaultKey);
+        var result = await _recycleBinService.GetDeletedAccountsAsync(pageNumber, pageSize, websiteId);
         return Ok(ApiResponse<PagedResult<DeletedAccountResponse>>.Ok(result));
     }
 

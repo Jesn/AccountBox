@@ -9,34 +9,28 @@ using Microsoft.EntityFrameworkCore;
 namespace AccountBox.Api.Services;
 
 /// <summary>
-/// API密钥管理服务
+/// API密钥管理服务（明文存储模式，无需 Vault）
 /// </summary>
 public class ApiKeysManagementService
 {
     private readonly AccountBoxDbContext _context;
     private readonly IApiKeyService _apiKeyService;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ApiKeysManagementService(
         AccountBoxDbContext context,
-        IApiKeyService apiKeyService,
-        IHttpContextAccessor httpContextAccessor)
+        IApiKeyService apiKeyService)
     {
         _context = context;
         _apiKeyService = apiKeyService;
-        _httpContextAccessor = httpContextAccessor;
     }
 
     /// <summary>
-    /// 获取当前Vault的所有API密钥
+    /// 获取所有API密钥
     /// </summary>
     public async Task<List<ApiKeyDto>> GetAllAsync()
     {
-        var vaultId = GetCurrentVaultId();
-
         var apiKeys = await _context.ApiKeys
             .Include(k => k.ApiKeyWebsiteScopes)
-            .Where(k => k.VaultId == vaultId)
             .OrderByDescending(k => k.CreatedAt)
             .ToListAsync();
 
@@ -48,8 +42,6 @@ public class ApiKeysManagementService
     /// </summary>
     public async Task<ApiKeyDto> CreateAsync(CreateApiKeyRequest request)
     {
-        var vaultId = GetCurrentVaultId();
-
         // 验证输入
         if (string.IsNullOrWhiteSpace(request.Name))
             throw new ArgumentException("密钥名称不能为空");
@@ -70,7 +62,6 @@ public class ApiKeysManagementService
             KeyPlaintext = keyPlaintext,
             KeyHash = keyHash,
             ScopeType = scopeType,
-            VaultId = vaultId,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -106,10 +97,8 @@ public class ApiKeysManagementService
     /// </summary>
     public async Task DeleteAsync(int id)
     {
-        var vaultId = GetCurrentVaultId();
-
         var apiKey = await _context.ApiKeys
-            .FirstOrDefaultAsync(k => k.Id == id && k.VaultId == vaultId);
+            .FirstOrDefaultAsync(k => k.Id == id);
 
         if (apiKey == null)
             throw new KeyNotFoundException($"API密钥 {id} 不存在");
@@ -133,17 +122,5 @@ public class ApiKeysManagementService
             CreatedAt = apiKey.CreatedAt,
             LastUsedAt = apiKey.LastUsedAt
         };
-    }
-
-    /// <summary>
-    /// 获取当前Vault ID
-    /// </summary>
-    private int GetCurrentVaultId()
-    {
-        var vaultId = _httpContextAccessor.HttpContext?.Items["VaultId"] as int?;
-        if (vaultId == null)
-            throw new UnauthorizedAccessException("Vault未解锁");
-
-        return vaultId.Value;
     }
 }

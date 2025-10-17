@@ -9,6 +9,7 @@ export interface WebsiteResponse {
   createdAt: string
   updatedAt: string
   activeAccountCount: number
+  disabledAccountCount: number
   deletedAccountCount: number
 }
 

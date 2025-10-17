@@ -14,11 +14,6 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
     }
 
     /// <summary>
-    /// KeySlot 表（单例，只有一条记录）
-    /// </summary>
-    public DbSet<KeySlot> KeySlots { get; set; } = null!;
-
-    /// <summary>
     /// Website 表
     /// </summary>
     public DbSet<Website> Websites { get; set; } = null!;
@@ -53,7 +48,6 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.KeyPlaintext).IsUnique();
-            entity.HasIndex(e => e.VaultId);
             entity.Property(e => e.ScopeType).HasDefaultValue(Core.Enums.ApiKeyScopeType.All);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
@@ -106,21 +100,37 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
         {
             var now = DateTime.UtcNow;
 
+            // 尝试设置 CreatedAt（仅对新增实体）
             if (entry.State == EntityState.Added)
             {
-                var createdAtProperty = entry.Property("CreatedAt");
-                if (createdAtProperty != null &&
-                    (createdAtProperty.CurrentValue == null ||
-                     (createdAtProperty.CurrentValue is DateTime dt && dt == default)))
+                try
                 {
-                    createdAtProperty.CurrentValue = now;
+                    var createdAtProperty = entry.Property("CreatedAt");
+                    if (createdAtProperty != null &&
+                        (createdAtProperty.CurrentValue == null ||
+                         (createdAtProperty.CurrentValue is DateTime dt && dt == default)))
+                    {
+                        createdAtProperty.CurrentValue = now;
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    // 实体没有 CreatedAt 属性，跳过
                 }
             }
 
-            var updatedAtProperty = entry.Property("UpdatedAt");
-            if (updatedAtProperty != null)
+            // 尝试设置 UpdatedAt
+            try
             {
-                updatedAtProperty.CurrentValue = now;
+                var updatedAtProperty = entry.Property("UpdatedAt");
+                if (updatedAtProperty != null)
+                {
+                    updatedAtProperty.CurrentValue = now;
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                // 实体没有 UpdatedAt 属性，跳过
             }
         }
     }

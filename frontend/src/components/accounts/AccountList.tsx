@@ -8,9 +8,10 @@ import {
 } from '@/components/ui/table'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/common/CopyButton'
 import { AccountStatusBadge } from '@/components/accounts/AccountStatusBadge'
 import type { AccountResponse } from '@/services/accountService'
-import { Eye, EyeOff, Copy, CheckCircle, XCircle } from 'lucide-react'
+import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react'
 import { useState } from 'react'
 
 interface AccountListProps {
@@ -25,7 +26,13 @@ interface AccountListProps {
  * 账号列表组件
  * 显示某网站下的账号列表，支持查看密码、复制密码、编辑和删除
  */
-export function AccountList({ accounts, onEdit, onDelete, onEnable, onDisable }: AccountListProps) {
+export function AccountList({
+  accounts,
+  onEdit,
+  onDelete,
+  onEnable,
+  onDisable,
+}: AccountListProps) {
   const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(
     new Set()
   )
@@ -40,15 +47,6 @@ export function AccountList({ accounts, onEdit, onDelete, onEnable, onDisable }:
       }
       return newSet
     })
-  }
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      // 这里可以添加一个 toast 提示
-    } catch (err) {
-      console.error('复制失败:', err)
-    }
   }
 
   if (accounts.length === 0) {
@@ -100,6 +98,12 @@ export function AccountList({ accounts, onEdit, onDelete, onEnable, onDisable }:
                     variant="ghost"
                     size="sm"
                     onClick={() => togglePasswordVisibility(account.id)}
+                    className="h-8 w-8 p-0"
+                    title={
+                      visiblePasswords.has(account.id)
+                        ? '隐藏密码'
+                        : '显示密码'
+                    }
                   >
                     {visiblePasswords.has(account.id) ? (
                       <EyeOff className="h-4 w-4" />
@@ -107,13 +111,12 @@ export function AccountList({ accounts, onEdit, onDelete, onEnable, onDisable }:
                       <Eye className="h-4 w-4" />
                     )}
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => copyToClipboard(account.password)}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
+                  <CopyButton
+                    text={account.password}
+                    successMessage="密码已复制到剪贴板"
+                    className="h-8 w-8 p-0"
+                    title="复制密码"
+                  />
                 </div>
               </TableCell>
 

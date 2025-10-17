@@ -1,100 +1,38 @@
-import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { VaultProvider } from '@/contexts/VaultContext'
-import { vaultService } from '@/services/vaultService'
-import { InitializePage } from '@/pages/InitializePage'
-import { UnlockPage } from '@/pages/UnlockPage'
 import { WebsitesPage } from '@/pages/WebsitesPage'
 import { AccountsPage } from '@/pages/AccountsPage'
 import { RecycleBinPage } from '@/pages/RecycleBinPage'
 import { SearchPage } from '@/pages/SearchPage'
 import { ApiKeysPage } from '@/pages/ApiKeysPage'
-import { useVault } from '@/hooks/useVault'
-
-/**
- * 应用启动流程路由守卫
- */
-function AppRouter() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [isInitialized, setIsInitialized] = useState(false)
-  const { isUnlocked } = useVault()
-
-  useEffect(() => {
-    // 检查 Vault 状态
-    const checkStatus = async () => {
-      try {
-        const response = await vaultService.getStatus()
-        if (response.success && response.data) {
-          setIsInitialized(response.data.isInitialized)
-        }
-      } catch (err) {
-        console.error('Failed to check vault status:', err)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    checkStatus()
-  }, [])
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600 mx-auto"></div>
-          <p className="text-gray-600">正在加载...</p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <Routes>
-      {/* 未初始化：显示初始化页面 */}
-      {!isInitialized && (
-        <>
-          <Route path="/initialize" element={<InitializePage />} />
-          <Route path="*" element={<Navigate to="/initialize" replace />} />
-        </>
-      )}
-
-      {/* 已初始化但未解锁：显示解锁页面 */}
-      {isInitialized && !isUnlocked && (
-        <>
-          <Route path="/unlock" element={<UnlockPage />} />
-          <Route path="*" element={<Navigate to="/unlock" replace />} />
-        </>
-      )}
-
-      {/* 已解锁：显示主应用 */}
-      {isInitialized && isUnlocked && (
-        <>
-          <Route path="/websites" element={<WebsitesPage />} />
-          <Route
-            path="/websites/:websiteId/accounts"
-            element={<AccountsPage />}
-          />
-          <Route path="/recycle-bin" element={<RecycleBinPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/api-keys" element={<ApiKeysPage />} />
-          <Route path="/" element={<Navigate to="/websites" replace />} />
-          <Route path="*" element={<Navigate to="/websites" replace />} />
-        </>
-      )}
-    </Routes>
-  )
-}
+import { ApiDocumentationPage } from '@/pages/ApiDocumentationPage'
+import { Toaster } from '@/components/ui/sonner'
 
 /**
  * 应用根组件
+ *
+ * 注意：系统已从加密存储切换为明文存储（2025-10-17架构变更）
+ * - 不再需要主密码初始化和解锁流程
+ * - 移除了 VaultContext、InitializePage、UnlockPage
+ * - 应用启动后直接进入主界面
  */
 function App() {
   return (
-    <VaultProvider>
-      <BrowserRouter>
-        <AppRouter />
-      </BrowserRouter>
-    </VaultProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/websites" element={<WebsitesPage />} />
+        <Route
+          path="/websites/:websiteId/accounts"
+          element={<AccountsPage />}
+        />
+        <Route path="/recycle-bin" element={<RecycleBinPage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/api-keys" element={<ApiKeysPage />} />
+        <Route path="/api-documentation" element={<ApiDocumentationPage />} />
+        <Route path="/" element={<Navigate to="/websites" replace />} />
+        <Route path="*" element={<Navigate to="/websites" replace />} />
+      </Routes>
+      <Toaster />
+    </BrowserRouter>
   )
 }
 

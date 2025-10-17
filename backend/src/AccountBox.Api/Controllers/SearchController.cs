@@ -21,19 +21,6 @@ public class SearchController : ControllerBase
     }
 
     /// <summary>
-    /// 从 HttpContext.Items 获取 VaultKey（由 VaultSessionMiddleware 设置）
-    /// </summary>
-    private byte[] GetVaultKey()
-    {
-        if (!HttpContext.Items.TryGetValue("VaultKey", out var vaultKeyObj) || vaultKeyObj is not byte[] vaultKey)
-        {
-            throw new UnauthorizedAccessException("Vault key not found in session");
-        }
-
-        return vaultKey;
-    }
-
-    /// <summary>
     /// 搜索账号
     /// GET /api/search?query=xxx&pageNumber=1&pageSize=10
     /// </summary>
@@ -50,8 +37,7 @@ public class SearchController : ControllerBase
                 "Search query cannot be empty"));
         }
 
-        var vaultKey = GetVaultKey();
-        var result = await _searchService.SearchAsync(query, pageNumber, pageSize, vaultKey);
+        var result = await _searchService.SearchAsync(query, pageNumber, pageSize);
 
         return Ok(ApiResponse<PagedResult<SearchResultItem>>.Ok(result));
     }

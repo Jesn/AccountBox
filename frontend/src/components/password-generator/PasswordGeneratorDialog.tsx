@@ -41,6 +41,14 @@ export function PasswordGeneratorDialog({
   const [includeSymbols, setIncludeSymbols] = useState(true)
   const [excludeAmbiguous, setExcludeAmbiguous] = useState(false)
 
+  // 字符比例控制
+  const [useCharacterDistribution, setUseCharacterDistribution] =
+    useState(false)
+  const [uppercasePercentage, setUppercasePercentage] = useState(30)
+  const [lowercasePercentage, setLowercasePercentage] = useState(40)
+  const [numbersPercentage, setNumbersPercentage] = useState(20)
+  const [symbolsPercentage, setSymbolsPercentage] = useState(10)
+
   const [generatedPassword, setGeneratedPassword] = useState('')
   const [passwordStrength, setPasswordStrength] =
     useState<PasswordStrength | null>(null)
@@ -60,6 +68,11 @@ export function PasswordGeneratorDialog({
         includeNumbers,
         includeSymbols,
         excludeAmbiguous,
+        uppercasePercentage,
+        lowercasePercentage,
+        numbersPercentage,
+        symbolsPercentage,
+        useCharacterDistribution,
       }
 
       const response = await passwordGeneratorService.generate(request)
@@ -113,6 +126,11 @@ export function PasswordGeneratorDialog({
     includeNumbers,
     includeSymbols,
     excludeAmbiguous,
+    useCharacterDistribution,
+    uppercasePercentage,
+    lowercasePercentage,
+    numbersPercentage,
+    symbolsPercentage,
   ])
 
   return (
@@ -255,6 +273,121 @@ export function PasswordGeneratorDialog({
                 排除易混淆字符 (0O1lI)
               </label>
             </div>
+          </div>
+
+          {/* 字符比例控制 */}
+          <div className="space-y-3 border-t pt-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="useDistribution"
+                checked={useCharacterDistribution}
+                onCheckedChange={(checked) =>
+                  setUseCharacterDistribution(checked as boolean)
+                }
+              />
+              <label
+                htmlFor="useDistribution"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                启用字符比例控制
+              </label>
+            </div>
+
+            {useCharacterDistribution && (
+              <div className="space-y-3 pl-6">
+                {/* 大写字母比例 */}
+                {includeUppercase && (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">大写字母</Label>
+                      <span className="text-xs font-medium">
+                        {uppercasePercentage}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[uppercasePercentage]}
+                      onValueChange={(values) =>
+                        setUppercasePercentage(values[0])
+                      }
+                      min={0}
+                      max={100}
+                      step={5}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+
+                {/* 小写字母比例 */}
+                {includeLowercase && (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">小写字母</Label>
+                      <span className="text-xs font-medium">
+                        {lowercasePercentage}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[lowercasePercentage]}
+                      onValueChange={(values) =>
+                        setLowercasePercentage(values[0])
+                      }
+                      min={0}
+                      max={100}
+                      step={5}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+
+                {/* 数字比例 */}
+                {includeNumbers && (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">数字</Label>
+                      <span className="text-xs font-medium">
+                        {numbersPercentage}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[numbersPercentage]}
+                      onValueChange={(values) =>
+                        setNumbersPercentage(values[0])
+                      }
+                      min={0}
+                      max={100}
+                      step={5}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+
+                {/* 符号比例 */}
+                {includeSymbols && (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">符号</Label>
+                      <span className="text-xs font-medium">
+                        {symbolsPercentage}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[symbolsPercentage]}
+                      onValueChange={(values) =>
+                        setSymbolsPercentage(values[0])
+                      }
+                      min={0}
+                      max={100}
+                      step={5}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+
+                <div className="text-xs text-muted-foreground">
+                  提示：比例会自动归一化，无需总和为 100%
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

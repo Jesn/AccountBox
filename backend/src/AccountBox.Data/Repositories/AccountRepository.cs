@@ -24,7 +24,8 @@ public class AccountRepository
     public async Task<(List<Account> Items, int TotalCount)> GetPagedAsync(
         int pageNumber,
         int pageSize,
-        int? websiteId = null)
+        int? websiteId = null,
+        string? searchTerm = null)
     {
         if (pageNumber < 1)
         {
@@ -44,6 +45,17 @@ public class AccountRepository
         if (websiteId.HasValue)
         {
             query = query.Where(a => a.WebsiteId == websiteId.Value);
+        }
+
+        // 搜索过滤（支持用户名、标签、备注模糊搜索）
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(a =>
+                a.Username.ToLower().Contains(term) ||
+                (a.Tags != null && a.Tags.ToLower().Contains(term)) ||
+                (a.Notes != null && a.Notes.ToLower().Contains(term))
+            );
         }
 
         // 全局软删除过滤器已在 DbContext 配置，这里自动过滤 IsDeleted=true 的账号

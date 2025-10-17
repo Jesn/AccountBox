@@ -3,9 +3,6 @@ using AccountBox.Api.Services;
 using AccountBox.Core.Interfaces;
 using AccountBox.Data.DbContext;
 using AccountBox.Data.Repositories;
-using AccountBox.Security.Encryption;
-using AccountBox.Security.KeyDerivation;
-using AccountBox.Security.VaultManager;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,19 +27,12 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<AccountBoxDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 配置依赖注入 - 加密服务
-builder.Services.AddSingleton<Argon2Service>();
-builder.Services.AddSingleton<IEncryptionService, AesGcmEncryptionService>();
-builder.Services.AddScoped<IVaultManager, VaultManager>();
-
 // 配置依赖注入 - 仓储层
-builder.Services.AddScoped<KeySlotRepository>();
 builder.Services.AddScoped<WebsiteRepository>();
 builder.Services.AddScoped<AccountRepository>();
 builder.Services.AddScoped<SearchRepository>();
 
 // 配置依赖注入 - 业务服务层
-builder.Services.AddScoped<VaultService>();
 builder.Services.AddScoped<WebsiteService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<RecycleBinService>();
@@ -50,8 +40,9 @@ builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<AccountBox.Core.Services.PasswordGeneratorService>();
 builder.Services.AddScoped<AccountBox.Core.Services.IApiKeyService, ApiKeyService>();
 builder.Services.AddScoped<ApiKeysManagementService>();
+builder.Services.AddScoped<RandomAccountService>();
 
-// HTTP Context Accessor（用于获取当前Vault ID）
+// HTTP Context Accessor（用于获取当前请求上下文）
 builder.Services.AddHttpContextAccessor();
 
 // 配置控制器
@@ -64,8 +55,9 @@ var app = builder.Build();
 // 全局异常处理中间件（必须在最前面）
 app.UseMiddleware<ExceptionMiddleware>();
 
-// Vault 会话验证中间件（在 CORS 之后，路由之前）
-app.UseMiddleware<VaultSessionMiddleware>();
+// 静态文件服务 (用于 Docker 单镜像部署) - 必须在 CORS 之前
+app.UseDefaultFiles(); // 启用默认文档(index.html)
+app.UseStaticFiles();  // 提供 wwwroot 下的静态文件
 
 // CORS 中间件
 app.UseCors();
@@ -79,8 +71,19 @@ if (app.Environment.IsDevelopment())
 // 路由
 app.UseRouting();
 
+// API密钥认证中间件（仅应用于 /api/external/* 路径）
+app.UseWhen(
+    context => context.Request.Path.StartsWithSegments("/api/external"),
+    appBuilder => appBuilder.UseMiddleware<ApiKeyAuthMiddleware>()
+);
+
 // 控制器端点
 app.MapControllers();
+
+// 健康检查端点
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
+    .WithName("HealthCheck")
+    .WithOpenApi();
 
 // 保留示例端点用于测试
 var summaries = new[]
@@ -103,9 +106,12 @@ app.MapGet("/weatherforecast", () =>
 .WithName("GetWeatherForecast")
 .WithOpenApi();
 
+// SPA fallback 路由 - 所有非 API、非静态文件请求都返回 index.html
+app.MapFallbackToFile("index.html");
+
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

@@ -18,6 +18,11 @@ public class WebsiteResponse
     public int ActiveAccountCount { get; set; }
 
     /// <summary>
+    /// 禁用账号数（不包括回收站）
+    /// </summary>
+    public int DisabledAccountCount { get; set; }
+
+    /// <summary>
     /// 回收站账号数
     /// </summary>
     public int DeletedAccountCount { get; set; }

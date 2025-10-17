@@ -1,28 +1,27 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useVault } from '@/hooks/useVault'
 import { websiteService } from '@/services/websiteService'
-import { vaultService } from '@/services/vaultService'
+import { searchService } from '@/services/searchService'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { ChangeMasterPasswordDialog } from '@/components/vault/ChangeMasterPasswordDialog'
 import { CreateWebsiteDialog } from '@/components/websites/CreateWebsiteDialog'
 import { EditWebsiteDialog } from '@/components/websites/EditWebsiteDialog'
 import { DeleteWebsiteDialog } from '@/components/websites/DeleteWebsiteDialog'
 import { WebsiteList } from '@/components/websites/WebsiteList'
-import { Lock, Plus, Trash2, Search as SearchIcon, X } from 'lucide-react'
+import { Plus, Trash2, Search as SearchIcon, X, Key } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 import type { WebsiteResponse } from '@/services/websiteService'
 
 /**
  * 网站管理页面
+ *
+ * 注意：系统已从加密存储切换为明文存储（2025-10-17架构变更）
+ * - 移除了"锁定"和"修改主密码"功能
+ * - 不再需要 Vault Session 管理
  */
 export function WebsitesPage() {
-  const { lock } = useVault()
   const navigate = useNavigate()
-  const [showChangePasswordDialog, setShowChangePasswordDialog] =
-    useState(false)
   const [showCreateWebsiteDialog, setShowCreateWebsiteDialog] = useState(false)
   const [showEditWebsiteDialog, setShowEditWebsiteDialog] = useState(false)
   const [showDeleteWebsiteDialog, setShowDeleteWebsiteDialog] = useState(false)
@@ -33,6 +32,7 @@ export function WebsitesPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
   const pageSize = 15
 
   const loadWebsites = useCallback(async () => {
@@ -50,38 +50,64 @@ export function WebsitesPage() {
     }
   }, [currentPage, pageSize])
 
-  const filteredWebsites = useMemo(() => {
-    if (!searchQuery.trim()) return websites
-    const query = searchQuery.toLowerCase()
-    return websites.filter(
-      (website) =>
-        website.displayName?.toLowerCase().includes(query) ||
-        website.domain.toLowerCase().includes(query)
-    )
-  }, [websites, searchQuery])
+  // 全局搜索功能
+  const handleSearch = useCallback(async () => {
+    if (!searchQuery.trim()) {
+      // 清空搜索时重置搜索状态，让 useEffect 触发 loadWebsites
+      setIsSearching(false)
+      return
+    }
+
+    setIsLoading(true)
+    setIsSearching(true)
+    try {
+      const response = await searchService.search(searchQuery, 1, 15) // 每页15条
+      if (response.success && response.data) {
+        // 从搜索结果中提取唯一的网站信息
+        const websiteMap = new Map<number, WebsiteResponse>()
+        response.data.items.forEach((item) => {
+          if (!websiteMap.has(item.websiteId)) {
+            websiteMap.set(item.websiteId, {
+              id: item.websiteId,
+              domain: item.websiteDomain,
+              displayName: item.websiteDisplayName || item.websiteDomain,
+              activeAccountCount: 0, // 搜索结果不包含账号数量
+              disabledAccountCount: 0,
+              deletedAccountCount: 0,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+            })
+          }
+        })
+        setWebsites(Array.from(websiteMap.values()))
+        setTotalPages(1) // 搜索结果不分页
+      }
+    } catch (error) {
+      console.error('搜索失败:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [searchQuery])
 
   useEffect(() => {
-    loadWebsites()
-  }, [currentPage, loadWebsites])
-
-  const handleLock = async () => {
-    try {
-      await vaultService.lock()
-      lock()
-      navigate('/unlock')
-    } catch (err) {
-      console.error('Lock error:', err)
+    if (!isSearching) {
+      loadWebsites()
     }
-  }
+  }, [currentPage, loadWebsites, isSearching])
 
-  const handleChangePasswordSuccess = () => {
-    // 修改密码成功后，会话被清除，需要重新解锁
-    lock()
-    navigate('/unlock')
-  }
+  // 处理搜索输入变化
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSearch()
+    }, 500) // 500ms 防抖
+
+    return () => clearTimeout(timer)
+  }, [searchQuery, handleSearch])
 
   const handleCreateWebsiteSuccess = () => {
     // 创建成功后重新加载列表
+    setSearchQuery('')
+    setIsSearching(false)
     loadWebsites()
   }
 
@@ -92,7 +118,11 @@ export function WebsitesPage() {
 
   const handleEditWebsiteSuccess = () => {
     // 编辑成功后重新加载列表
-    loadWebsites()
+    if (searchQuery) {
+      handleSearch()
+    } else {
+      loadWebsites()
+    }
   }
 
   const handleViewAccounts = (websiteId: number) => {
@@ -106,7 +136,17 @@ export function WebsitesPage() {
 
   const handleDeleteWebsiteSuccess = () => {
     // 删除成功后重新加载列表
-    loadWebsites()
+    if (searchQuery) {
+      handleSearch()
+    } else {
+      loadWebsites()
+    }
+  }
+
+  const handleClearSearch = () => {
+    setSearchQuery('')
+    setIsSearching(false)
+    setCurrentPage(1)
   }
 
   return (
@@ -115,23 +155,13 @@ export function WebsitesPage() {
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold">网站管理</h1>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/search')}>
-              <SearchIcon className="mr-2 h-4 w-4" />
-              全局搜索
+            <Button variant="outline" onClick={() => navigate('/api-keys')}>
+              <Key className="mr-2 h-4 w-4" />
+              API密钥
             </Button>
             <Button variant="outline" onClick={() => navigate('/recycle-bin')}>
               <Trash2 className="mr-2 h-4 w-4" />
               回收站
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowChangePasswordDialog(true)}
-            >
-              修改主密码
-            </Button>
-            <Button variant="outline" onClick={handleLock}>
-              <Lock className="mr-2 h-4 w-4" />
-              锁定
             </Button>
             <Button onClick={() => setShowCreateWebsiteDialog(true)}>
               <Plus className="mr-2 h-4 w-4" />
@@ -140,19 +170,19 @@ export function WebsitesPage() {
           </div>
         </div>
 
-        {/* 搜索框 */}
+        {/* 全局搜索框 */}
         <div className="mb-4 relative">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             type="text"
-            placeholder="搜索网站（域名或显示名称）"
+            placeholder="全局搜索（搜索所有网站和账号信息）"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-10"
           />
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery('')}
+              onClick={handleClearSearch}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               <X className="h-4 w-4" />
@@ -161,27 +191,24 @@ export function WebsitesPage() {
         </div>
 
         {/* 搜索无结果提示 */}
-        {!isLoading &&
-          searchQuery &&
-          filteredWebsites.length === 0 &&
-          websites.length > 0 && (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-gray-600 mb-4">
-                  未找到匹配 "{searchQuery}" 的网站
-                </p>
-                <Button variant="outline" onClick={() => setSearchQuery('')}>
-                  清空搜索
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+        {!isLoading && searchQuery && websites.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-gray-600 mb-4">
+                未找到匹配 "{searchQuery}" 的网站
+              </p>
+              <Button variant="outline" onClick={handleClearSearch}>
+                清空搜索
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* 网站列表和分页 */}
-        {(!searchQuery || filteredWebsites.length > 0) && (
+        {(!searchQuery || websites.length > 0) && (
           <>
             <WebsiteList
-              websites={filteredWebsites}
+              websites={websites}
               isLoading={isLoading}
               onViewAccounts={handleViewAccounts}
               onEdit={handleEditWebsite}
@@ -189,7 +216,7 @@ export function WebsitesPage() {
               onCreateNew={() => setShowCreateWebsiteDialog(true)}
             />
 
-            {!isLoading && filteredWebsites.length > 0 && (
+            {!isLoading && websites.length > 0 && !isSearching && (
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -199,12 +226,6 @@ export function WebsitesPage() {
           </>
         )}
       </div>
-
-      <ChangeMasterPasswordDialog
-        open={showChangePasswordDialog}
-        onOpenChange={setShowChangePasswordDialog}
-        onSuccess={handleChangePasswordSuccess}
-      />
 
       <CreateWebsiteDialog
         open={showCreateWebsiteDialog}

@@ -28,4 +28,3 @@ globalThis.IntersectionObserver = class IntersectionObserver {
     return []
   }
 } as any
-

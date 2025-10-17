@@ -5,7 +5,7 @@ namespace AccountBox.Data.Entities;
 
 /// <summary>
 /// Account 实体 - 表示网站上的一个账号
-/// 敏感字段（Password, Notes）以加密形式存储
+/// 密码以明文形式存储（适用于个人自托管场景）
 /// </summary>
 public class Account
 {
@@ -25,39 +25,14 @@ public class Account
     public string Username { get; set; } = null!;
 
     /// <summary>
-    /// 加密的密码（使用 VaultKey 加密）
+    /// 密码（明文存储）
     /// </summary>
-    public byte[] PasswordEncrypted { get; set; } = null!;
+    public string Password { get; set; } = null!;
 
     /// <summary>
-    /// 密码加密的 IV (Nonce)
-    /// </summary>
-    public byte[] PasswordIV { get; set; } = null!;
-
-    /// <summary>
-    /// 密码加密的认证标签
-    /// </summary>
-    public byte[] PasswordTag { get; set; } = null!;
-
-    /// <summary>
-    /// 备注（明文，可为空）
+    /// 备注（可为空）
     /// </summary>
     public string? Notes { get; set; }
-
-    /// <summary>
-    /// 加密的备注（使用 VaultKey 加密，可为空）
-    /// </summary>
-    public byte[]? NotesEncrypted { get; set; }
-
-    /// <summary>
-    /// 备注加密的 IV (Nonce)
-    /// </summary>
-    public byte[]? NotesIV { get; set; }
-
-    /// <summary>
-    /// 备注加密的认证标签
-    /// </summary>
-    public byte[]? NotesTag { get; set; }
 
     /// <summary>
     /// 标签（JSON 数组，用于分类和过滤）

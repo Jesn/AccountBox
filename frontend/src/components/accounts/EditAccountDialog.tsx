@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { PasswordGeneratorDialog } from '@/components/password-generator/PasswordGeneratorDialog'
+import { ExtendedFieldsEditor } from '@/components/accounts/ExtendedFieldsEditor'
 import { Eye, EyeOff, KeyRound } from 'lucide-react'
 
 interface EditAccountDialogProps {
@@ -41,6 +42,7 @@ export function EditAccountDialog({
   const [showPassword, setShowPassword] = useState(false)
   const [notes, setNotes] = useState('')
   const [tags, setTags] = useState('')
+  const [extendedData, setExtendedData] = useState<Record<string, unknown>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPasswordGenerator, setShowPasswordGenerator] = useState(false)
@@ -52,6 +54,7 @@ export function EditAccountDialog({
       setPassword(account.password)
       setNotes(account.notes || '')
       setTags(account.tags || '')
+      setExtendedData(account.extendedData || {})
     }
   }, [account])
 
@@ -82,6 +85,8 @@ export function EditAccountDialog({
         password: password.trim(),
         notes: notes.trim() || undefined,
         tags: tags.trim() || undefined,
+        extendedData:
+          Object.keys(extendedData).length > 0 ? extendedData : undefined,
       }
 
       const response = await accountService.update(account.id, request)
@@ -196,6 +201,14 @@ export function EditAccountDialog({
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="border-t pt-4">
+                <ExtendedFieldsEditor
+                  value={extendedData}
+                  onChange={setExtendedData}
+                  maxSizeKB={10}
                 />
               </div>
 

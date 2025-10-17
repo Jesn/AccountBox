@@ -34,6 +34,31 @@ public class GeneratePasswordRequest
     /// 排除易混淆字符 (0O, 1lI, etc.)
     /// </summary>
     public bool ExcludeAmbiguous { get; set; } = false;
+
+    /// <summary>
+    /// 大写字母占比百分比 (0-100，默认 25)
+    /// </summary>
+    public int UppercasePercentage { get; set; } = 25;
+
+    /// <summary>
+    /// 小写字母占比百分比 (0-100，默认 25)
+    /// </summary>
+    public int LowercasePercentage { get; set; } = 25;
+
+    /// <summary>
+    /// 数字占比百分比 (0-100，默认 25)
+    /// </summary>
+    public int NumbersPercentage { get; set; } = 25;
+
+    /// <summary>
+    /// 符号占比百分比 (0-100，默认 25)
+    /// </summary>
+    public int SymbolsPercentage { get; set; } = 25;
+
+    /// <summary>
+    /// 是否启用字符类型比例控制
+    /// </summary>
+    public bool UseCharacterDistribution { get; set; } = false;
 }
 
 /// <summary>

@@ -27,16 +27,25 @@ public class PasswordGeneratorService
         // 验证请求
         ValidateRequest(request);
 
-        // 构建字符集
-        var charset = BuildCharset(request);
-
-        if (charset.Length == 0)
+        // 根据是否启用字符分布生成密码
+        string password;
+        if (request.UseCharacterDistribution)
         {
-            throw new ArgumentException("至少需要选择一种字符类型");
+            password = GeneratePasswordWithDistribution(request);
         }
+        else
+        {
+            // 构建字符集
+            var charset = BuildCharset(request);
 
-        // 生成密码
-        var password = GenerateSecurePassword(charset, request.Length);
+            if (charset.Length == 0)
+            {
+                throw new ArgumentException("至少需要选择一种字符类型");
+            }
+
+            // 生成密码（原有逻辑）
+            password = GenerateSecurePassword(charset, request.Length);
+        }
 
         // 计算强度
         var strength = CalculatePasswordStrength(password);
@@ -161,6 +170,175 @@ public class PasswordGeneratorService
         }
 
         return new string(password);
+    }
+
+    /// <summary>
+    /// 按字符类型比例生成密码
+    /// </summary>
+    private string GeneratePasswordWithDistribution(GeneratePasswordRequest request)
+    {
+        // 计算各类型字符数量
+        var counts = CalculateCharacterCounts(request);
+
+        // 构建各类型字符集
+        var charsets = new List<(string charset, int count)>();
+
+        if (request.IncludeUppercase && counts.uppercase > 0)
+        {
+            var charset = request.ExcludeAmbiguous
+                ? RemoveAmbiguousChars(UppercaseChars)
+                : UppercaseChars;
+            charsets.Add((charset, counts.uppercase));
+        }
+
+        if (request.IncludeLowercase && counts.lowercase > 0)
+        {
+            var charset = request.ExcludeAmbiguous
+                ? RemoveAmbiguousChars(LowercaseChars)
+                : LowercaseChars;
+            charsets.Add((charset, counts.lowercase));
+        }
+
+        if (request.IncludeNumbers && counts.numbers > 0)
+        {
+            var charset = request.ExcludeAmbiguous
+                ? RemoveAmbiguousChars(NumberChars)
+                : NumberChars;
+            charsets.Add((charset, counts.numbers));
+        }
+
+        if (request.IncludeSymbols && counts.symbols > 0)
+        {
+            charsets.Add((SymbolChars, counts.symbols));
+        }
+
+        if (charsets.Count == 0)
+        {
+            throw new ArgumentException("至少需要选择一种字符类型");
+        }
+
+        // 生成各类型字符
+        var passwordChars = new List<char>();
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            foreach (var (charset, count) in charsets)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    var randomBytes = new byte[4];
+                    rng.GetBytes(randomBytes);
+                    var randomValue = BitConverter.ToUInt32(randomBytes, 0);
+                    var index = randomValue % (uint)charset.Length;
+                    passwordChars.Add(charset[(int)index]);
+                }
+            }
+
+            // 打乱字符顺序
+            for (int i = passwordChars.Count - 1; i > 0; i--)
+            {
+                var randomBytes = new byte[4];
+                rng.GetBytes(randomBytes);
+                var randomValue = BitConverter.ToUInt32(randomBytes, 0);
+                var j = (int)(randomValue % (uint)(i + 1));
+                (passwordChars[i], passwordChars[j]) = (passwordChars[j], passwordChars[i]);
+            }
+        }
+
+        return new string(passwordChars.ToArray());
+    }
+
+    /// <summary>
+    /// 计算各类型字符数量
+    /// </summary>
+    private (int uppercase, int lowercase, int numbers, int symbols) CalculateCharacterCounts(GeneratePasswordRequest request)
+    {
+        var totalPercentage = 0;
+        var enabledTypes = 0;
+
+        if (request.IncludeUppercase)
+        {
+            totalPercentage += request.UppercasePercentage;
+            enabledTypes++;
+        }
+        if (request.IncludeLowercase)
+        {
+            totalPercentage += request.LowercasePercentage;
+            enabledTypes++;
+        }
+        if (request.IncludeNumbers)
+        {
+            totalPercentage += request.NumbersPercentage;
+            enabledTypes++;
+        }
+        if (request.IncludeSymbols)
+        {
+            totalPercentage += request.SymbolsPercentage;
+            enabledTypes++;
+        }
+
+        if (enabledTypes == 0)
+        {
+            throw new ArgumentException("至少需要选择一种字符类型");
+        }
+
+        // 归一化百分比
+        var uppercasePercent = request.IncludeUppercase ? (double)request.UppercasePercentage / totalPercentage : 0;
+        var lowercasePercent = request.IncludeLowercase ? (double)request.LowercasePercentage / totalPercentage : 0;
+        var numbersPercent = request.IncludeNumbers ? (double)request.NumbersPercentage / totalPercentage : 0;
+        var symbolsPercent = request.IncludeSymbols ? (double)request.SymbolsPercentage / totalPercentage : 0;
+
+        // 计算各类型字符数量
+        var uppercaseCount = (int)Math.Floor(request.Length * uppercasePercent);
+        var lowercaseCount = (int)Math.Floor(request.Length * lowercasePercent);
+        var numbersCount = (int)Math.Floor(request.Length * numbersPercent);
+        var symbolsCount = (int)Math.Floor(request.Length * symbolsPercent);
+
+        // 处理舍入误差，将剩余字符分配给启用的类型
+        var remaining = request.Length - (uppercaseCount + lowercaseCount + numbersCount + symbolsCount);
+        if (remaining > 0)
+        {
+            if (request.IncludeLowercase) lowercaseCount += remaining;
+            else if (request.IncludeUppercase) uppercaseCount += remaining;
+            else if (request.IncludeNumbers) numbersCount += remaining;
+            else if (request.IncludeSymbols) symbolsCount += remaining;
+        }
+
+        // 确保每种启用的类型至少有1个字符
+        if (request.IncludeUppercase && uppercaseCount == 0) uppercaseCount = 1;
+        if (request.IncludeLowercase && lowercaseCount == 0) lowercaseCount = 1;
+        if (request.IncludeNumbers && numbersCount == 0) numbersCount = 1;
+        if (request.IncludeSymbols && symbolsCount == 0) symbolsCount = 1;
+
+        // 如果总数超过目标长度，按比例减少
+        var total = uppercaseCount + lowercaseCount + numbersCount + symbolsCount;
+        if (total > request.Length)
+        {
+            var excess = total - request.Length;
+            // 从占比最大的类型中减少
+            if (lowercaseCount >= uppercaseCount && lowercaseCount >= numbersCount && lowercaseCount >= symbolsCount)
+                lowercaseCount -= excess;
+            else if (uppercaseCount >= numbersCount && uppercaseCount >= symbolsCount)
+                uppercaseCount -= excess;
+            else if (numbersCount >= symbolsCount)
+                numbersCount -= excess;
+            else
+                symbolsCount -= excess;
+        }
+
+        return (uppercaseCount, lowercaseCount, numbersCount, symbolsCount);
+    }
+
+    /// <summary>
+    /// 移除易混淆字符
+    /// </summary>
+    private string RemoveAmbiguousChars(string input)
+    {
+        var result = input;
+        foreach (var ambiguousChar in AmbiguousChars)
+        {
+            result = result.Replace(ambiguousChar.ToString(), string.Empty);
+        }
+        return result;
     }
 
     /// <summary>

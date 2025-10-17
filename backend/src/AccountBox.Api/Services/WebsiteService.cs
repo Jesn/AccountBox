@@ -31,6 +31,7 @@ public class WebsiteService
         foreach (var website in items)
         {
             var activeCount = await _websiteRepository.GetActiveAccountCountAsync(website.Id);
+            var disabledCount = await _websiteRepository.GetDisabledAccountCountAsync(website.Id);
             var deletedCount = await _websiteRepository.GetDeletedAccountCountAsync(website.Id);
 
             websiteResponses.Add(new WebsiteResponse
@@ -42,6 +43,7 @@ public class WebsiteService
                 CreatedAt = website.CreatedAt,
                 UpdatedAt = website.UpdatedAt,
                 ActiveAccountCount = activeCount,
+                DisabledAccountCount = disabledCount,
                 DeletedAccountCount = deletedCount
             });
         }
@@ -69,6 +71,7 @@ public class WebsiteService
         }
 
         var activeCount = await _websiteRepository.GetActiveAccountCountAsync(website.Id);
+        var disabledCount = await _websiteRepository.GetDisabledAccountCountAsync(website.Id);
         var deletedCount = await _websiteRepository.GetDeletedAccountCountAsync(website.Id);
 
         return new WebsiteResponse
@@ -80,6 +83,7 @@ public class WebsiteService
             CreatedAt = website.CreatedAt,
             UpdatedAt = website.UpdatedAt,
             ActiveAccountCount = activeCount,
+            DisabledAccountCount = disabledCount,
             DeletedAccountCount = deletedCount
         };
     }
@@ -120,6 +124,7 @@ public class WebsiteService
             CreatedAt = created.CreatedAt,
             UpdatedAt = created.UpdatedAt,
             ActiveAccountCount = 0,
+            DisabledAccountCount = 0,
             DeletedAccountCount = 0
         };
     }
@@ -155,6 +160,7 @@ public class WebsiteService
         await _websiteRepository.UpdateAsync(existing);
 
         var activeCount = await _websiteRepository.GetActiveAccountCountAsync(existing.Id);
+        var disabledCount = await _websiteRepository.GetDisabledAccountCountAsync(existing.Id);
         var deletedCount = await _websiteRepository.GetDeletedAccountCountAsync(existing.Id);
 
         return new WebsiteResponse
@@ -166,6 +172,7 @@ public class WebsiteService
             CreatedAt = existing.CreatedAt,
             UpdatedAt = existing.UpdatedAt,
             ActiveAccountCount = activeCount,
+            DisabledAccountCount = disabledCount,
             DeletedAccountCount = deletedCount
         };
     }

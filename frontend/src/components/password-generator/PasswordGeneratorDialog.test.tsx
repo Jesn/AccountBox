@@ -36,9 +36,9 @@ describe('PasswordGeneratorDialog', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(passwordGeneratorService.passwordGeneratorService.generate).mockResolvedValue(
-      mockPasswordResponse
-    )
+    vi.mocked(
+      passwordGeneratorService.passwordGeneratorService.generate
+    ).mockResolvedValue(mockPasswordResponse)
   })
 
   it('should render dialog when open', () => {
@@ -116,14 +116,18 @@ describe('PasswordGeneratorDialog', () => {
 
     // Wait for initial generation
     await waitFor(() => {
-      expect(passwordGeneratorService.passwordGeneratorService.generate).toHaveBeenCalledTimes(1)
+      expect(
+        passwordGeneratorService.passwordGeneratorService.generate
+      ).toHaveBeenCalledTimes(1)
     })
 
     const generateButton = screen.getByText('重新生成')
     await user.click(generateButton)
 
     await waitFor(() => {
-      expect(passwordGeneratorService.passwordGeneratorService.generate).toHaveBeenCalledTimes(2)
+      expect(
+        passwordGeneratorService.passwordGeneratorService.generate
+      ).toHaveBeenCalledTimes(2)
     })
   })
 
@@ -170,7 +174,9 @@ describe('PasswordGeneratorDialog', () => {
 
     // Wait for initial password generation
     await waitFor(() => {
-      expect(passwordGeneratorService.passwordGeneratorService.generate).toHaveBeenCalled()
+      expect(
+        passwordGeneratorService.passwordGeneratorService.generate
+      ).toHaveBeenCalled()
     })
 
     const acceptButton = screen.getByText('使用此密码')
@@ -235,7 +241,9 @@ describe('PasswordGeneratorDialog', () => {
 
     // Wait for initial generation
     await waitFor(() => {
-      expect(passwordGeneratorService.passwordGeneratorService.generate).toHaveBeenCalledTimes(1)
+      expect(
+        passwordGeneratorService.passwordGeneratorService.generate
+      ).toHaveBeenCalledTimes(1)
     })
 
     // Wait for component to render
@@ -249,12 +257,16 @@ describe('PasswordGeneratorDialog', () => {
 
     // Should trigger regeneration
     await waitFor(() => {
-      expect(passwordGeneratorService.passwordGeneratorService.generate).toHaveBeenCalledTimes(2)
+      expect(
+        passwordGeneratorService.passwordGeneratorService.generate
+      ).toHaveBeenCalledTimes(2)
     })
   })
 
   it('should handle API errors gracefully', async () => {
-    vi.mocked(passwordGeneratorService.passwordGeneratorService.generate).mockResolvedValueOnce({
+    vi.mocked(
+      passwordGeneratorService.passwordGeneratorService.generate
+    ).mockResolvedValueOnce({
       success: false,
       error: {
         message: 'API Error',
@@ -272,7 +284,9 @@ describe('PasswordGeneratorDialog', () => {
 
     // Component should handle error gracefully - password should remain empty
     await waitFor(() => {
-      expect(passwordGeneratorService.passwordGeneratorService.generate).toHaveBeenCalled()
+      expect(
+        passwordGeneratorService.passwordGeneratorService.generate
+      ).toHaveBeenCalled()
     })
 
     // Should still show the empty state
@@ -280,7 +294,9 @@ describe('PasswordGeneratorDialog', () => {
   })
 
   it('should prevent accepting password when generation fails', async () => {
-    vi.mocked(passwordGeneratorService.passwordGeneratorService.generate).mockResolvedValueOnce({
+    vi.mocked(
+      passwordGeneratorService.passwordGeneratorService.generate
+    ).mockResolvedValueOnce({
       success: false,
       error: {
         message: 'API Error',
@@ -297,7 +313,9 @@ describe('PasswordGeneratorDialog', () => {
     )
 
     await waitFor(() => {
-      expect(passwordGeneratorService.passwordGeneratorService.generate).toHaveBeenCalled()
+      expect(
+        passwordGeneratorService.passwordGeneratorService.generate
+      ).toHaveBeenCalled()
     })
 
     const acceptButton = screen.getByText('使用此密码')

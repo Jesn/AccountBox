@@ -24,6 +24,11 @@ public class AccountResponse
     /// </summary>
     public string Status { get; set; } = "Active";
 
+    /// <summary>
+    /// 扩展字段（JSON 格式）
+    /// </summary>
+    public Dictionary<string, object>? ExtendedData { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
@@ -45,6 +50,11 @@ public class CreateAccountRequest
 
     public string? Notes { get; set; }
     public string? Tags { get; set; }
+
+    /// <summary>
+    /// 扩展字段（JSON 格式）
+    /// </summary>
+    public Dictionary<string, object>? ExtendedData { get; set; }
 }
 
 /// <summary>
@@ -61,4 +71,9 @@ public class UpdateAccountRequest
 
     public string? Notes { get; set; }
     public string? Tags { get; set; }
+
+    /// <summary>
+    /// 扩展字段（JSON 格式）
+    /// </summary>
+    public Dictionary<string, object>? ExtendedData { get; set; }
 }

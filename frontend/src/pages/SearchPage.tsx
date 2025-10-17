@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { searchService } from '@/services/searchService'
 import type { SearchResultItem } from '@/services/searchService'
@@ -34,10 +34,27 @@ export function SearchPage() {
   )
   const pageSize = 10
 
+  // 监听查询变化，如果清空了就重置搜索状态
+  useEffect(() => {
+    if (query.trim() === '' && hasSearched) {
+      setHasSearched(false)
+      setSearchResults([])
+      setTotalPages(1)
+      setTotalCount(0)
+      setCurrentPage(1)
+    }
+  }, [query, hasSearched])
+
   const handleSearch = async (pageNumber: number = 1) => {
     const trimmedQuery = query.trim()
 
     if (!trimmedQuery) {
+      // 清空搜索时重置状态
+      setHasSearched(false)
+      setSearchResults([])
+      setTotalPages(1)
+      setTotalCount(0)
+      setCurrentPage(1)
       return
     }
 
@@ -150,9 +167,7 @@ export function SearchPage() {
         {!isLoading && hasSearched && searchResults.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-gray-600 mb-4">
-                未找到匹配 "{query}" 的账号
-              </p>
+              <p className="text-gray-600 mb-4">未找到匹配 "{query}" 的账号</p>
               <p className="text-sm text-gray-500">
                 提示：搜索不区分大小写，会自动去除首尾空格
               </p>
@@ -164,7 +179,8 @@ export function SearchPage() {
           <>
             {/* 结果统计 */}
             <div className="mb-4 text-sm text-gray-600">
-              找到 <span className="font-semibold">{totalCount}</span> 个匹配结果
+              找到 <span className="font-semibold">{totalCount}</span>{' '}
+              个匹配结果
             </div>
 
             {/* 结果列表 */}

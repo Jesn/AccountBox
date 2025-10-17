@@ -48,20 +48,15 @@ public class ApiKey
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     /// <summary>
+    /// 更新时间
+    /// </summary>
+    [Required]
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
     /// 最后使用时间
     /// </summary>
     public DateTime? LastUsedAt { get; set; }
-
-    /// <summary>
-    /// 所属保险库ID（关联到KeySlot）
-    /// </summary>
-    [Required]
-    public int VaultId { get; set; }
-
-    /// <summary>
-    /// 导航属性：所属保险库
-    /// </summary>
-    public KeySlot? Vault { get; set; }
 
     /// <summary>
     /// 导航属性：网站作用域列表（仅当ScopeType=Specific时有数据）

@@ -24,14 +24,9 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .IsRequired()
             .HasMaxLength(255);
 
-        builder.Property(a => a.PasswordEncrypted)
-            .IsRequired();
-
-        builder.Property(a => a.PasswordIV)
-            .IsRequired();
-
-        builder.Property(a => a.PasswordTag)
-            .IsRequired();
+        builder.Property(a => a.Password)
+            .IsRequired()
+            .HasMaxLength(1000); // 明文密码，限制长度
 
         builder.Property(a => a.IsDeleted)
             .IsRequired()

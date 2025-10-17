@@ -11,6 +11,7 @@ export interface AccountResponse {
   notes?: string
   tags?: string
   status: 'Active' | 'Disabled'
+  extendedData?: Record<string, unknown>
   createdAt: string
   updatedAt: string
   isDeleted: boolean
@@ -23,6 +24,7 @@ export interface CreateAccountRequest {
   password: string
   notes?: string
   tags?: string
+  extendedData?: Record<string, unknown>
 }
 
 export interface UpdateAccountRequest {
@@ -30,6 +32,7 @@ export interface UpdateAccountRequest {
   password: string
   notes?: string
   tags?: string
+  extendedData?: Record<string, unknown>
 }
 
 class AccountService {
@@ -38,7 +41,8 @@ class AccountService {
   async getAll(
     pageNumber: number = 1,
     pageSize: number = 10,
-    websiteId?: number
+    websiteId?: number,
+    searchTerm?: string
   ): Promise<ApiResponse<PagedResult<AccountResponse>>> {
     const params = new URLSearchParams({
       pageNumber: pageNumber.toString(),
@@ -47,6 +51,10 @@ class AccountService {
 
     if (websiteId) {
       params.append('websiteId', websiteId.toString())
+    }
+
+    if (searchTerm && searchTerm.trim()) {
+      params.append('searchTerm', searchTerm.trim())
     }
 
     return await apiClient.get<PagedResult<AccountResponse>>(
@@ -79,11 +87,15 @@ class AccountService {
   }
 
   async enable(id: number): Promise<ApiResponse<{ message: string }>> {
-    return await apiClient.put<{ message: string }>(`${this.baseUrl}/${id}/enable`)
+    return await apiClient.put<{ message: string }>(
+      `${this.baseUrl}/${id}/enable`
+    )
   }
 
   async disable(id: number): Promise<ApiResponse<{ message: string }>> {
-    return await apiClient.put<{ message: string }>(`${this.baseUrl}/${id}/disable`)
+    return await apiClient.put<{ message: string }>(
+      `${this.baseUrl}/${id}/disable`
+    )
   }
 }
 

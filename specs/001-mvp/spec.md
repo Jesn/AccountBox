@@ -5,6 +5,27 @@
 **Status**: Draft
 **Input**: User description: "最小 MVP 需求（更新项：网站删除与回收站）..."
 
+---
+
+## ⚠️ 重要架构变更说明（2025-10-17）
+
+**本规范中的加密系统设计（User Story 6 和 FR-036 至 FR-043）已不再适用于当前版本。**
+
+系统已从**加密存储模式**切换为**明文存储模式**：
+- ✅ 密码直接以明文形式存储在数据库中
+- ✅ 移除了所有加密相关组件（VaultKey, KeySlot, Argon2, AES-GCM）
+- ✅ 简化了系统架构，适用于个人自托管场景
+
+**为什么保留这些内容？**
+本规范记录了项目的历史设计，保留原文有助于理解项目演进过程。
+
+**当前版本请参考：**
+- `/specs/ENCRYPTION_REMOVAL_SUMMARY.md` - 架构变更总结
+- `/specs/006-api-management/spec.md` - 最新功能规范（已反映明文存储架构）
+- `/Augment-Memories.md` - 项目记忆库（已更新架构变更记录）
+
+---
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - 管理网站和账号 (Priority: P1)

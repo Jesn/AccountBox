@@ -1,5 +1,4 @@
-using System.Text;
-using AccountBox.Core.Interfaces;
+using System.Text.Json;
 using AccountBox.Core.Models;
 using AccountBox.Core.Models.Account;
 using AccountBox.Data.Entities;
@@ -9,22 +8,19 @@ namespace AccountBox.Api.Services;
 
 /// <summary>
 /// Account 业务服务
-/// 管理账号的 CRUD 操作、密码加密/解密、分页
+/// 管理账号的 CRUD 操作（明文存储，适用于个人自托管场景）
 /// </summary>
 public class AccountService
 {
     private readonly AccountRepository _accountRepository;
     private readonly WebsiteRepository _websiteRepository;
-    private readonly IEncryptionService _encryptionService;
 
     public AccountService(
         AccountRepository accountRepository,
-        WebsiteRepository websiteRepository,
-        IEncryptionService encryptionService)
+        WebsiteRepository websiteRepository)
     {
         _accountRepository = accountRepository ?? throw new ArgumentNullException(nameof(accountRepository));
         _websiteRepository = websiteRepository ?? throw new ArgumentNullException(nameof(websiteRepository));
-        _encryptionService = encryptionService ?? throw new ArgumentNullException(nameof(encryptionService));
     }
 
     /// <summary>
@@ -34,16 +30,11 @@ public class AccountService
         int pageNumber,
         int pageSize,
         int? websiteId,
-        byte[] vaultKey)
+        string? searchTerm = null)
     {
-        if (vaultKey == null || vaultKey.Length == 0)
-        {
-            throw new ArgumentException("Vault key is required", nameof(vaultKey));
-        }
+        var (items, totalCount) = await _accountRepository.GetPagedAsync(pageNumber, pageSize, websiteId, searchTerm);
 
-        var (items, totalCount) = await _accountRepository.GetPagedAsync(pageNumber, pageSize, websiteId);
-
-        var accountResponses = items.Select(account => MapToResponse(account, vaultKey)).ToList();
+        var accountResponses = items.Select(MapToResponse).ToList();
 
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
@@ -59,35 +50,25 @@ public class AccountService
     /// <summary>
     /// 根据 ID 获取账号
     /// </summary>
-    public async Task<AccountResponse?> GetByIdAsync(int id, byte[] vaultKey)
+    public async Task<AccountResponse?> GetByIdAsync(int id)
     {
-        if (vaultKey == null || vaultKey.Length == 0)
-        {
-            throw new ArgumentException("Vault key is required", nameof(vaultKey));
-        }
-
         var account = await _accountRepository.GetByIdAsync(id);
         if (account == null)
         {
             return null;
         }
 
-        return MapToResponse(account, vaultKey);
+        return MapToResponse(account);
     }
 
     /// <summary>
     /// 创建账号
     /// </summary>
-    public async Task<AccountResponse> CreateAsync(CreateAccountRequest request, byte[] vaultKey)
+    public async Task<AccountResponse> CreateAsync(CreateAccountRequest request)
     {
         if (request == null)
         {
             throw new ArgumentNullException(nameof(request));
-        }
-
-        if (vaultKey == null || vaultKey.Length == 0)
-        {
-            throw new ArgumentException("Vault key is required", nameof(vaultKey));
         }
 
         if (string.IsNullOrWhiteSpace(request.Username))
@@ -106,32 +87,19 @@ public class AccountService
             throw new KeyNotFoundException($"Website with ID {request.WebsiteId} not found");
         }
 
-        // 加密密码
-        var passwordBytes = Encoding.UTF8.GetBytes(request.Password);
-        var (encryptedPassword, passwordIV, passwordTag) = _encryptionService.Encrypt(passwordBytes, vaultKey);
-
-        // 加密备注（如果存在）
-        byte[]? encryptedNotes = null;
-        byte[]? notesIV = null;
-        byte[]? notesTag = null;
-
-        if (!string.IsNullOrWhiteSpace(request.Notes))
-        {
-            var notesBytes = Encoding.UTF8.GetBytes(request.Notes);
-            (encryptedNotes, notesIV, notesTag) = _encryptionService.Encrypt(notesBytes, vaultKey);
-        }
+        // 序列化扩展字段
+        var extendedDataJson = request.ExtendedData != null && request.ExtendedData.Count > 0
+            ? JsonSerializer.Serialize(request.ExtendedData)
+            : "{}";
 
         var account = new Data.Entities.Account
         {
             WebsiteId = request.WebsiteId,
             Username = request.Username.Trim(),
-            PasswordEncrypted = encryptedPassword,
-            PasswordIV = passwordIV,
-            PasswordTag = passwordTag,
-            NotesEncrypted = encryptedNotes,
-            NotesIV = notesIV,
-            NotesTag = notesTag,
-            Tags = request.Tags?.Trim()
+            Password = request.Password, // 明文存储
+            Notes = request.Notes?.Trim(),
+            Tags = request.Tags?.Trim(),
+            ExtendedData = extendedDataJson
         };
 
         var created = await _accountRepository.CreateAsync(account);
@@ -143,22 +111,17 @@ public class AccountService
             throw new InvalidOperationException("Failed to reload created account");
         }
 
-        return MapToResponse(reloaded, vaultKey);
+        return MapToResponse(reloaded);
     }
 
     /// <summary>
     /// 更新账号
     /// </summary>
-    public async Task<AccountResponse> UpdateAsync(int id, UpdateAccountRequest request, byte[] vaultKey)
+    public async Task<AccountResponse> UpdateAsync(int id, UpdateAccountRequest request)
     {
         if (request == null)
         {
             throw new ArgumentNullException(nameof(request));
-        }
-
-        if (vaultKey == null || vaultKey.Length == 0)
-        {
-            throw new ArgumentException("Vault key is required", nameof(vaultKey));
         }
 
         if (string.IsNullOrWhiteSpace(request.Username))
@@ -177,29 +140,16 @@ public class AccountService
             throw new KeyNotFoundException($"Account with ID {id} not found");
         }
 
-        // 加密密码
-        var passwordBytes = Encoding.UTF8.GetBytes(request.Password);
-        var (encryptedPassword, passwordIV, passwordTag) = _encryptionService.Encrypt(passwordBytes, vaultKey);
-
-        // 加密备注（如果存在）
-        byte[]? encryptedNotes = null;
-        byte[]? notesIV = null;
-        byte[]? notesTag = null;
-
-        if (!string.IsNullOrWhiteSpace(request.Notes))
-        {
-            var notesBytes = Encoding.UTF8.GetBytes(request.Notes);
-            (encryptedNotes, notesIV, notesTag) = _encryptionService.Encrypt(notesBytes, vaultKey);
-        }
+        // 序列化扩展字段
+        var extendedDataJson = request.ExtendedData != null && request.ExtendedData.Count > 0
+            ? JsonSerializer.Serialize(request.ExtendedData)
+            : "{}";
 
         existing.Username = request.Username.Trim();
-        existing.PasswordEncrypted = encryptedPassword;
-        existing.PasswordIV = passwordIV;
-        existing.PasswordTag = passwordTag;
-        existing.NotesEncrypted = encryptedNotes;
-        existing.NotesIV = notesIV;
-        existing.NotesTag = notesTag;
+        existing.Password = request.Password; // 明文存储
+        existing.Notes = request.Notes?.Trim();
         existing.Tags = request.Tags?.Trim();
+        existing.ExtendedData = extendedDataJson;
 
         await _accountRepository.UpdateAsync(existing);
 
@@ -210,7 +160,7 @@ public class AccountService
             throw new InvalidOperationException("Failed to reload updated account");
         }
 
-        return MapToResponse(reloaded, vaultKey);
+        return MapToResponse(reloaded);
     }
 
     /// <summary>
@@ -257,28 +207,23 @@ public class AccountService
     }
 
     /// <summary>
-    /// 将 Account 实体映射到 AccountResponse DTO（解密密码和备注）
+    /// 将 Account 实体映射到 AccountResponse DTO
     /// </summary>
-    private AccountResponse MapToResponse(Data.Entities.Account account, byte[] vaultKey)
+    private AccountResponse MapToResponse(Data.Entities.Account account)
     {
-        // 解密密码 - 注意参数顺序: (ciphertext, key, iv, tag)
-        var decryptedPassword = _encryptionService.Decrypt(
-            account.PasswordEncrypted,
-            vaultKey,
-            account.PasswordIV,
-            account.PasswordTag);
-        var password = Encoding.UTF8.GetString(decryptedPassword);
-
-        // 解密备注（如果存在）
-        string? notes = null;
-        if (account.NotesEncrypted != null && account.NotesIV != null && account.NotesTag != null)
+        // 解析扩展字段
+        Dictionary<string, object>? extendedData = null;
+        if (!string.IsNullOrWhiteSpace(account.ExtendedData) && account.ExtendedData != "{}")
         {
-            var decryptedNotes = _encryptionService.Decrypt(
-                account.NotesEncrypted,
-                vaultKey,
-                account.NotesIV,
-                account.NotesTag);
-            notes = Encoding.UTF8.GetString(decryptedNotes);
+            try
+            {
+                extendedData = JsonSerializer.Deserialize<Dictionary<string, object>>(account.ExtendedData);
+            }
+            catch
+            {
+                // 如果解析失败，返回 null
+                extendedData = null;
+            }
         }
 
         return new AccountResponse
@@ -288,10 +233,11 @@ public class AccountService
             WebsiteDomain = account.Website?.Domain ?? string.Empty,
             WebsiteDisplayName = account.Website?.DisplayName,
             Username = account.Username,
-            Password = password,
-            Notes = notes,
+            Password = account.Password, // 直接返回明文密码
+            Notes = account.Notes,
             Tags = account.Tags,
             Status = account.Status.ToString(),
+            ExtendedData = extendedData,
             CreatedAt = account.CreatedAt,
             UpdatedAt = account.UpdatedAt,
             IsDeleted = account.IsDeleted,

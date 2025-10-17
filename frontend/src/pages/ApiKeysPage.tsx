@@ -1,74 +1,105 @@
-import { useEffect, useState } from 'react';
-import { apiKeyService } from '@/services/apiKeyService';
-import type { ApiKey } from '@/types/ApiKey';
-import { Button } from '@/components/ui/button';
-import { CreateApiKeyDialog } from '@/components/api-keys/CreateApiKeyDialog';
-import { DeleteApiKeyDialog } from '@/components/api-keys/DeleteApiKeyDialog';
-import { ApiKeyList } from '@/components/api-keys/ApiKeyList';
-import { Plus, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from 'react'
+import { apiKeyService } from '@/services/apiKeyService'
+import { websiteService, type WebsiteResponse } from '@/services/websiteService'
+import type { ApiKey } from '@/types/ApiKey'
+import { Button } from '@/components/ui/button'
+import { CreateApiKeyDialog } from '@/components/api-keys/CreateApiKeyDialog'
+import { DeleteApiKeyDialog } from '@/components/api-keys/DeleteApiKeyDialog'
+import { ApiKeyList } from '@/components/api-keys/ApiKeyList'
+import { Plus, RefreshCw, ArrowLeft, BookOpen } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * API密钥管理页面
  */
 export function ApiKeysPage() {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedApiKey, setSelectedApiKey] = useState<ApiKey | null>(null);
+  const navigate = useNavigate()
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
+  const [websites, setWebsites] = useState<WebsiteResponse[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [selectedApiKey, setSelectedApiKey] = useState<ApiKey | null>(null)
 
   useEffect(() => {
-    loadApiKeys();
-  }, []);
+    loadData()
+  }, [])
 
-  const loadApiKeys = async () => {
-    setIsLoading(true);
-    setError(null);
+  const loadData = async () => {
+    setIsLoading(true)
+    setError(null)
     try {
-      const keys = await apiKeyService.getAll();
-      setApiKeys(keys);
+      // 并行加载 API 密钥和网站列表
+      const [keysData, websitesData] = await Promise.all([
+        apiKeyService.getAll(),
+        websiteService.getAll(1, 100), // 获取所有网站
+      ])
+      setApiKeys(keysData)
+      if (websitesData.data) {
+        setWebsites(websitesData.data.items)
+      }
     } catch (err: any) {
-      console.error('加载API密钥失败:', err);
-      setError(err.response?.data?.error?.message || '加载API密钥失败，请重试');
+      console.error('加载数据失败:', err)
+      setError(err.message || '加载数据失败，请重试')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleCreateSuccess = () => {
-    loadApiKeys();
-  };
+    loadData()
+  }
 
   const handleDeleteClick = (apiKey: ApiKey) => {
-    setSelectedApiKey(apiKey);
-    setIsDeleteDialogOpen(true);
-  };
+    setSelectedApiKey(apiKey)
+    setIsDeleteDialogOpen(true)
+  }
 
   const handleDeleteSuccess = () => {
-    loadApiKeys();
-    setSelectedApiKey(null);
-  };
+    loadData()
+    setSelectedApiKey(null)
+  }
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-4xl">
       {/* 页头 */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">API密钥管理</h1>
-          <p className="text-muted-foreground mt-1">
-            创建和管理用于外部API调用的密钥
-          </p>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            title="返回"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">API密钥管理</h1>
+            <p className="text-muted-foreground mt-1">
+              创建和管理用于外部API调用的密钥
+            </p>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
+            onClick={() => navigate('/api-documentation')}
+            title="查看API使用文档"
+          >
+            <BookOpen className="h-4 w-4 mr-2" />
+            API文档
+          </Button>
+          <Button
+            variant="outline"
             size="icon"
-            onClick={loadApiKeys}
+            onClick={loadData}
             disabled={isLoading}
             title="刷新"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+            />
           </Button>
           <Button onClick={() => setIsCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -121,7 +152,13 @@ export function ApiKeysPage() {
       )}
 
       {/* API密钥列表 */}
-      {!isLoading && <ApiKeyList apiKeys={apiKeys} onDelete={handleDeleteClick} />}
+      {!isLoading && (
+        <ApiKeyList
+          apiKeys={apiKeys}
+          websites={websites}
+          onDelete={handleDeleteClick}
+        />
+      )}
 
       {/* 对话框 */}
       <CreateApiKeyDialog
@@ -137,5 +174,5 @@ export function ApiKeysPage() {
         onSuccess={handleDeleteSuccess}
       />
     </div>
-  );
+  )
 }

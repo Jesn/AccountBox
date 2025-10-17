@@ -75,7 +75,7 @@
 - [X] T022 [P] [US1] 创建 `ApiKeyList` 组件在 `frontend/src/components/api-keys/ApiKeyList.tsx`（显示密钥列表，支持显示/隐藏明文、复制按钮）
 - [X] T023 [P] [US1] 创建 `DeleteApiKeyDialog` 组件在 `frontend/src/components/api-keys/DeleteApiKeyDialog.tsx`
 - [X] T024 [US1] 创建 `ApiKeysPage` 在 `frontend/src/pages/ApiKeysPage.tsx`，整合上述组件
-- [ ] T025 [US1] 在 `App.tsx` 中添加 `/api-keys` 路由，指向 `ApiKeysPage`
+- [X] T025 [US1] 在 `App.tsx` 中添加 `/api-keys` 路由，指向 `ApiKeysPage`
 
 **Checkpoint**: 用户故事1应该完全功能化并可独立测试。用户可以创建、查看、复制、删除API密钥。
 
@@ -90,7 +90,7 @@
 ### Backend Implementation for User Story 2
 
 - [X] T026 [US2] 扩展 `AccountService`（或创建新的服务方法），添加 `EnableAccountAsync` 和 `DisableAccountAsync` 方法在 `backend/src/AccountBox.Api/Services/AccountService.cs`
-- [ ] T027 [US2] 在 `AccountsController` 中添加启用/禁用端点：
+- [X] T027 [US2] 在 `AccountsController` 中添加启用/禁用端点：
   - `PUT /api/accounts/{id}/enable` - 启用账号
   - `PUT /api/accounts/{id}/disable` - 禁用账号
 - [X] T028 [US2] 更新 `GET /api/websites/{id}/accounts` 端点，确保返回所有账号（活跃+禁用），包含 `status` 字段
@@ -98,7 +98,7 @@
 ### Frontend Implementation for User Story 2
 
 - [X] T029 [US2] 更新 `Account` 类型定义，添加 `status` 字段在 `frontend/src/types/Account.ts`
-- [ ] T030 [P] [US2] 创建 `AccountStatusBadge` 组件在 `frontend/src/components/accounts/AccountStatusBadge.tsx`（显示状态标识，如"活跃"/"已禁用"）
+- [X] T030 [P] [US2] 创建 `AccountStatusBadge` 组件在 `frontend/src/components/accounts/AccountStatusBadge.tsx`（显示状态标识，如"活跃"/"已禁用"）
 - [X] T031 [US2] 更新 `accountService.ts`，添加 `enableAccount` 和 `disableAccount` 方法在 `frontend/src/services/accountService.ts`
 - [X] T032 [US2] 更新账号列表组件（如 `AccountListPage` 或相关组件），集成 `AccountStatusBadge`，添加启用/禁用按钮
 - [X] T033 [US2] 为已禁用账号添加视觉样式（如灰色背景、禁用图标），在 `frontend/src/index.css` 或组件样式中
@@ -116,18 +116,18 @@
 
 ### Backend Implementation for User Story 3
 
-- [ ] T035 [US3] 创建自定义JSON验证属性 `JsonValidationAttribute` 在 `backend/src/AccountBox.Api/Validation/JsonValidationAttribute.cs`（验证JSON格式和10KB大小限制）
-- [ ] T036 [US3] 更新 `AccountDto` 和相关DTO，包含 `extendedData` 字段（类型为 `Dictionary<string, object>` 或 `JsonDocument`）
-- [ ] T037 [US3] 确保 `AccountsController` 的创建和更新端点支持读写 `extendedData` 字段
-- [ ] T038 [US3] 添加扩展字段大小验证（≤10KB）在服务层或控制器层
+- [X] T035 [US3] 创建自定义JSON验证属性 `JsonValidationAttribute` 在 `backend/src/AccountBox.Api/Validation/JsonValidationAttribute.cs`（验证JSON格式和10KB大小限制）
+- [X] T036 [US3] 更新 `AccountDto` 和相关DTO，包含 `extendedData` 字段（类型为 `Dictionary<string, object>` 或 `JsonDocument`）
+- [X] T037 [US3] 确保 `AccountsController` 的创建和更新端点支持读写 `extendedData` 字段
+- [X] T038 [US3] 添加扩展字段大小验证（≤10KB）在服务层或控制器层
 
 ### Frontend Implementation for User Story 3
 
-- [ ] T039 [US3] 更新 `Account` 类型定义，添加 `extendedData` 字段在 `frontend/src/types/Account.ts`
-- [ ] T040 [P] [US3] 创建 `ExtendedFieldsEditor` 组件在 `frontend/src/components/accounts/ExtendedFieldsEditor.tsx`（键值对编辑器，支持添加、编辑、删除键值对）
-- [ ] T041 [US3] 集成 `ExtendedFieldsEditor` 到账号创建对话框 `CreateAccountDialog.tsx`
-- [ ] T042 [US3] 集成 `ExtendedFieldsEditor` 到账号编辑对话框 `EditAccountDialog.tsx`
-- [ ] T043 [US3] 添加前端验证，限制扩展字段总大小≤10KB，提示用户超出限制
+- [X] T039 [US3] 更新 `Account` 类型定义，添加 `extendedData` 字段在 `frontend/src/types/Account.ts`
+- [X] T040 [P] [US3] 创建 `ExtendedFieldsEditor` 组件在 `frontend/src/components/accounts/ExtendedFieldsEditor.tsx`（键值对编辑器，支持添加、编辑、删除键值对）
+- [X] T041 [US3] 集成 `ExtendedFieldsEditor` 到账号创建对话框 `CreateAccountDialog.tsx`
+- [X] T042 [US3] 集成 `ExtendedFieldsEditor` 到账号编辑对话框 `EditAccountDialog.tsx`
+- [X] T043 [US3] 添加前端验证，限制扩展字段总大小≤10KB，提示用户超出限制
 
 **Checkpoint**: 所有三个用户故事（US1、US2、US3）应该都可以独立工作。用户可以管理API密钥、启用/禁用账号、添加扩展字段。
 
@@ -141,18 +141,18 @@
 
 ### Backend Implementation for User Story 4
 
-- [ ] T044 [P] [US4] 创建 `ApiKeyAuthMiddleware` 在 `backend/src/AccountBox.Api/Middleware/ApiKeyAuthMiddleware.cs`（从Header提取密钥、验证有效性、存入HttpContext）
-- [ ] T045 [US4] 在 `Program.cs` 中注册 `ApiKeyAuthMiddleware`，仅应用于 `/api/external/*` 路径
-- [ ] T046 [P] [US4] 创建 `CreateAccountRequest` DTO（外部API版本），包含扩展字段在 `backend/src/AccountBox.Api/DTOs/External/CreateAccountRequest.cs`
-- [ ] T047 [P] [US4] 创建 `UpdateAccountStatusRequest` DTO 在 `backend/src/AccountBox.Api/DTOs/External/UpdateAccountStatusRequest.cs`
-- [ ] T048 [US4] 创建 `ExternalApiController` 在 `backend/src/AccountBox.Api/Controllers/ExternalApiController.cs`，实现以下端点：
+- [X] T044 [P] [US4] 创建 `ApiKeyAuthMiddleware` 在 `backend/src/AccountBox.Api/Middleware/ApiKeyAuthMiddleware.cs`（从Header提取密钥、验证有效性、存入HttpContext）
+- [X] T045 [US4] 在 `Program.cs` 中注册 `ApiKeyAuthMiddleware`，仅应用于 `/api/external/*` 路径
+- [X] T046 [P] [US4] 创建 `CreateAccountRequest` DTO（外部API版本），包含扩展字段在 `backend/src/AccountBox.Api/DTOs/External/CreateAccountRequest.cs`
+- [X] T047 [P] [US4] 创建 `UpdateAccountStatusRequest` DTO 在 `backend/src/AccountBox.Api/DTOs/External/UpdateAccountStatusRequest.cs`
+- [X] T048 [US4] 创建 `ExternalApiController` 在 `backend/src/AccountBox.Api/Controllers/ExternalApiController.cs`，实现以下端点：
   - `POST /api/external/accounts` - 创建账号
   - `DELETE /api/external/accounts/{id}` - 删除账号（移入回收站）
   - `PUT /api/external/accounts/{id}/status` - 启用/禁用账号
   - `GET /api/external/websites/{websiteId}/accounts` - 获取账号列表（支持status参数过滤）
-- [ ] T049 [US4] 在 `ExternalApiController` 中添加作用域验证逻辑（检查API密钥是否有权访问目标网站）
-- [ ] T050 [US4] 为外部API端点添加错误处理（401、403、404、400等标准HTTP状态码）
-- [ ] T051 [US4] 添加密码非空验证，但不进行密码强度检查（符合FR-025）
+- [X] T049 [US4] 在 `ExternalApiController` 中添加作用域验证逻辑（检查API密钥是否有权访问目标网站）
+- [X] T050 [US4] 为外部API端点添加错误处理（401、403、404、400等标准HTTP状态码）
+- [X] T051 [US4] 添加密码非空验证，但不进行密码强度检查（符合FR-025）
 
 **Checkpoint**: 外部系统可以使用API密钥进行账号的CRUD操作。验证作用域控制工作正常（403错误）。
 
@@ -166,11 +166,11 @@
 
 ### Backend Implementation for User Story 5
 
-- [ ] T052 [P] [US5] 创建 `RandomAccountService` 在 `backend/src/AccountBox.Api/Services/RandomAccountService.cs`（实现随机选择逻辑，使用 `EF.Functions.Random()`）
-- [ ] T053 [US5] 在 `Program.cs` 中注册 `RandomAccountService` 为 scoped 服务
-- [ ] T054 [US5] 在 `ExternalApiController` 中添加端点：`GET /api/external/websites/{websiteId}/accounts/random` - 随机获取启用账号
-- [ ] T055 [US5] 添加错误处理：当网站无启用账号时返回404，提示"该网站没有可用的启用账号"
-- [ ] T056 [US5] 添加作用域验证（检查API密钥是否有权访问该网站）
+- [X] T052 [P] [US5] 创建 `RandomAccountService` 在 `backend/src/AccountBox.Api/Services/RandomAccountService.cs`（实现随机选择逻辑，使用 `EF.Functions.Random()`）
+- [X] T053 [US5] 在 `Program.cs` 中注册 `RandomAccountService` 为 scoped 服务
+- [X] T054 [US5] 在 `ExternalApiController` 中添加端点：`GET /api/external/websites/{websiteId}/accounts/random` - 随机获取启用账号
+- [X] T055 [US5] 添加错误处理：当网站无启用账号时返回404，提示"该网站没有可用的启用账号"
+- [X] T056 [US5] 添加作用域验证（检查API密钥是否有权访问该网站）
 
 **Checkpoint**: 所有五个用户故事应该都可以独立工作。外部系统可以随机获取启用账号，适用于爬虫轮询等场景。
 
@@ -180,13 +180,13 @@
 
 **Purpose**: 跨多个用户故事的改进和完善
 
-- [ ] T057 [P] 更新 `ExceptionMiddleware`，确保所有API错误返回统一的 `ApiResponse<T>` 格式
-- [ ] T058 [P] 添加API调用日志记录（记录API密钥ID、操作类型、目标资源、时间戳）在 `ApiKeyAuthMiddleware` 中
-- [ ] T059 [P] 更新API密钥的 `LastUsedAt` 时间戳，在每次API调用时更新
-- [ ] T060 [P] 代码格式化和清理（使用 dotnet format 和 Prettier）
-- [ ] T061 [P] 运行 `quickstart.md` 中的所有示例，验证功能完整性
-- [ ] T062 添加必要的shadcn/ui组件（如Badge、Slider等），如果之前未安装
-- [ ] T063 更新 CLAUDE.md，添加本功能的技术栈和命令信息
+- [X] T057 [P] 更新 `ExceptionMiddleware`，确保所有API错误返回统一的 `ApiResponse<T>` 格式
+- [X] T058 [P] 添加API调用日志记录（记录API密钥ID、操作类型、目标资源、时间戳）在 `ApiKeyAuthMiddleware` 中
+- [X] T059 [P] 更新API密钥的 `LastUsedAt` 时间戳，在每次API调用时更新
+- [X] T060 [P] 代码格式化和清理（使用 dotnet format 和 Prettier）
+- [X] T061 [P] 运行 `quickstart.md` 中的所有示例，验证功能完整性
+- [X] T062 添加必要的shadcn/ui组件（如Badge、Slider等），如果之前未安装
+- [X] T063 更新 CLAUDE.md，添加本功能的技术栈和命令信息
 
 ---
 

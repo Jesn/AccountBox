@@ -48,6 +48,17 @@ public class WebsiteRepository
     }
 
     /// <summary>
+    /// 获取所有网站
+    /// </summary>
+    public async Task<List<Website>> GetAllAsync()
+    {
+        return await _context.Websites
+            .AsNoTracking()
+            .OrderByDescending(w => w.CreatedAt)
+            .ToListAsync();
+    }
+
+    /// <summary>
     /// 根据 ID 获取网站
     /// </summary>
     public async Task<Website?> GetByIdAsync(int id)
@@ -55,6 +66,18 @@ public class WebsiteRepository
         return await _context.Websites
             .AsNoTracking()
             .FirstOrDefaultAsync(w => w.Id == id);
+    }
+
+    /// <summary>
+    /// 根据 ID 列表获取多个网站
+    /// </summary>
+    public async Task<List<Website>> GetByIdsAsync(List<int> ids)
+    {
+        return await _context.Websites
+            .AsNoTracking()
+            .Where(w => ids.Contains(w.Id))
+            .OrderByDescending(w => w.CreatedAt)
+            .ToListAsync();
     }
 
     /// <summary>
@@ -122,7 +145,17 @@ public class WebsiteRepository
     public async Task<int> GetActiveAccountCountAsync(int websiteId)
     {
         return await _context.Accounts
-            .Where(a => a.WebsiteId == websiteId && !a.IsDeleted)
+            .Where(a => a.WebsiteId == websiteId && !a.IsDeleted && a.Status == Core.Enums.AccountStatus.Active)
+            .CountAsync();
+    }
+
+    /// <summary>
+    /// 获取网站下的禁用账号数（不包括回收站）
+    /// </summary>
+    public async Task<int> GetDisabledAccountCountAsync(int websiteId)
+    {
+        return await _context.Accounts
+            .Where(a => a.WebsiteId == websiteId && !a.IsDeleted && a.Status == Core.Enums.AccountStatus.Disabled)
             .CountAsync();
     }
 

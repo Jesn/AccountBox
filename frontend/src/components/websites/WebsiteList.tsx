@@ -32,31 +32,28 @@ export function WebsiteList({
   onDelete,
   onCreateNew,
 }: WebsiteListProps) {
-  // 加载状态
-  if (isLoading) {
+  // 加载状态或空状态
+  if (isLoading || websites.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center">
-          <p className="text-gray-600">加载中...</p>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  // 空状态
-  if (websites.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>开始使用 AccountBox</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-4">还没有添加任何网站</p>
-          <Button onClick={onCreateNew}>
-            <Plus className="mr-2 h-4 w-4" />
-            添加第一个网站
-          </Button>
-        </CardContent>
+        {isLoading ? (
+          <CardContent className="py-12 text-center">
+            <p className="text-gray-600">加载中...</p>
+          </CardContent>
+        ) : (
+          <>
+            <CardHeader>
+              <CardTitle>开始使用 AccountBox</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">还没有添加任何网站</p>
+              <Button onClick={onCreateNew}>
+                <Plus className="mr-2 h-4 w-4" />
+                添加第一个网站
+              </Button>
+            </CardContent>
+          </>
+        )}
       </Card>
     )
   }
@@ -67,17 +64,22 @@ export function WebsiteList({
       <Table className="text-sm">
         <TableHeader>
           <TableRow>
+            <TableHead className="h-10 w-16">ID</TableHead>
             <TableHead className="h-10">显示名</TableHead>
             <TableHead className="h-10">域名</TableHead>
-            <TableHead className="hidden md:table-cell h-10">标签</TableHead>
             <TableHead className="h-10">活跃账号</TableHead>
+            <TableHead className="h-10">禁用账号</TableHead>
             <TableHead className="h-10">回收站</TableHead>
+            <TableHead className="hidden md:table-cell h-10">标签</TableHead>
             <TableHead className="text-right h-10">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {websites.map((website) => (
             <TableRow key={website.id}>
+              <TableCell className="py-2 px-3 text-muted-foreground">
+                {website.id}
+              </TableCell>
               <TableCell
                 className="font-medium max-w-xs truncate py-2 px-3"
                 title={website.displayName || website.domain}
@@ -90,14 +92,17 @@ export function WebsiteList({
               >
                 {website.domain}
               </TableCell>
-              <TableCell className="hidden md:table-cell py-2 px-3">
-                {website.tags || '-'}
-              </TableCell>
               <TableCell className="py-2 px-3">
                 {website.activeAccountCount}
               </TableCell>
               <TableCell className="py-2 px-3">
+                {website.disabledAccountCount}
+              </TableCell>
+              <TableCell className="py-2 px-3">
                 {website.deletedAccountCount}
+              </TableCell>
+              <TableCell className="hidden md:table-cell py-2 px-3">
+                {website.tags || '-'}
               </TableCell>
               <TableCell className="text-right py-2 px-3">
                 <div className="flex gap-2 justify-end">

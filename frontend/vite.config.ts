@@ -14,7 +14,9 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
-      '/api': {
+      // 只代理以 /api/ 开头的请求（注意末尾的斜杠）
+      // 这样 /api-keys 和 /api-documentation 等前端路由就不会被代理
+      '^/api/': {
         target: 'http://localhost:5093',
         changeOrigin: true,
       },

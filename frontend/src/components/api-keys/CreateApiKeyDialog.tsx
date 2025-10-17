@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { apiKeyService } from '@/services/apiKeyService';
-import { websiteService, type WebsiteResponse } from '@/services/websiteService';
-import type { CreateApiKeyRequest, ApiKeyScopeType } from '@/types/ApiKey';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react'
+import { apiKeyService } from '@/services/apiKeyService'
+import { websiteService, type WebsiteResponse } from '@/services/websiteService'
+import type { CreateApiKeyRequest, ApiKeyScopeType } from '@/types/ApiKey'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -10,15 +10,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface CreateApiKeyDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSuccess: () => void
 }
 
 /**
@@ -29,89 +29,91 @@ export function CreateApiKeyDialog({
   onOpenChange,
   onSuccess,
 }: CreateApiKeyDialogProps) {
-  const [name, setName] = useState('');
-  const [scopeType, setScopeType] = useState<ApiKeyScopeType>('All');
-  const [selectedWebsiteIds, setSelectedWebsiteIds] = useState<number[]>([]);
-  const [websites, setWebsites] = useState<WebsiteResponse[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoadingWebsites, setIsLoadingWebsites] = useState(false);
+  const [name, setName] = useState('')
+  const [scopeType, setScopeType] = useState<ApiKeyScopeType>('All')
+  const [selectedWebsiteIds, setSelectedWebsiteIds] = useState<number[]>([])
+  const [websites, setWebsites] = useState<WebsiteResponse[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [isLoadingWebsites, setIsLoadingWebsites] = useState(false)
 
   // 加载网站列表
   useEffect(() => {
     if (open && scopeType === 'Specific') {
-      loadWebsites();
+      loadWebsites()
     }
-  }, [open, scopeType]);
+  }, [open, scopeType])
 
   const loadWebsites = async () => {
-    setIsLoadingWebsites(true);
+    setIsLoadingWebsites(true)
     try {
-      const response = await websiteService.getAll(1, 100); // 获取前100个网站
+      const response = await websiteService.getAll(1, 100) // 获取前100个网站
       if (response.success && response.data) {
-        setWebsites(response.data.items);
+        setWebsites(response.data.items)
       }
     } catch (err) {
-      console.error('加载网站列表失败:', err);
+      console.error('加载网站列表失败:', err)
     } finally {
-      setIsLoadingWebsites(false);
+      setIsLoadingWebsites(false)
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+    e.preventDefault()
+    setError(null)
 
     // 验证
     if (!name.trim()) {
-      setError('密钥名称不能为空');
-      return;
+      setError('密钥名称不能为空')
+      return
     }
 
     if (scopeType === 'Specific' && selectedWebsiteIds.length === 0) {
-      setError('指定网站作用域时必须选择至少一个网站');
-      return;
+      setError('指定网站作用域时必须选择至少一个网站')
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       const request: CreateApiKeyRequest = {
         name: name.trim(),
         scopeType,
         websiteIds: scopeType === 'Specific' ? selectedWebsiteIds : undefined,
-      };
+      }
 
-      await apiKeyService.create(request);
+      await apiKeyService.create(request)
 
       // 重置表单
-      setName('');
-      setScopeType('All');
-      setSelectedWebsiteIds([]);
-      onOpenChange(false);
-      onSuccess();
+      setName('')
+      setScopeType('All')
+      setSelectedWebsiteIds([])
+      onOpenChange(false)
+      onSuccess()
     } catch (err: any) {
-      console.error('创建API密钥失败:', err);
-      setError(err.response?.data?.error?.message || '创建API密钥时发生错误，请重试');
+      console.error('创建API密钥失败:', err)
+      setError(
+        err.response?.data?.error?.message || '创建API密钥时发生错误，请重试'
+      )
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const handleCancel = () => {
-    setName('');
-    setScopeType('All');
-    setSelectedWebsiteIds([]);
-    setError(null);
-    onOpenChange(false);
-  };
+    setName('')
+    setScopeType('All')
+    setSelectedWebsiteIds([])
+    setError(null)
+    onOpenChange(false)
+  }
 
   const toggleWebsiteSelection = (websiteId: number) => {
     setSelectedWebsiteIds((prev) =>
       prev.includes(websiteId)
         ? prev.filter((id) => id !== websiteId)
         : [...prev, websiteId]
-    );
-  };
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -152,7 +154,10 @@ export function CreateApiKeyDialog({
                     disabled={isSubmitting}
                     className="h-4 w-4"
                   />
-                  <Label htmlFor="scope-all" className="font-normal cursor-pointer">
+                  <Label
+                    htmlFor="scope-all"
+                    className="font-normal cursor-pointer"
+                  >
                     所有网站
                   </Label>
                 </div>
@@ -166,7 +171,10 @@ export function CreateApiKeyDialog({
                     disabled={isSubmitting}
                     className="h-4 w-4"
                   />
-                  <Label htmlFor="scope-specific" className="font-normal cursor-pointer">
+                  <Label
+                    htmlFor="scope-specific"
+                    className="font-normal cursor-pointer"
+                  >
                     指定网站
                   </Label>
                 </div>
@@ -185,11 +193,16 @@ export function CreateApiKeyDialog({
                 ) : (
                   <div className="max-h-48 overflow-y-auto border rounded-md p-3 space-y-2">
                     {websites.map((website) => (
-                      <div key={website.id} className="flex items-center space-x-2">
+                      <div
+                        key={website.id}
+                        className="flex items-center space-x-2"
+                      >
                         <Checkbox
                           id={`website-${website.id}`}
                           checked={selectedWebsiteIds.includes(website.id)}
-                          onCheckedChange={() => toggleWebsiteSelection(website.id)}
+                          onCheckedChange={() =>
+                            toggleWebsiteSelection(website.id)
+                          }
                           disabled={isSubmitting}
                         />
                         <Label
@@ -228,5 +241,5 @@ export function CreateApiKeyDialog({
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
