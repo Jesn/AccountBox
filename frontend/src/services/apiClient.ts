@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
 import type { ApiResponse, ErrorResponse } from '@/types/common'
+import { authService } from './authService'
 
 /**
  * API 客户端基类
@@ -9,7 +10,7 @@ import type { ApiResponse, ErrorResponse } from '@/types/common'
  * 注意：系统已从加密存储切换为明文存储（2025-10-17架构变更）
  * - 移除了 Vault Session 管理
  * - 移除了 X-Vault-Session 请求头
- * - 简化了 401 错误处理逻辑
+ * - 添加了 JWT Token 认证支持（2025-10-17）
  */
 class ApiClient {
   private client: AxiosInstance
@@ -23,6 +24,27 @@ class ApiClient {
       },
       withCredentials: true,
     })
+
+    // 请求拦截器：自动附加JWT Token
+    this.client.interceptors.request.use(
+      (config) => {
+        // 跳过登录请求（避免循环）
+        if (config.url === '/api/auth/login') {
+          return config
+        }
+
+        // 从authService获取Token
+        const token = authService.getToken()
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`
+        }
+
+        return config
+      },
+      (error) => {
+        return Promise.reject(error)
+      }
+    )
 
     // 响应拦截器：统一处理响应和错误
     this.client.interceptors.response.use(
@@ -86,6 +108,21 @@ class ApiClient {
    */
   private handleError(error: AxiosError<ApiResponse<unknown>>): Promise<never> {
     if (error.response) {
+      // 401 未授权：Token过期或无效，清除Token并跳转登录页
+      if (error.response.status === 401) {
+        authService.logout()
+
+        // 仅在非登录页面时跳转（避免登录页面无限循环）
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login'
+        }
+
+        return Promise.reject({
+          errorCode: 'UNAUTHORIZED',
+          message: 'Session expired. Please login again.',
+        } as ErrorResponse)
+      }
+
       // 服务器返回错误响应
       const apiResponse = error.response.data
       if (apiResponse && apiResponse.error) {
