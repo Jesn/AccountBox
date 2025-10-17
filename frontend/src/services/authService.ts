@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5093';
+// 在生产环境（Docker容器内）使用相对路径
+// 在开发环境使用完整URL（通过Vite代理）
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const TOKEN_KEY = 'accountbox_token';
 const TOKEN_EXPIRY_KEY = 'accountbox_token_expiry';
 

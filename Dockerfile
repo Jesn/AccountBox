@@ -24,7 +24,7 @@ RUN VITE_VERSION=${VERSION} pnpm build
 # ============================================
 # Stage 2: Build Backend
 # ============================================
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS backend-builder
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS backend-builder
 
 WORKDIR /src
 
