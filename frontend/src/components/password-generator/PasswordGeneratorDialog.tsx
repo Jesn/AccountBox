@@ -110,7 +110,7 @@ export function PasswordGeneratorDialog({
 
   // 对话框打开时自动生成一次密码
   useEffect(() => {
-    if (open && !generatedPassword) {
+    if (open) {
       generatePassword()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
