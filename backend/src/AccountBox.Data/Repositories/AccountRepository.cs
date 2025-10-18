@@ -1,3 +1,4 @@
+using AccountBox.Core.Enums;
 using AccountBox.Data.DbContext;
 using AccountBox.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,8 @@ public class AccountRepository
         int pageNumber,
         int pageSize,
         int? websiteId = null,
-        string? searchTerm = null)
+        string? searchTerm = null,
+        string? status = null)
     {
         if (pageNumber < 1)
         {
@@ -56,6 +58,15 @@ public class AccountRepository
                 (a.Tags != null && a.Tags.ToLower().Contains(term)) ||
                 (a.Notes != null && a.Notes.ToLower().Contains(term))
             );
+        }
+
+        // 状态过滤
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (Enum.TryParse<AccountStatus>(status, out var accountStatus))
+            {
+                query = query.Where(a => a.Status == accountStatus);
+            }
         }
 
         // 全局软删除过滤器已在 DbContext 配置，这里自动过滤 IsDeleted=true 的账号

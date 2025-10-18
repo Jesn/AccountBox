@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { accountService } from '@/services/accountService'
 import { websiteService } from '@/services/websiteService'
@@ -42,21 +42,69 @@ export function AccountsPage() {
     useState<AccountResponse | null>(null)
   const pageSize = 15
 
-  // 根据状态筛选账号列表
-  const filteredAccounts = useMemo(() => {
-    if (statusFilter === 'all') {
-      return accounts
-    }
-    return accounts.filter(account => account.status === statusFilter)
-  }, [accounts, statusFilter])
-
+  // 只在websiteId变化时加载网站信息
   useEffect(() => {
-    if (websiteId) {
-      loadWebsite()
-      loadAccounts()
+    if (!websiteId) return
+
+    let cancelled = false
+
+    const fetchWebsite = async () => {
+      try {
+        const response = await websiteService.getById(parseInt(websiteId))
+        if (!cancelled && response.success && response.data) {
+          setWebsite(response.data)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('加载网站信息失败:', error)
+        }
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [websiteId, currentPage, searchTerm])
+
+    fetchWebsite()
+
+    return () => {
+      cancelled = true
+    }
+  }, [websiteId])
+
+  // 在页面、搜索、状态筛选变化时加载账号列表
+  useEffect(() => {
+    if (!websiteId) return
+
+    let cancelled = false
+
+    const fetchAccounts = async () => {
+      setIsLoading(true)
+      try {
+        const response = await accountService.getAll(
+          currentPage,
+          pageSize,
+          parseInt(websiteId),
+          searchTerm,
+          statusFilter !== 'all' ? statusFilter : undefined
+        )
+        if (!cancelled && response.success && response.data) {
+          setAccounts(response.data.items as AccountResponse[])
+          setTotalPages(response.data.totalPages)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('加载账号列表失败:', error)
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    fetchAccounts()
+
+    return () => {
+      cancelled = true
+    }
+  }, [websiteId, currentPage, searchTerm, statusFilter])
 
   const loadWebsite = async () => {
     if (!websiteId) return
@@ -80,7 +128,8 @@ export function AccountsPage() {
         currentPage,
         pageSize,
         parseInt(websiteId),
-        searchTerm
+        searchTerm,
+        statusFilter !== 'all' ? statusFilter : undefined
       )
       if (response.success && response.data) {
         setAccounts(response.data.items as AccountResponse[])
@@ -96,6 +145,11 @@ export function AccountsPage() {
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
     setCurrentPage(1) // 搜索时重置到第一页
+  }
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value as 'all' | 'Active' | 'Disabled')
+    setCurrentPage(1) // 状态筛选时重置到第一页
   }
 
   const handleCreateAccountSuccess = () => {
@@ -187,7 +241,7 @@ export function AccountsPage() {
             </div>
             <Select
               value={statusFilter}
-              onValueChange={(value) => setStatusFilter(value as 'all' | 'Active' | 'Disabled')}
+              onValueChange={handleStatusFilterChange}
             >
               <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder="筛选状态" />
@@ -210,7 +264,7 @@ export function AccountsPage() {
         ) : (
           <>
             <AccountList
-              accounts={filteredAccounts}
+              accounts={accounts}
               onEdit={handleEditAccount}
               onDelete={handleDeleteAccount}
               onEnable={handleEnableAccount}

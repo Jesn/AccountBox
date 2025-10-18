@@ -42,7 +42,8 @@ class AccountService {
     pageNumber: number = 1,
     pageSize: number = 10,
     websiteId?: number,
-    searchTerm?: string
+    searchTerm?: string,
+    status?: string
   ): Promise<ApiResponse<PagedResult<AccountResponse>>> {
     const params = new URLSearchParams({
       pageNumber: pageNumber.toString(),
@@ -55,6 +56,10 @@ class AccountService {
 
     if (searchTerm && searchTerm.trim()) {
       params.append('searchTerm', searchTerm.trim())
+    }
+
+    if (status && status !== 'all') {
+      params.append('status', status)
     }
 
     return await apiClient.get<PagedResult<AccountResponse>>(

@@ -24,16 +24,17 @@ public class AccountController : ControllerBase
 
     /// <summary>
     /// 获取分页账号列表
-    /// GET /api/accounts?pageNumber=1&pageSize=10&websiteId=1&searchTerm=user
+    /// GET /api/accounts?pageNumber=1&pageSize=10&websiteId=1&searchTerm=user&status=Active
     /// </summary>
     [HttpGet]
     public async Task<ActionResult<ApiResponse<PagedResult<AccountResponse>>>> GetPaged(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] int? websiteId = null,
-        [FromQuery] string? searchTerm = null)
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? status = null)
     {
-        var result = await _accountService.GetPagedAsync(pageNumber, pageSize, websiteId, searchTerm);
+        var result = await _accountService.GetPagedAsync(pageNumber, pageSize, websiteId, searchTerm, status);
         return Ok(ApiResponse<PagedResult<AccountResponse>>.Ok(result));
     }
 
