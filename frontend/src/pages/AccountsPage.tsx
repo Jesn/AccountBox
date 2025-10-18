@@ -106,19 +106,6 @@ export function AccountsPage() {
     }
   }, [websiteId, currentPage, searchTerm, statusFilter])
 
-  const loadWebsite = async () => {
-    if (!websiteId) return
-
-    try {
-      const response = await websiteService.getById(parseInt(websiteId))
-      if (response.success && response.data) {
-        setWebsite(response.data)
-      }
-    } catch (error) {
-      console.error('加载网站信息失败:', error)
-    }
-  }
-
   const loadAccounts = async () => {
     if (!websiteId) return
 
