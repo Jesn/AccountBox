@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { copyToClipboard } from '@/lib/clipboard'
 
 interface ApiEndpoint {
   id: string
@@ -202,6 +203,37 @@ const API_ENDPOINTS: ApiEndpoint[] = [
   }
 }`,
   },
+  {
+    id: 'generate-password',
+    title: '生成随机密码',
+    method: 'GET',
+    path: '/api/external/password/generate',
+    description:
+      '生成密码学安全的随机密码。默认生成8位密码，可通过 length 参数自定义长度（8-128位）。密码包含大写字母、小写字母、数字和符号，并排除易混淆字符（0O1lI等）。',
+    curlExample: `curl -X GET 'http://localhost:5093/api/external/password/generate?length=16' \\
+  -H 'X-API-Key: YOUR_API_KEY'`,
+    successResponse: `{
+  "success": true,
+  "data": {
+    "password": "uYv9pbFdV69rTd4t",
+    "length": 16,
+    "strength": {
+      "score": 81,
+      "level": "VeryStrong",
+      "entropy": 95.27
+    }
+  },
+  "error": null,
+  "timestamp": "2025-10-18T08:35:51.670975Z"
+}`,
+    errorResponse: `{
+  "success": false,
+  "error": {
+    "errorCode": "INVALID_LENGTH",
+    "message": "密码长度必须在8到128之间"
+  }
+}`,
+  },
 ]
 
 /**
@@ -211,13 +243,11 @@ const API_ENDPOINTS: ApiEndpoint[] = [
 export function ApiDocumentation() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
-  const copyToClipboard = async (text: string, id: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
+  const handleCopy = async (text: string, id: string) => {
+    const success = await copyToClipboard(text)
+    if (success) {
       setCopiedId(id)
       setTimeout(() => setCopiedId(null), 2000)
-    } catch (err) {
-      console.error('复制失败:', err)
     }
   }
 
@@ -273,7 +303,7 @@ export function ApiDocumentation() {
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        copyToClipboard(
+                        handleCopy(
                           endpoint.curlExample,
                           `curl-${endpoint.id}`
                         )
@@ -306,7 +336,7 @@ export function ApiDocumentation() {
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          copyToClipboard(
+                          handleCopy(
                             endpoint.requestBody!,
                             `request-${endpoint.id}`
                           )
@@ -339,7 +369,7 @@ export function ApiDocumentation() {
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        copyToClipboard(
+                        handleCopy(
                           endpoint.successResponse,
                           `success-${endpoint.id}`
                         )
@@ -372,7 +402,7 @@ export function ApiDocumentation() {
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          copyToClipboard(
+                          handleCopy(
                             endpoint.errorResponse!,
                             `error-${endpoint.id}`
                           )

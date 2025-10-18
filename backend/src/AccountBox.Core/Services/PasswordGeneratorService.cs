@@ -14,7 +14,7 @@ public class PasswordGeneratorService
     private const string UppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private const string LowercaseChars = "abcdefghijklmnopqrstuvwxyz";
     private const string NumberChars = "0123456789";
-    private const string SymbolChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+    private const string SymbolChars = "!@#$%^&*";
 
     // 易混淆字符
     private const string AmbiguousChars = "0O1lI";
@@ -169,7 +169,68 @@ public class PasswordGeneratorService
             }
         }
 
-        return new string(password);
+        // 确保开头和结尾不是特殊字符
+        return EnsureNoSymbolsAtEnds(new string(password), charset);
+    }
+
+    /// <summary>
+    /// 确保密码开头和结尾不是特殊字符
+    /// </summary>
+    private string EnsureNoSymbolsAtEnds(string password, string charset)
+    {
+        if (string.IsNullOrEmpty(password) || password.Length < 2)
+            return password;
+
+        var chars = password.ToCharArray();
+        var nonSymbolCharset = BuildNonSymbolCharset(charset);
+
+        if (nonSymbolCharset.Length == 0)
+            return password; // 如果没有非符号字符集，直接返回
+
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            // 检查并替换开头
+            if (SymbolChars.Contains(chars[0]))
+            {
+                chars[0] = GetRandomChar(rng, nonSymbolCharset);
+            }
+
+            // 检查并替换结尾
+            if (SymbolChars.Contains(chars[^1]))
+            {
+                chars[^1] = GetRandomChar(rng, nonSymbolCharset);
+            }
+        }
+
+        return new string(chars);
+    }
+
+    /// <summary>
+    /// 构建非特殊字符集
+    /// </summary>
+    private string BuildNonSymbolCharset(string charset)
+    {
+        var result = new StringBuilder();
+        foreach (var c in charset)
+        {
+            if (!SymbolChars.Contains(c))
+            {
+                result.Append(c);
+            }
+        }
+        return result.ToString();
+    }
+
+    /// <summary>
+    /// 从字符集中随机获取一个字符
+    /// </summary>
+    private char GetRandomChar(RandomNumberGenerator rng, string charset)
+    {
+        var randomBytes = new byte[4];
+        rng.GetBytes(randomBytes);
+        var randomValue = BitConverter.ToUInt32(randomBytes, 0);
+        var index = randomValue % (uint)charset.Length;
+        return charset[(int)index];
     }
 
     /// <summary>
@@ -244,7 +305,70 @@ public class PasswordGeneratorService
             }
         }
 
-        return new string(passwordChars.ToArray());
+        var password = new string(passwordChars.ToArray());
+
+        // 确保开头和结尾不是特殊字符
+        return EnsureNoSymbolsAtEndsForDistribution(password, request);
+    }
+
+    /// <summary>
+    /// 确保按比例生成的密码开头和结尾不是特殊字符
+    /// </summary>
+    private string EnsureNoSymbolsAtEndsForDistribution(string password, GeneratePasswordRequest request)
+    {
+        if (string.IsNullOrEmpty(password) || password.Length < 2)
+            return password;
+
+        var chars = password.ToCharArray();
+
+        // 构建非符号字符集
+        var nonSymbolChars = new List<char>();
+
+        if (request.IncludeUppercase)
+        {
+            var charset = request.ExcludeAmbiguous
+                ? RemoveAmbiguousChars(UppercaseChars)
+                : UppercaseChars;
+            nonSymbolChars.AddRange(charset);
+        }
+
+        if (request.IncludeLowercase)
+        {
+            var charset = request.ExcludeAmbiguous
+                ? RemoveAmbiguousChars(LowercaseChars)
+                : LowercaseChars;
+            nonSymbolChars.AddRange(charset);
+        }
+
+        if (request.IncludeNumbers)
+        {
+            var charset = request.ExcludeAmbiguous
+                ? RemoveAmbiguousChars(NumberChars)
+                : NumberChars;
+            nonSymbolChars.AddRange(charset);
+        }
+
+        if (nonSymbolChars.Count == 0)
+            return password; // 如果没有非符号字符集，直接返回
+
+        var nonSymbolCharset = new string(nonSymbolChars.ToArray());
+
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            // 检查并替换开头
+            if (SymbolChars.Contains(chars[0]))
+            {
+                chars[0] = GetRandomChar(rng, nonSymbolCharset);
+            }
+
+            // 检查并替换结尾
+            if (SymbolChars.Contains(chars[^1]))
+            {
+                chars[^1] = GetRandomChar(rng, nonSymbolCharset);
+            }
+        }
+
+        return new string(chars);
     }
 
     /// <summary>

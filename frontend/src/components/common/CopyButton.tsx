@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Copy, Check } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { copyToClipboard } from '@/lib/clipboard'
 
 interface CopyButtonProps {
   /**
@@ -76,14 +77,18 @@ export function CopyButton({
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(text)
-      setIsCopied(true)
-      toast.success(successMessage)
+      const success = await copyToClipboard(text)
+      if (success) {
+        setIsCopied(true)
+        toast.success(successMessage)
 
-      // 延迟后恢复按钮状态
-      setTimeout(() => {
-        setIsCopied(false)
-      }, resetDelay)
+        // 延迟后恢复按钮状态
+        setTimeout(() => {
+          setIsCopied(false)
+        }, resetDelay)
+      } else {
+        toast.error('复制失败，请重试')
+      }
     } catch (err) {
       console.error('复制失败:', err)
       toast.error('复制失败，请重试')

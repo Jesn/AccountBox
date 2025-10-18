@@ -3,6 +3,7 @@ using AccountBox.Api.Services;
 using AccountBox.Core.Enums;
 using AccountBox.Core.Interfaces;
 using AccountBox.Core.Models;
+using AccountBox.Core.Services;
 using AccountBox.Data.Entities;
 using AccountBox.Data.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -21,15 +22,18 @@ public class ExternalApiController : ControllerBase
     private readonly AccountService _accountService;
     private readonly WebsiteRepository _websiteRepository;
     private readonly RandomAccountService _randomAccountService;
+    private readonly PasswordGeneratorService _passwordGeneratorService;
 
     public ExternalApiController(
         AccountService accountService,
         WebsiteRepository websiteRepository,
-        RandomAccountService randomAccountService)
+        RandomAccountService randomAccountService,
+        PasswordGeneratorService passwordGeneratorService)
     {
         _accountService = accountService;
         _websiteRepository = websiteRepository;
         _randomAccountService = randomAccountService;
+        _passwordGeneratorService = passwordGeneratorService;
     }
 
     /// <summary>
@@ -439,6 +443,71 @@ public class ExternalApiController : ControllerBase
             return StatusCode(500, ApiResponse<object>.Fail(
                 "INTERNAL_ERROR",
                 $"获取网站列表失败: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// 生成随机密码
+    /// GET /api/external/password/generate?length=8
+    /// </summary>
+    /// <param name="length">密码长度，默认为8，最小8，最大128</param>
+    [HttpGet("password/generate")]
+    public ActionResult<ApiResponse<object>> GeneratePassword([FromQuery] int? length = null)
+    {
+        try
+        {
+            var apiKey = GetApiKeyFromContext();
+            if (apiKey == null)
+            {
+                return Unauthorized(ApiResponse<object>.Fail("API_KEY_MISSING", "API密钥缺失"));
+            }
+
+            // 使用默认长度8或用户提供的长度
+            var passwordLength = length ?? 8;
+
+            // 验证长度范围
+            if (passwordLength < 8 || passwordLength > 128)
+            {
+                return BadRequest(ApiResponse<object>.Fail(
+                    "INVALID_LENGTH",
+                    "密码长度必须在8到128之间"));
+            }
+
+            // 使用密码生成器服务生成密码
+            var request = new Core.Models.PasswordGenerator.GeneratePasswordRequest
+            {
+                Length = passwordLength,
+                IncludeUppercase = true,
+                IncludeLowercase = true,
+                IncludeNumbers = true,
+                IncludeSymbols = true,
+                ExcludeAmbiguous = true,
+                UseCharacterDistribution = true,
+                UppercasePercentage = 25,
+                LowercasePercentage = 45,
+                NumbersPercentage = 25,
+                SymbolsPercentage = 5
+            };
+
+            var response = _passwordGeneratorService.Generate(request);
+
+            return Ok(ApiResponse<object>.Ok(new
+            {
+                password = response.Password,
+                length = response.Strength.Length,
+                strength = new
+                {
+                    score = response.Strength.Score,
+                    level = response.Strength.Level,
+                    entropy = response.Strength.Entropy
+                }
+            }));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.Fail(
+                "INTERNAL_ERROR",
+                $"生成密码失败: {ex.Message}"));
         }
     }
 }

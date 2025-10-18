@@ -10,6 +10,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/common/CopyButton'
 import { AccountStatusBadge } from '@/components/accounts/AccountStatusBadge'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import type { AccountResponse } from '@/services/accountService'
 import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react'
 import { useState } from 'react'
@@ -60,25 +66,26 @@ export function AccountList({
   }
 
   return (
-    <div className="rounded-md border overflow-x-auto">
-      <Table className="text-sm">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="h-10">用户名</TableHead>
-            <TableHead className="h-10">密码</TableHead>
-            <TableHead className="h-10">状态</TableHead>
-            <TableHead className="hidden md:table-cell h-10">标签</TableHead>
-            <TableHead className="hidden lg:table-cell h-10">备注</TableHead>
-            <TableHead className="hidden xl:table-cell h-10">
-              创建时间
-            </TableHead>
-            <TableHead className="hidden xl:table-cell h-10">
-              更新时间
-            </TableHead>
-            <TableHead className="text-right h-10">操作</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+    <TooltipProvider>
+      <div className="rounded-md border">
+        <Table className="text-sm">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="h-10">用户名</TableHead>
+              <TableHead className="h-10">密码</TableHead>
+              <TableHead className="h-10">状态</TableHead>
+              <TableHead className="hidden md:table-cell h-10">标签</TableHead>
+              <TableHead className="hidden lg:table-cell h-10">备注</TableHead>
+              <TableHead className="hidden xl:table-cell h-10">
+                创建时间
+              </TableHead>
+              <TableHead className="hidden xl:table-cell h-10">
+                更新时间
+              </TableHead>
+              <TableHead className="text-right h-10">操作</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
           {accounts.map((account) => (
             <TableRow key={account.id}>
               {/* 用户名 */}
@@ -89,16 +96,32 @@ export function AccountList({
               {/* 密码（可切换显示/隐藏）*/}
               <TableCell className="py-2 px-3">
                 <div className="flex items-center gap-2">
-                  <code className="text-sm font-mono">
-                    {visiblePasswords.has(account.id)
-                      ? account.password
-                      : '••••••••'}
-                  </code>
+                  {visiblePasswords.has(account.id) &&
+                  account.password.length > 8 ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <code className="text-sm font-mono block cursor-help">
+                          {account.password.substring(0, 8)}...
+                        </code>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-mono text-xs max-w-md break-all">
+                          {account.password}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <code className="text-sm font-mono block">
+                      {visiblePasswords.has(account.id)
+                        ? account.password
+                        : '••••••••'}
+                    </code>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => togglePasswordVisibility(account.id)}
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 flex-shrink-0"
                     title={
                       visiblePasswords.has(account.id)
                         ? '隐藏密码'
@@ -114,7 +137,7 @@ export function AccountList({
                   <CopyButton
                     text={account.password}
                     successMessage="密码已复制到剪贴板"
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 flex-shrink-0"
                     title="复制密码"
                   />
                 </div>
@@ -150,7 +173,7 @@ export function AccountList({
 
               {/* 操作 */}
               <TableCell className="text-right py-2 px-3">
-                <div className="flex gap-2 justify-end flex-wrap">
+                <div className="flex gap-2 justify-end items-center whitespace-nowrap">
                   {account.status === 'Disabled' && onEnable && (
                     <Button
                       variant="outline"
@@ -194,5 +217,6 @@ export function AccountList({
         </TableBody>
       </Table>
     </div>
+    </TooltipProvider>
   )
 }

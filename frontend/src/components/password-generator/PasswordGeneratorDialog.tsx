@@ -18,6 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator'
 import { RefreshCw, Copy, Check } from 'lucide-react'
+import { copyToClipboard } from '@/lib/clipboard'
 
 interface PasswordGeneratorDialogProps {
   open: boolean
@@ -39,7 +40,7 @@ export function PasswordGeneratorDialog({
   const [includeLowercase, setIncludeLowercase] = useState(true)
   const [includeNumbers, setIncludeNumbers] = useState(true)
   const [includeSymbols, setIncludeSymbols] = useState(true)
-  const [excludeAmbiguous, setExcludeAmbiguous] = useState(false)
+  const [excludeAmbiguous, setExcludeAmbiguous] = useState(true)
 
   // 字符比例控制
   const [useCharacterDistribution, setUseCharacterDistribution] =
@@ -91,9 +92,11 @@ export function PasswordGeneratorDialog({
   // 复制密码
   const copyPassword = async () => {
     if (generatedPassword) {
-      await navigator.clipboard.writeText(generatedPassword)
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 2000)
+      const success = await copyToClipboard(generatedPassword)
+      if (success) {
+        setIsCopied(true)
+        setTimeout(() => setIsCopied(false), 2000)
+      }
     }
   }
 
