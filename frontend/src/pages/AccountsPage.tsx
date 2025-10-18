@@ -147,7 +147,7 @@ export function AccountsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-[1400px]">
         <div className="mb-8">
           <Button
             variant="ghost"

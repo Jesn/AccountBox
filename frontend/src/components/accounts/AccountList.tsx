@@ -71,27 +71,27 @@ export function AccountList({
         <Table className="text-sm">
           <TableHeader>
             <TableRow>
-              <TableHead className="h-10">用户名</TableHead>
-              <TableHead className="h-10">密码</TableHead>
-              <TableHead className="h-10">状态</TableHead>
-              <TableHead className="hidden md:table-cell h-10">标签</TableHead>
-              <TableHead className="hidden lg:table-cell h-10">备注</TableHead>
-              <TableHead className="hidden xl:table-cell h-10">
+              <TableHead className="h-10 w-[250px]">用户名</TableHead>
+              <TableHead className="h-10 w-[180px]">密码</TableHead>
+              <TableHead className="h-10 w-[80px]">状态</TableHead>
+              <TableHead className="hidden md:table-cell h-10 w-[120px]">标签</TableHead>
+              <TableHead className="hidden lg:table-cell h-10 w-[200px]">备注</TableHead>
+              <TableHead className="hidden xl:table-cell h-10 w-[140px]">
                 创建时间
               </TableHead>
-              <TableHead className="hidden xl:table-cell h-10">
+              <TableHead className="hidden xl:table-cell h-10 w-[140px]">
                 更新时间
               </TableHead>
-              <TableHead className="text-right h-10">操作</TableHead>
+              <TableHead className="text-right h-10 w-[240px]">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
           {accounts.map((account) => (
             <TableRow key={account.id}>
               {/* 用户名 */}
-              <TableCell className="font-medium py-2 px-3">
+              <TableCell className="font-medium py-2 px-3 w-[250px]">
                 <div className="flex items-center gap-2">
-                  <span className="truncate" title={account.username}>
+                  <span title={account.username}>
                     {account.username}
                   </span>
                   <CopyButton
@@ -104,13 +104,13 @@ export function AccountList({
               </TableCell>
 
               {/* 密码（可切换显示/隐藏）*/}
-              <TableCell className="py-2 px-3">
+              <TableCell className="py-2 px-3 w-[180px]">
                 <div className="flex items-center gap-2">
                   {visiblePasswords.has(account.id) &&
                   account.password.length > 8 ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <code className="text-sm font-mono block cursor-help">
+                        <code className="text-sm font-mono block cursor-help truncate max-w-[80px]">
                           {account.password.substring(0, 8)}...
                         </code>
                       </TooltipTrigger>
@@ -154,35 +154,38 @@ export function AccountList({
               </TableCell>
 
               {/* 状态 */}
-              <TableCell className="py-2 px-3">
+              <TableCell className="py-2 px-3 w-[80px]">
                 <AccountStatusBadge status={account.status} />
               </TableCell>
 
               {/* 标签 */}
-              <TableCell className="hidden md:table-cell py-2 px-3">
-                {account.tags || '-'}
+              <TableCell className="hidden md:table-cell py-2 px-3 w-[120px]">
+                <span className="truncate block" title={account.tags || ''}>
+                  {account.tags || '-'}
+                </span>
               </TableCell>
 
               {/* 备注（截断显示）*/}
               <TableCell
-                className="hidden lg:table-cell max-w-xs truncate py-2 px-3"
-                title={account.notes || ''}
+                className="hidden lg:table-cell py-2 px-3 w-[200px]"
               >
-                {account.notes || '-'}
+                <span className="truncate block" title={account.notes || ''}>
+                  {account.notes || '-'}
+                </span>
               </TableCell>
 
               {/* 创建时间 */}
-              <TableCell className="hidden xl:table-cell text-sm text-gray-500 py-2 px-3">
+              <TableCell className="hidden xl:table-cell text-sm text-gray-500 py-2 px-3 w-[140px]">
                 {new Date(account.createdAt).toLocaleString('zh-CN')}
               </TableCell>
 
               {/* 更新时间 */}
-              <TableCell className="hidden xl:table-cell text-sm text-gray-500 py-2 px-3">
+              <TableCell className="hidden xl:table-cell text-sm text-gray-500 py-2 px-3 w-[140px]">
                 {new Date(account.updatedAt).toLocaleString('zh-CN')}
               </TableCell>
 
               {/* 操作 */}
-              <TableCell className="text-right py-2 px-3">
+              <TableCell className="text-right py-2 px-3 w-[240px]">
                 <div className="flex gap-2 justify-end items-center whitespace-nowrap">
                   {account.status === 'Disabled' && onEnable && (
                     <Button
