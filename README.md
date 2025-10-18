@@ -225,7 +225,7 @@ docker run -d \
   -v accountbox_data:/app/data \
   -e ASPNETCORE_ENVIRONMENT=Production \
   -e ASPNETCORE_URLS=http://+:8080 \
-  -e MASTER_PASSWORD=your_master_password \
+  -e Authentication__MasterPassword=your_master_password \
   docker.cnb.cool/rich/public/accountbox:latest
 ```
 
@@ -237,7 +237,7 @@ docker run -d \
   -p 5093:8080 \
   -e ASPNETCORE_ENVIRONMENT=Production \
   -e ASPNETCORE_URLS=http://+:8080 \
-  -e MASTER_PASSWORD=your_master_password \
+  -e Authentication__MasterPassword=your_master_password \
   -e ConnectionStrings__DefaultConnection="Host=postgres;Port=5432;Database=accountbox;Username=postgres;Password=your_password" \
   --link postgres:postgres \
   docker.cnb.cool/rich/public/accountbox:latest
@@ -261,7 +261,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      - MASTER_PASSWORD=your_master_password
+      - Authentication__MasterPassword=your_master_password
     restart: unless-stopped
 
 volumes:
@@ -299,7 +299,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      - MASTER_PASSWORD=your_master_password
+      - Authentication__MasterPassword=your_master_password
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=accountbox;Username=postgres;Password=your_db_password
     depends_on:
       - postgres

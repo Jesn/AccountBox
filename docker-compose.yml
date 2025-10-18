@@ -34,7 +34,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - DATABASE_PATH=/app/data/accountbox.db
       - ASPNETCORE_URLS=http://+:5093
-      - MASTER_PASSWORD=${MASTER_PASSWORD:-admin123}
+      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5093/health"]
       interval: 30s

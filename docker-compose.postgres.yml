@@ -78,7 +78,7 @@ services:
       - DB_PROVIDER=postgresql
       - CONNECTION_STRING=Host=postgres;Port=5432;Database=accountbox;Username=accountbox;Password=accountbox123
       - ASPNETCORE_URLS=http://+:5093
-      - MASTER_PASSWORD=${MASTER_PASSWORD:-admin123}
+      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
     depends_on:
       postgres:
         condition: service_healthy
