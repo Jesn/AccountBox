@@ -77,7 +77,6 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">主密码</Label>
               <Input
                 id="password"
                 type="password"
