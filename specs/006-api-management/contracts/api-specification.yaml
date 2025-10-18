@@ -236,6 +236,178 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiResponse_Error'
 
+  /api/external/websites/{websiteId}/accounts/check-username:
+    get:
+      tags: [External API]
+      summary: 检查用户名是否存在
+      description: 检查指定网站下是否存在指定用户名的账号
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: websiteId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 网站ID
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 要检查的用户名
+      responses:
+        '200':
+          description: 成功检查用户名
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [websiteId, username, exists]
+                    properties:
+                      websiteId:
+                        type: integer
+                        description: 网站ID
+                        example: 5
+                      username:
+                        type: string
+                        description: 用户名
+                        example: "test@example.com"
+                      exists:
+                        type: boolean
+                        description: 是否存在（true=存在，false=不存在）
+                        example: true
+        '400':
+          description: 请求参数错误（用户名为空）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+              example:
+                error:
+                  message: "用户名参数不能为空"
+                  code: "USERNAME_REQUIRED"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: 指定的网站不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+
+  # ========== 外部API：网站管理 ==========
+  /api/external/websites:
+    get:
+      tags: [External API]
+      summary: 获取可访问的网站列表
+      description: 获取当前API密钥有权访问的网站列表
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: 成功获取网站列表
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [totalCount, websites]
+                    properties:
+                      totalCount:
+                        type: integer
+                        example: 3
+                      websites:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            domain:
+                              type: string
+                            displayName:
+                              type: string
+                            createdAt:
+                              type: string
+                              format: date-time
+                            updatedAt:
+                              type: string
+                              format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ========== 外部API：密码生成 ==========
+  /api/external/password/generate:
+    get:
+      tags: [External API]
+      summary: 生成随机密码
+      description: 生成指定长度的强密码
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: length
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 8
+            maximum: 128
+            default: 8
+          description: 密码长度（默认8，最小8，最大128）
+      responses:
+        '200':
+          description: 成功生成密码
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [password, length, strength]
+                    properties:
+                      password:
+                        type: string
+                        example: "Xy9$mPq2nK7#vBcR"
+                      length:
+                        type: integer
+                        example: 16
+                      strength:
+                        type: object
+                        properties:
+                          score:
+                            type: integer
+                            example: 4
+                          level:
+                            type: string
+                            example: "Strong"
+                          entropy:
+                            type: number
+                            example: 82.5
+        '400':
+          description: 密码长度参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Error'
+              example:
+                error:
+                  message: "密码长度必须在8到128之间"
+                  code: "INVALID_LENGTH"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
 components:
   securitySchemes:
     ApiKeyAuth:

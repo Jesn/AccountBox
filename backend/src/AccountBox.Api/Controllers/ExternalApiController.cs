@@ -510,4 +510,64 @@ public class ExternalApiController : ControllerBase
                 $"生成密码失败: {ex.Message}"));
         }
     }
+
+    /// <summary>
+    /// 检查指定网站下是否存在指定用户名的账号
+    /// GET /api/external/websites/{websiteId}/accounts/check-username?username=xxx
+    /// </summary>
+    /// <param name="websiteId">网站ID</param>
+    /// <param name="username">要检查的用户名</param>
+    [HttpGet("websites/{websiteId}/accounts/check-username")]
+    public async Task<ActionResult<ApiResponse<object>>> CheckUsernameExists(
+        int websiteId,
+        [FromQuery] string username)
+    {
+        try
+        {
+            var apiKey = GetApiKeyFromContext();
+            if (apiKey == null)
+            {
+                return Unauthorized(ApiResponse<object>.Fail("API_KEY_MISSING", "API密钥缺失"));
+            }
+
+            // 验证用户名参数
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return BadRequest(ApiResponse<object>.Fail(
+                    "USERNAME_REQUIRED",
+                    "用户名参数不能为空"));
+            }
+
+            // 验证网站是否存在
+            var website = await _websiteRepository.GetByIdAsync(websiteId);
+            if (website == null)
+            {
+                return NotFound(ApiResponse<object>.Fail("WEBSITE_NOT_FOUND", "指定的网站不存在"));
+            }
+
+            // 验证API密钥是否有权访问该网站
+            if (!CanAccessWebsite(apiKey, websiteId))
+            {
+                return StatusCode(403, ApiResponse<object>.Fail(
+                    "ACCESS_DENIED",
+                    "API密钥无权访问该网站"));
+            }
+
+            // 检查用户名是否存在
+            var exists = await _accountService.UsernameExistsAsync(websiteId, username);
+
+            return Ok(ApiResponse<object>.Ok(new
+            {
+                websiteId = websiteId,
+                username = username.Trim(),
+                exists = exists
+            }));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.Fail(
+                "INTERNAL_ERROR",
+                $"检查用户名失败: {ex.Message}"));
+        }
+    }
 }

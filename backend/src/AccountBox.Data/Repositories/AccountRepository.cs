@@ -250,4 +250,22 @@ public class AccountRepository
         _context.Accounts.RemoveRange(accountsToDelete);
         await _context.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// 检查指定网站下是否存在指定用户名的账号
+    /// </summary>
+    /// <param name="websiteId">网站ID</param>
+    /// <param name="username">用户名</param>
+    /// <returns>如果存在返回true，否则返回false</returns>
+    public async Task<bool> UsernameExistsAsync(int websiteId, string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            throw new ArgumentException("Username cannot be empty", nameof(username));
+        }
+
+        return await _context.Accounts
+            .AsNoTracking()
+            .AnyAsync(a => a.WebsiteId == websiteId && a.Username == username.Trim());
+    }
 }

@@ -207,6 +207,17 @@ public class AccountService
     }
 
     /// <summary>
+    /// 检查指定网站下是否存在指定用户名的账号
+    /// </summary>
+    /// <param name="websiteId">网站ID</param>
+    /// <param name="username">用户名</param>
+    /// <returns>如果存在返回true，否则返回false</returns>
+    public async Task<bool> UsernameExistsAsync(int websiteId, string username)
+    {
+        return await _accountRepository.UsernameExistsAsync(websiteId, username);
+    }
+
+    /// <summary>
     /// 将 Account 实体映射到 AccountResponse DTO
     /// </summary>
     private AccountResponse MapToResponse(Data.Entities.Account account)
