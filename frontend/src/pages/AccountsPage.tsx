@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { accountService } from '@/services/accountService'
 import { websiteService } from '@/services/websiteService'
@@ -7,6 +7,13 @@ import type { WebsiteResponse } from '@/services/websiteService'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { AccountList } from '@/components/accounts/AccountList'
 import { CreateAccountDialog } from '@/components/accounts/CreateAccountDialog'
 import { EditAccountDialog } from '@/components/accounts/EditAccountDialog'
@@ -27,12 +34,21 @@ export function AccountsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'Active' | 'Disabled'>('all')
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false)
   const [showEditAccountDialog, setShowEditAccountDialog] = useState(false)
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
   const [selectedAccount, setSelectedAccount] =
     useState<AccountResponse | null>(null)
   const pageSize = 15
+
+  // 根据状态筛选账号列表
+  const filteredAccounts = useMemo(() => {
+    if (statusFilter === 'all') {
+      return accounts
+    }
+    return accounts.filter(account => account.status === statusFilter)
+  }, [accounts, statusFilter])
 
   useEffect(() => {
     if (websiteId) {
@@ -157,16 +173,31 @@ export function AccountsPage() {
             </Button>
           </div>
 
-          {/* 搜索框 */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-            <Input
-              type="text"
-              placeholder="搜索用户名、标签或备注..."
-              value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10"
-            />
+          {/* 搜索和筛选区域 */}
+          <div className="flex gap-4 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+              <Input
+                type="text"
+                placeholder="搜索用户名、标签或备注..."
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => setStatusFilter(value as 'all' | 'Active' | 'Disabled')}
+            >
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="筛选状态" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部状态</SelectItem>
+                <SelectItem value="Active">活跃</SelectItem>
+                <SelectItem value="Disabled">已禁用</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -179,7 +210,7 @@ export function AccountsPage() {
         ) : (
           <>
             <AccountList
-              accounts={accounts}
+              accounts={filteredAccounts}
               onEdit={handleEditAccount}
               onDelete={handleDeleteAccount}
               onEnable={handleEnableAccount}
