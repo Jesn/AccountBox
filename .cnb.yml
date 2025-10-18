@@ -88,7 +88,7 @@
             image: docker.cnb.cool/rich/plugins/mqtt:latest
             settings:
               MQTT_URL: $MQTT_URL
-              MQTT_TOPIC: $MQTT_TOPIC
+              MQTT_TOPIC: cnb/accountbox
               MQTT_USERNAME: $MQTT_USERNAME
               MQTT_PASSWORD: $MQTT_PASSWORD
               MQTT_QOS: 2
