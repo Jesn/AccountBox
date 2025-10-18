@@ -45,9 +45,9 @@ export function PasswordGeneratorDialog({
   const [useCharacterDistribution, setUseCharacterDistribution] =
     useState(false)
   const [uppercasePercentage, setUppercasePercentage] = useState(30)
-  const [lowercasePercentage, setLowercasePercentage] = useState(40)
+  const [lowercasePercentage, setLowercasePercentage] = useState(45)
   const [numbersPercentage, setNumbersPercentage] = useState(20)
-  const [symbolsPercentage, setSymbolsPercentage] = useState(10)
+  const [symbolsPercentage, setSymbolsPercentage] = useState(5)
 
   const [generatedPassword, setGeneratedPassword] = useState('')
   const [passwordStrength, setPasswordStrength] =
