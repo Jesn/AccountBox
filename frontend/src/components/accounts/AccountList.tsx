@@ -90,7 +90,17 @@ export function AccountList({
             <TableRow key={account.id}>
               {/* 用户名 */}
               <TableCell className="font-medium py-2 px-3">
-                {account.username}
+                <div className="flex items-center gap-2">
+                  <span className="truncate" title={account.username}>
+                    {account.username}
+                  </span>
+                  <CopyButton
+                    text={account.username}
+                    successMessage="用户名已复制到剪贴板"
+                    className="h-8 w-8 p-0 flex-shrink-0"
+                    title="复制用户名"
+                  />
+                </div>
               </TableCell>
 
               {/* 密码（可切换显示/隐藏）*/}
