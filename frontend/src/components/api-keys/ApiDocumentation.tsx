@@ -204,6 +204,33 @@ const API_ENDPOINTS: ApiEndpoint[] = [
 }`,
   },
   {
+    id: 'check-username',
+    title: '检查用户名是否存在',
+    method: 'GET',
+    path: '/api/external/websites/{websiteId}/accounts/check-username',
+    description:
+      '检查指定网站下是否存在指定用户名的账号。返回布尔值，true 表示用户名已存在，false 表示用户名不存在。适用于创建账号前的用户名重复检查。',
+    curlExample: `curl -X GET 'http://localhost:5093/api/external/websites/1/accounts/check-username?username=user@example.com' \\
+  -H 'X-API-Key: YOUR_API_KEY'`,
+    successResponse: `{
+  "success": true,
+  "data": {
+    "websiteId": 1,
+    "username": "user@example.com",
+    "exists": true
+  },
+  "error": null,
+  "timestamp": "2025-10-18T09:15:19.147771Z"
+}`,
+    errorResponse: `{
+  "success": false,
+  "error": {
+    "errorCode": "USERNAME_REQUIRED",
+    "message": "用户名参数不能为空"
+  }
+}`,
+  },
+  {
     id: 'generate-password',
     title: '生成随机密码',
     method: 'GET',
