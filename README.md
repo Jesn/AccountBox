@@ -17,7 +17,6 @@
 - 🎲 **密码生成器** - 生成强密码，支持自定义规则
 - 📊 **表格视图** - 网站和账号列表支持表格布局
 - 🐳 **Docker 支持** - 单镜像或分离镜像部署
-- 📱 **响应式设计** - 支持多种屏幕尺寸
 
 ## 🚀 快速开始
 
@@ -27,7 +26,7 @@
 - **前端**: Node.js >= 20.19.0, pnpm
 - **数据库**: SQLite (开发) / PostgreSQL (生产)
 
-### 方式 1: 使用启动脚本（推荐）
+### 方式 1: 本地使用启动脚本（推荐）
 
 ```bash
 ./start.sh
@@ -112,30 +111,6 @@ AccountBox/
 └── start.sh                    # 启动脚本
 ```
 
-## 🔧 配置
-
-### 后端配置 (appsettings.json)
-
-```json
-{
-  "Cors": {
-    "AllowedOrigins": ["http://localhost:5173", "http://localhost:5093"]
-  },
-  "JwtSettings": {
-    "SecretKey": "your-secret-key-here",
-    "Issuer": "AccountBox",
-    "Audience": "AccountBox",
-    "ExpirationMinutes": 1440
-  }
-}
-```
-
-### 环境变量
-
-- `DATABASE_PATH`: 数据库文件路径 (默认: `backend/src/AccountBox.Api/accountbox.db`)
-- `ASPNETCORE_ENVIRONMENT`: 运行环境 (Development/Production)
-- `ASPNETCORE_URLS`: API 服务地址 (默认: `http://localhost:5093`)
-
 ## 📚 API 文档
 
 ### 内部 API (需要 JWT Token)
@@ -166,29 +141,6 @@ X-API-Key: sk_your_api_key_here
 
 详细 API 文档请访问: http://localhost:5093/swagger
 
-## 🧪 测试
-
-### 后端测试
-
-```bash
-cd backend
-dotnet test
-```
-
-### 前端测试
-
-```bash
-cd frontend
-pnpm test          # 交互模式
-pnpm test:run      # 单次运行
-```
-
-### E2E 测试
-
-```bash
-cd frontend
-pnpm test:e2e
-```
 
 ## 🐳 Docker 部署
 
@@ -391,5 +343,5 @@ MIT License - 详见 [LICENSE](LICENSE)
 
 ---
 
-**最后更新**: 2025-10-17 | **版本**: 2.0 | **状态**: 生产就绪
+**最后更新**: 2025-10-18 | **版本**: 2.0 | **状态**: 生产就绪
 
