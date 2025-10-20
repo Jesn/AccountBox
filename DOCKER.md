@@ -10,21 +10,20 @@ AccountBox 提供两种 Docker 部署方式:
 - 前端和后端打包在一个镜像中
 - 使用 ASP.NET Core 的静态文件服务提供前端
 - 更简单的部署和管理
-- 使用 `docker-compose.single.yml`
-
-### 2. 分离镜像部署
-- 前端和后端分别构建独立镜像
-- 前端使用 Nginx，后端使用 ASP.NET Core
-- 更灵活的扩展和配置
 - 使用 `docker-compose.yml`
+
+### 2. 数据库栈部署
+- MySQL 或 PostgreSQL 与应用一同启动
+- 使用 `docker-compose.mysql.yml` 或 `docker-compose.postgres.yml`
 
 ## 目录结构
 
 ```
 AccountBox/
 ├── Dockerfile                 # 单镜像多阶段构建配置（前端+后端）
-├── docker-compose.single.yml  # 单镜像部署配置
-├── docker-compose.yml         # 分离镜像部署配置
+├── docker-compose.yml         # 单镜像（SQLite）部署配置
+├── docker-compose.mysql.yml   # MySQL 部署配置
+├── docker-compose.postgres.yml# PostgreSQL 部署配置
 ├── .dockerignore             # 构建忽略文件
 ├── backend/
 │   ├── Dockerfile            # 后端独立镜像构建配置
@@ -35,6 +34,25 @@ AccountBox/
     └── .dockerignore         # 前端构建忽略文件
 ```
 
+## 部署总览表（快速对照）
+
+- `docker-compose.yml`（单镜像/SQLite）
+  - 端口: 本机 5095 → 容器 5093
+  - 数据卷: `accountbox-data:/app/data`
+  - 适用: 最简部署（内置 SQLite）
+
+- `docker-compose.mysql.yml`（MySQL 栈）
+  - 端口: MySQL 3306、phpMyAdmin 8080、应用 5095
+  - 适用: 使用 MySQL，带可视化管理
+
+- `docker-compose.postgres.yml`（PostgreSQL 栈）
+  - 端口: PostgreSQL 5432、pgAdmin 5050、应用 5095
+  - 适用: 使用 PostgreSQL，带可视化管理
+
+- `docker-compose.prod.yml`（生产一体化编排）
+  - 包含数据库与后端服务，使用根 `Dockerfile`
+  - 通过环境变量选择 `DB_PROVIDER` 和 `CONNECTION_STRING`
+
 ## 快速开始
 
 ### 方式一：单镜像部署（推荐）
@@ -42,67 +60,107 @@ AccountBox/
 #### 1. 构建并启动服务
 
 ```bash
-docker-compose -f docker-compose.single.yml up -d
+docker compose -f docker-compose.yml up -d
 ```
 
 #### 2. 查看服务状态
 
 ```bash
-docker-compose -f docker-compose.single.yml ps
+docker compose -f docker-compose.yml ps
 ```
 
 #### 3. 查看日志
 
 ```bash
-docker-compose -f docker-compose.single.yml logs -f
+docker compose -f docker-compose.yml logs -f
 ```
 
 #### 4. 停止服务
 
 ```bash
-docker-compose -f docker-compose.single.yml down
+docker compose -f docker-compose.yml down
 ```
 
 #### 5. 访问应用
 
-- **应用地址**: http://localhost:5093
-- **前端和API都通过这个端口访问**
+- **应用地址**: http://localhost:5095
+- **前端和 API 都通过该端口访问**
 
-### 方式二：分离镜像部署
-
-#### 1. 构建并启动所有服务
+### 方式二：数据库栈（MySQL/PostgreSQL）
 
 ```bash
-docker-compose up -d
+# MySQL 栈
+docker compose -f docker-compose.mysql.yml up -d
+
+# PostgreSQL 栈
+docker compose -f docker-compose.postgres.yml up -d
 ```
 
-#### 2. 查看服务状态
+#### MySQL 栈示例（docker-compose.mysql.yml）
 
-```bash
-docker-compose ps
+```yaml
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: accountbox-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: accountbox
+      MYSQL_USER: accountbox
+      MYSQL_PASSWORD: accountbox123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "accountbox", "-paccountbox123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: accountbox-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: accountbox
+      PMA_PASSWORD: accountbox123
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  accountbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: accountbox-app
+    restart: unless-stopped
+    ports:
+      - "5095:5093"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DB_PROVIDER=mysql
+      - CONNECTION_STRING=Server=mysql;Port=3306;Database=accountbox;User=accountbox;Password=accountbox123
+      - ASPNETCORE_URLS=http://+:5093
+      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
 ```
 
-#### 3. 查看日志
-
-```bash
-# 查看所有服务日志
-docker-compose logs -f
-
-# 查看特定服务日志
-docker-compose logs -f backend
-docker-compose logs -f frontend
-```
-
-#### 4. 停止服务
-
-```bash
-docker-compose down
-```
-
-#### 5. 访问应用
-
-- **前端应用**: http://localhost:8080
-- **后端API**: http://localhost:5093
+启动后：
+- 应用地址: http://localhost:5095
+- phpMyAdmin: http://localhost:8080 （账号: accountbox / 密码: accountbox123）
 
 ## 镜像特性
 
@@ -110,14 +168,14 @@ docker-compose down
 
 **三阶段构建**:
 1. **Frontend Build**: 使用 `node:20-alpine` + pnpm 构建前端
-2. **Backend Build**: 使用 `mcr.microsoft.com/dotnet/sdk:9.0` 构建后端
-3. **Runtime**: 使用 `mcr.microsoft.com/dotnet/aspnet:9.0` 运行应用，包含前端静态文件
+2. **Backend Build**: 使用 `mcr.microsoft.com/dotnet/sdk:8.0-alpine` 构建后端
+3. **Runtime**: 使用 `mcr.microsoft.com/dotnet/aspnet:8.0-alpine` 运行应用，包含前端静态文件
 
 **优化特性**:
 - 三阶段构建，最大化缓存利用
 - 前端构建产物嵌入后端 wwwroot 目录
 - 单一端口访问，简化网络配置
-- 非root用户运行 (appuser)
+- 非root用户运行 (accountbox)
 - 健康检查端点
 - 数据持久化 (/app/data)
 

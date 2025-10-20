@@ -92,7 +92,7 @@ pnpm dev
 
 #### MySQL
 - **用途**: 生产环境
-- **Docker启动**: `docker-compose -f docker-compose.mysql-test.yml up -d`
+- **Docker启动**: `docker-compose -f docker-compose.mysql.yml up -d`
 - **连接信息**:
   - 主机: localhost
   - 端口: 3306

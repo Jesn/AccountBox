@@ -13,8 +13,10 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
     {
         builder.ToTable("Accounts");
 
-        // 主键
+        // 主键（自增）
         builder.HasKey(a => a.Id);
+        builder.Property(a => a.Id)
+            .ValueGeneratedOnAdd(); // 显式声明自增，EF Core 会根据数据库类型自动选择合适的策略
 
         // 必填字段
         builder.Property(a => a.WebsiteId)

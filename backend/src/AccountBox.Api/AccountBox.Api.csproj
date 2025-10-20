@@ -28,4 +28,11 @@
     <ProjectReference Include="..\AccountBox.Security\AccountBox.Security.csproj" />
   </ItemGroup>
 
+  <!-- 引入三套迁移程序集，确保运行时和 EF 工具可加载到对应迁移 -->
+  <ItemGroup>
+    <ProjectReference Include="..\AccountBox.Data.Migrations.PostgreSQL\AccountBox.Data.Migrations.PostgreSQL.csproj" />
+    <ProjectReference Include="..\AccountBox.Data.Migrations.MySQL\AccountBox.Data.Migrations.MySQL.csproj" />
+    <ProjectReference Include="..\AccountBox.Data.Migrations.Sqlite\AccountBox.Data.Migrations.Sqlite.csproj" />
+  </ItemGroup>
+
 </Project>

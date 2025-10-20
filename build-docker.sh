@@ -4,7 +4,6 @@
 
 set -e
 
-VERSION=${VERSION:-1.0.0}
 BUILD_TYPE=${1:-single}
 
 echo "======================================"
@@ -16,12 +15,12 @@ echo "======================================"
 case $BUILD_TYPE in
   single)
     echo "构建单镜像部署..."
-    docker-compose -f docker-compose.single.yml build --build-arg VERSION=$VERSION
+    docker compose -f docker-compose.yml build
     echo ""
     echo "✅ 单镜像构建完成!"
     echo ""
     echo "启动服务:"
-    echo "  docker-compose -f docker-compose.single.yml up -d"
+    echo "  docker compose -f docker-compose.yml up -d"
     echo ""
     echo "访问应用:"
     echo "  http://localhost:5093"
@@ -29,7 +28,7 @@ case $BUILD_TYPE in
 
   separated)
     echo "构建分离镜像部署..."
-    docker-compose build
+    docker compose build
     echo ""
     echo "✅ 分离镜像构建完成!"
     echo ""
@@ -45,7 +44,7 @@ case $BUILD_TYPE in
     echo "构建所有镜像..."
     echo ""
     echo "1/2 构建单镜像..."
-    docker-compose -f docker-compose.single.yml build --build-arg VERSION=$VERSION
+    docker compose -f docker-compose.yml build
     echo ""
     echo "2/2 构建分离镜像..."
     docker-compose build
@@ -63,7 +62,7 @@ case $BUILD_TYPE in
     echo "  all       - 构建所有类型"
     echo ""
     echo "示例:"
-    echo "  VERSION=2.0.0 $0 single"
+    echo "  $0 single"
     exit 1
     ;;
 esac

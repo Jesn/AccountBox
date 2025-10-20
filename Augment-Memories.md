@@ -152,7 +152,7 @@ AccountBox/
 │   ├── 007-accountbox-web-jwt/      # Web前端JWT认证
 │   └── ENCRYPTION_REMOVAL_SUMMARY.md
 ├── docker-compose.yml               # Docker编排
-├── docker-compose.single.yml        # 单容器编排
+├── docker-compose.yml               # 单容器编排（SQLite）
 ├── Dockerfile                       # Docker镜像
 ├── start.sh                         # 启动脚本
 ├── reset_db.sh                      # 数据库重置脚本
@@ -309,7 +309,7 @@ pnpm dev
 #### 方式3: Docker启动
 ```bash
 # 单容器模式
-docker-compose -f docker-compose.single.yml up
+docker compose -f docker-compose.yml up
 
 # 或多容器模式
 docker-compose up
@@ -639,4 +639,3 @@ dotnet restore
 - **版本**: 2.0 (完整的认证和API管理系统)
 - **维护者**: Augment Agent
 - **状态**: 生产就绪 (Production Ready)
-

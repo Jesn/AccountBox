@@ -116,9 +116,10 @@ AccountBox/
 │   ├── 001-mvp/                # MVP 功能
 │   ├── 006-api-management/     # API 密钥管理
 │   └── 007-accountbox-web-jwt/ # JWT 认证
-├── docker-compose.yml          # 分离镜像部署
-├── docker-compose.single.yml   # 单镜像部署
-├── Dockerfile                  # 单镜像构建配置
+├── docker-compose.yml          # 单镜像部署（SQLite）
+├── docker-compose.mysql.yml    # MySQL 部署
+├── docker-compose.postgres.yml # PostgreSQL 部署
+├── Dockerfile                  # 单镜像构建配置（前端+后端）
 └── start.sh                    # 启动脚本
 ```
 
@@ -154,6 +155,13 @@ X-API-Key: sk_your_api_key_here
 
 
 ## 🐳 Docker 部署
+
+### 部署总览（快速对照）
+
+- `docker-compose.yml`（单镜像/SQLite）: 本机 5095 → 容器 5093；卷 `accountbox-data:/app/data`
+- `docker-compose.mysql.yml`（MySQL 栈）: MySQL 3306、phpMyAdmin 8080、应用 5095
+- `docker-compose.postgres.yml`（PostgreSQL 栈）: PostgreSQL 5432、pgAdmin 5050、应用 5095
+- `docker-compose.prod.yml`（生产一体化）: 后端 + 数据库，使用根 Dockerfile
 
 ### 本地部署
 
@@ -208,73 +216,118 @@ docker run -d \
 
 #### Docker Compose 部署（推荐）
 
-**SQLite 版本** (`docker-compose.prod.yml`):
+**SQLite 单镜像** (`docker-compose.yml`):
 
 ```yaml
-version: '3.8'
-
 services:
   accountbox:
-    image: docker.cnb.cool/rich/public/accountbox:latest
-    container_name: accountbox
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: accountbox-all-in-one
     ports:
-      - "5093:8080"
+      - "5095:5093"
     volumes:
-      - accountbox_data:/app/data
+      - accountbox-data:/app/data
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
-      - Authentication__MasterPassword=your_master_password
+      - DATABASE_PATH=/app/data/accountbox.db
+      - ASPNETCORE_URLS=http://+:5093
+      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
     restart: unless-stopped
 
 volumes:
-  accountbox_data:
+  accountbox-data:
 ```
 
 启动:
 ```bash
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.yml up -d
 ```
 
 ⚠️ **重要**: 请将 `your_master_password` 替换为强密码
 
-**PostgreSQL 版本** (`docker-compose.prod-pg.yml`):
+**PostgreSQL 栈** (`docker-compose.postgres.yml`):
 
 ```yaml
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: accountbox-postgres
     environment:
       - POSTGRES_DB=accountbox
-      - POSTGRES_PASSWORD=your_db_password
+      - POSTGRES_USER=accountbox
+      - POSTGRES_PASSWORD=accountbox123
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
 
   accountbox:
-    image: docker.cnb.cool/rich/public/accountbox:latest
-    container_name: accountbox
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: accountbox-app
     ports:
-      - "5093:8080"
+      - "5095:5093"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
-      - Authentication__MasterPassword=your_master_password
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=accountbox;Username=postgres;Password=your_db_password
+      - DB_PROVIDER=postgresql
+      - CONNECTION_STRING=Host=postgres;Port=5432;Database=accountbox;Username=accountbox;Password=accountbox123
+      - ASPNETCORE_URLS=http://+:5093
+      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
     depends_on:
       - postgres
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  postgres-data:
 ```
 
 启动:
 ```bash
-docker-compose -f docker-compose.prod-pg.yml up -d
+docker compose -f docker-compose.postgres.yml up -d
+```
+
+**MySQL 栈** (`docker-compose.mysql.yml`):
+
+```yaml
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: accountbox-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: accountbox
+      MYSQL_USER: accountbox
+      MYSQL_PASSWORD: accountbox123
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: unless-stopped
+
+  accountbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: accountbox-app
+    ports:
+      - "5095:5093"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DB_PROVIDER=mysql
+      - CONNECTION_STRING=Server=mysql;Port=3306;Database=accountbox;User=accountbox;Password=accountbox123
+      - ASPNETCORE_URLS=http://+:5093
+      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+```
+
+启动:
+```bash
+docker compose -f docker-compose.mysql.yml up -d
 ```
 
 ⚠️ **重要**: 请将以下参数替换为强密码:
@@ -355,4 +408,3 @@ MIT License - 详见 [LICENSE](LICENSE)
 ---
 
 **最后更新**: 2025-10-18 | **版本**: 2.0 | **状态**: 生产就绪
-

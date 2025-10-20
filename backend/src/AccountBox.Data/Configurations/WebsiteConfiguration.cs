@@ -13,8 +13,10 @@ public class WebsiteConfiguration : IEntityTypeConfiguration<Website>
     {
         builder.ToTable("Websites");
 
-        // 主键
+        // 主键（自增）
         builder.HasKey(w => w.Id);
+        builder.Property(w => w.Id)
+            .ValueGeneratedOnAdd(); // 显式声明自增，EF Core 会根据数据库类型自动选择合适的策略
 
         // 必填字段
         builder.Property(w => w.Domain)

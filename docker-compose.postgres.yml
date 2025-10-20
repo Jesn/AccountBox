@@ -67,8 +67,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        VERSION: ${VERSION:-1.0.0}
     container_name: accountbox-app
     restart: unless-stopped
     ports:
@@ -100,4 +98,3 @@ volumes:
     driver: local
   pgadmin-data:
     driver: local
-
