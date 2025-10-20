@@ -84,12 +84,14 @@ lerna-debug.log*
 # Database
 # ========================================
 
-# SQLite databases
+# SQLite databases (只忽略文件，不忽略目录)
 *.db
 *.db-shm
 *.db-wal
 *.sqlite
+!*.sqlite/
 *.sqlite3
+!*.sqlite3/
 
 # ========================================
 # Encryption / Security
