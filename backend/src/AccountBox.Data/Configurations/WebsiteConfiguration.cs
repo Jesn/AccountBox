@@ -27,7 +27,7 @@ public class WebsiteConfiguration : IEntityTypeConfiguration<Website>
 
         // 可选字段
         builder.Property(w => w.Tags)
-            .HasMaxLength(2000); // JSON 数组
+            .HasColumnType("text"); // 使用 TEXT 类型支持 MySQL
 
         builder.Property(w => w.CreatedAt)
             .IsRequired();

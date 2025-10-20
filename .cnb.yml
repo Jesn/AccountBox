@@ -94,9 +94,10 @@
               MQTT_QOS: 2
               MQTT_MESSAGE: |-
                 {
-                  "message": "多架构镜像构建完成",
-                  "tags": ["amd64", "arm64"],
-                  "target": "${IMAGE_TAG}"
+                  "projectName": "accountbox",
+                  "buildTime": ${CNB_BUILD_START_TIME},
+                  "commitHash": ${CNB_COMMIT_SHORT}
+                  "imageUrl": "${IMAGE_TAG}"
                 }
   
   # 更多资料见 https://docs.cnb.cool/build/quick-start.html

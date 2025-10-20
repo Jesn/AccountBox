@@ -67,7 +67,14 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.KeyPlaintext).IsUnique();
             entity.Property(e => e.ScopeType).HasDefaultValue(Core.Enums.ApiKeyScopeType.All);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            // 根据数据库类型设置不同的默认值
+            // MySQL 的 datetime 类型不支持 CURRENT_TIMESTAMP，由应用层处理
+            // PostgreSQL 和 SQLite 可以使用 CURRENT_TIMESTAMP
+            if (Database.ProviderName != "Pomelo.EntityFrameworkCore.MySql")
+            {
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            }
         });
 
         // ApiKeyWebsiteScope 配置（多对多关联）

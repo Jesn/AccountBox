@@ -14,20 +14,20 @@ FRONTEND_DIR="frontend"
 # 端口配置
 BACKEND_PORT=5093
 FRONTEND_PORT=5173
-POSTGRES_PORT=5432
-PGADMIN_PORT=5050
+MYSQL_PORT=3306
+PHPMYADMIN_PORT=8080
 
-# PostgreSQL 配置
-DB_PROVIDER="postgresql"
+# MySQL 配置
+DB_PROVIDER="mysql"
 DB_HOST="localhost"
-DB_PORT="5432"
+DB_PORT="3306"
 DB_USER="accountbox"
 DB_PASSWORD="accountbox123"
 DB_NAME="accountbox"
-CONNECTION_STRING="Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+CONNECTION_STRING="Server=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};User=${DB_USER};Password=${DB_PASSWORD}"
 
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}AccountBox PostgreSQL 启动脚本${NC}"
+echo -e "${GREEN}AccountBox MySQL 启动脚本${NC}"
 echo -e "${GREEN}========================================${NC}"
 
 # 检查并杀掉占用端口的进程
@@ -51,10 +51,10 @@ kill_port() {
     fi
 }
 
-# 启动 PostgreSQL 容器
-start_postgres() {
+# 启动 MySQL 容器
+start_mysql() {
     echo -e "\n${GREEN}========================================${NC}"
-    echo -e "${GREEN}启动 PostgreSQL 容器${NC}"
+    echo -e "${GREEN}启动 MySQL 容器${NC}"
     echo -e "${GREEN}========================================${NC}"
 
     # 检查 Docker 是否安装
@@ -69,25 +69,25 @@ start_postgres() {
         exit 1
     fi
 
-    # 启动 PostgreSQL 容器
-    echo -e "${YELLOW}启动 PostgreSQL 和 pgAdmin 容器...${NC}"
-    if docker-compose -f docker-compose.postgres.yml up -d; then
-        echo -e "${GREEN}✓ PostgreSQL 容器已启动${NC}"
-        
-        # 等待 PostgreSQL 启动
-        echo -e "${YELLOW}等待 PostgreSQL 启动...${NC}"
+    # 启动 MySQL 容器
+    echo -e "${YELLOW}启动 MySQL 和 phpMyAdmin 容器...${NC}"
+    if docker-compose -f docker-compose.mysql.yml up -d; then
+        echo -e "${GREEN}✓ MySQL 容器已启动${NC}"
+
+        # 等待 MySQL 启动
+        echo -e "${YELLOW}等待 MySQL 启动...${NC}"
         sleep 5
-        
+
         # 验证连接
         echo -e "${YELLOW}验证数据库连接...${NC}"
-        if docker exec accountbox-postgres-test psql -U $DB_USER -d $DB_NAME -c "SELECT version();" > /dev/null 2>&1; then
-            echo -e "${GREEN}✓ PostgreSQL 连接成功${NC}"
+        if docker exec accountbox-mysql-test mysqladmin ping -h localhost -u $DB_USER -p$DB_PASSWORD > /dev/null 2>&1; then
+            echo -e "${GREEN}✓ MySQL 连接成功${NC}"
         else
-            echo -e "${RED}✗ PostgreSQL 连接失败${NC}"
+            echo -e "${RED}✗ MySQL 连接失败${NC}"
             exit 1
         fi
     else
-        echo -e "${RED}✗ PostgreSQL 容器启动失败${NC}"
+        echo -e "${RED}✗ MySQL 容器启动失败${NC}"
         exit 1
     fi
 }
@@ -199,17 +199,17 @@ main() {
         exit 1
     fi
 
-    # 检查 docker-compose.postgres.yml 是否存在
-    if [ ! -f "docker-compose.postgres.yml" ]; then
-        echo -e "${RED}错误: docker-compose.postgres.yml 文件不存在${NC}"
+    # 检查 docker-compose.mysql.yml 是否存在
+    if [ ! -f "docker-compose.mysql.yml" ]; then
+        echo -e "${RED}错误: docker-compose.mysql.yml 文件不存在${NC}"
         exit 1
     fi
 
-    # 启动 PostgreSQL
-    start_postgres
+    # 启动 MySQL
+    start_mysql
 
-    # 等待 PostgreSQL 完全启动
-    echo -e "${YELLOW}等待 PostgreSQL 完全启动...${NC}"
+    # 等待 MySQL 完全启动
+    echo -e "${YELLOW}等待 MySQL 完全启动...${NC}"
     sleep 3
 
     # 启动后端
@@ -233,11 +233,11 @@ main() {
     echo -e "${GREEN}后端服务: http://localhost:${BACKEND_PORT}${NC}"
     echo -e "${GREEN}前端服务: http://localhost:${FRONTEND_PORT}${NC}"
     echo -e "${GREEN}Swagger API 文档: http://localhost:${BACKEND_PORT}/swagger${NC}"
-    echo -e "${GREEN}pgAdmin: http://localhost:${PGADMIN_PORT}${NC}"
+    echo -e "${GREEN}phpMyAdmin: http://localhost:${PHPMYADMIN_PORT}${NC}"
 
-    # 显示 PostgreSQL 连接信息
+    # 显示 MySQL 连接信息
     echo -e "\n${BLUE}╔════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║     PostgreSQL 连接信息                 ║${NC}"
+    echo -e "${BLUE}║     MySQL 连接信息                      ║${NC}"
     echo -e "${BLUE}╠════════════════════════════════════════╣${NC}"
     echo -e "${BLUE}║                                        ║${NC}"
     echo -e "${BLUE}║  主机: ${GREEN}${DB_HOST}${BLUE}                      ║${NC}"
@@ -266,8 +266,7 @@ main() {
 }
 
 # 捕获 Ctrl+C 信号
-trap 'echo -e "\n${YELLOW}正在停止所有服务...${NC}"; kill_port $BACKEND_PORT "后端"; kill_port $FRONTEND_PORT "前端"; docker-compose -f docker-compose.postgres.yml down; exit 0' INT
+trap 'echo -e "\n${YELLOW}正在停止所有服务...${NC}"; kill_port $BACKEND_PORT "后端"; kill_port $FRONTEND_PORT "前端"; docker-compose -f docker-compose.mysql.yml down; exit 0' INT
 
 # 运行主函数
 main
-

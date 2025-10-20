@@ -11,8 +11,12 @@
 ### 后端
 - **语言**: C# / .NET 8.0 (ASP.NET Core)
 - **架构**: 分层架构 (Controller → Service → Repository → Data)
-- **数据库**: SQLite (开发) / PostgreSQL (生产)
+- **数据库**: SQLite (开发) / PostgreSQL / MySQL (生产)
 - **ORM**: Entity Framework Core 9.0
+- **数据库驱动**:
+  - SQLite: Microsoft.EntityFrameworkCore.Sqlite 9.0.10
+  - PostgreSQL: Npgsql.EntityFrameworkCore.PostgreSQL 9.0.4
+  - MySQL: Pomelo.EntityFrameworkCore.MySql 9.0.0
 - **认证**: JWT Bearer (Microsoft.AspNetCore.Authentication.JwtBearer 8.0.11)
 - **密钥哈希**: BCrypt.Net-Next 4.0.3
 - **测试**: xUnit, Moq, FluentAssertions
@@ -32,12 +36,24 @@
 
 ## 启动与开发
 
-#### 方式1: 使用启动脚本
+### 方式1: 使用启动脚本
+
+#### SQLite (默认开发环境)
 ```bash
 ./start.sh
 ```
 
-#### 方式2: 手动启动
+#### PostgreSQL (生产环境)
+```bash
+./start-postgres.sh  # 启动 PostgreSQL + 后端 + 前端
+```
+
+#### MySQL (生产环境)
+```bash
+./start-mysql.sh  # 启动 MySQL + 后端 + 前端
+```
+
+### 方式2: 手动启动
 ```bash
 # 终端1: 后端
 cd backend/src/AccountBox.Api
@@ -48,6 +64,47 @@ cd frontend
 pnpm install  # 首次需要安装依赖
 pnpm dev
 ```
+
+### 数据库配置
+
+项目支持三种数据库：
+
+#### SQLite (默认)
+- **用途**: 本地开发
+- **配置**: 无需额外配置，自动创建 `accountbox.db` 文件
+- **迁移**: 自动应用
+
+#### PostgreSQL
+- **用途**: 生产环境
+- **Docker启动**: `docker-compose -f docker-compose.postgres-test.yml up -d`
+- **连接信息**:
+  - 主机: localhost
+  - 端口: 5432
+  - 数据库: accountbox
+  - 用户: accountbox
+  - 密码: accountbox123
+- **管理工具**: pgAdmin (http://localhost:5050)
+- **环境变量**:
+  ```bash
+  export DB_PROVIDER=postgresql
+  export CONNECTION_STRING="Host=localhost;Port=5432;Database=accountbox;Username=accountbox;Password=accountbox123"
+  ```
+
+#### MySQL
+- **用途**: 生产环境
+- **Docker启动**: `docker-compose -f docker-compose.mysql-test.yml up -d`
+- **连接信息**:
+  - 主机: localhost
+  - 端口: 3306
+  - 数据库: accountbox
+  - 用户: accountbox
+  - 密码: accountbox123
+- **管理工具**: phpMyAdmin (http://localhost:8080)
+- **环境变量**:
+  ```bash
+  export DB_PROVIDER=mysql
+  export CONNECTION_STRING="Server=localhost;Port=3306;Database=accountbox;User=accountbox;Password=accountbox123"
+  ```
 
 ## 开发规范
 

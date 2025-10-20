@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -16,15 +15,15 @@ namespace AccountBox.Data.Migrations
                 name: "ApiKeys",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    KeyPlaintext = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    KeyHash = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    ScopeType = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LastUsedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    KeyPlaintext = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    KeyHash = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    ScopeType = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    LastUsedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -35,13 +34,13 @@ namespace AccountBox.Data.Migrations
                 name: "LoginAttempts",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    IPAddress = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: false),
-                    AttemptTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsSuccessful = table.Column<bool>(type: "boolean", nullable: false),
-                    FailureReason = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    UserAgent = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    IPAddress = table.Column<string>(type: "TEXT", maxLength: 45, nullable: false),
+                    AttemptTime = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsSuccessful = table.Column<bool>(type: "INTEGER", nullable: false),
+                    FailureReason = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    UserAgent = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -52,13 +51,13 @@ namespace AccountBox.Data.Migrations
                 name: "Websites",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Domain = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    DisplayName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Tags = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Domain = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
+                    DisplayName = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
+                    Tags = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,19 +68,19 @@ namespace AccountBox.Data.Migrations
                 name: "Accounts",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    WebsiteId = table.Column<int>(type: "integer", nullable: false),
-                    Username = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Password = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
-                    Notes = table.Column<string>(type: "character varying(5000)", maxLength: 5000, nullable: true),
-                    Tags = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    ExtendedData = table.Column<string>(type: "character varying(10240)", maxLength: 10240, nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    WebsiteId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Username = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Tags = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    ExtendedData = table.Column<string>(type: "text", maxLength: 10240, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
+                    DeletedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -98,8 +97,8 @@ namespace AccountBox.Data.Migrations
                 name: "ApiKeyWebsiteScopes",
                 columns: table => new
                 {
-                    ApiKeyId = table.Column<int>(type: "integer", nullable: false),
-                    WebsiteId = table.Column<int>(type: "integer", nullable: false)
+                    ApiKeyId = table.Column<int>(type: "INTEGER", nullable: false),
+                    WebsiteId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

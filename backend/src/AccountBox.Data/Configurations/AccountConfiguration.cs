@@ -26,7 +26,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
 
         builder.Property(a => a.Password)
             .IsRequired()
-            .HasMaxLength(1000); // 明文密码，限制长度
+            .HasColumnType("text"); // 使用 TEXT 类型支持 MySQL
 
         builder.Property(a => a.IsDeleted)
             .IsRequired()
@@ -40,10 +40,15 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
 
         // 可选字段
         builder.Property(a => a.Notes)
-            .HasMaxLength(5000);
+            .HasColumnType("text"); // 使用 TEXT 类型支持 MySQL
 
         builder.Property(a => a.Tags)
-            .HasMaxLength(2000); // JSON 数组
+            .HasColumnType("text"); // 使用 TEXT 类型支持 MySQL
+
+        // ExtendedData 字段也需要使用 TEXT 类型
+        builder.Property(a => a.ExtendedData)
+            .IsRequired()
+            .HasColumnType("text"); // 使用 TEXT 类型支持 MySQL
 
         // 索引：WebsiteId（用于查询某网站下的所有账号）
         builder.HasIndex(a => a.WebsiteId);
