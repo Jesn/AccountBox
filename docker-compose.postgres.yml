@@ -1,0 +1,100 @@
+version: '3.8'
+
+# ============================================
+# AccountBox - PostgreSQL Deployment
+# ============================================
+# PostgreSQL 部署配置 - 前端和后端打包在一个镜像中
+# 包含 PostgreSQL 数据库和 pgAdmin 管理工具
+#
+# 启动方式:
+#   docker-compose -f docker-compose.postgres.yml up -d
+#
+# 访问方式:
+#   - 应用: http://localhost:5095
+#   - API: http://localhost:5095/api
+#   - Swagger: http://localhost:5095/swagger
+#   - pgAdmin: http://localhost:5050 (admin@admin.com / admin)
+# ============================================
+
+services:
+  # PostgreSQL 数据库服务
+  postgres:
+    image: postgres:16-alpine
+    container_name: accountbox-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: accountbox
+      POSTGRES_PASSWORD: accountbox123
+      POSTGRES_DB: accountbox
+      POSTGRES_INITDB_ARGS: "-c max_connections=200"
+    ports:
+      - "5432:5432"
+    volumes:
+      # 持久化数据库数据
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - accountbox-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U accountbox -d accountbox"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # pgAdmin 数据库管理工具
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: accountbox-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      # 持久化 pgAdmin 配置
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - accountbox-network
+
+  # 应用服务 - 连接到 PostgreSQL
+  accountbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: accountbox-app
+    restart: unless-stopped
+    ports:
+      - "5095:5093"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DB_PROVIDER=postgresql
+      - CONNECTION_STRING=Host=postgres;Port=5432;Database=accountbox;Username=accountbox;Password=accountbox123
+      - ASPNETCORE_URLS=http://+:5093
+      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - accountbox-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5093/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+networks:
+  accountbox-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
+  pgadmin-data:
+    driver: local

@@ -1,0 +1,157 @@
+openapi: 3.0.3
+info:
+  title: AccountBox - Vault API
+  description: 加密存储管理API（主密码、解锁、锁定）
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api
+
+paths:
+  /vault/initialize:
+    post:
+      summary: 初始化应用（首次设置主密码）
+      operationId: initializeVault
+      tags:
+        - Vault
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitializeVaultRequest'
+      responses:
+        '201':
+          description: 初始化成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VaultSessionResponse'
+        '400':
+          description: 请求错误（已初始化或密码强度不足）
+
+  /vault/unlock:
+    post:
+      summary: 解锁应用（输入主密码）
+      operationId: unlockVault
+      tags:
+        - Vault
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnlockVaultRequest'
+      responses:
+        '200':
+          description: 解锁成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VaultSessionResponse'
+        '401':
+          description: 主密码错误
+
+  /vault/lock:
+    post:
+      summary: 锁定应用（清除内存中的VaultKey）
+      operationId: lockVault
+      tags:
+        - Vault
+      responses:
+        '204':
+          description: 锁定成功
+
+  /vault/change-password:
+    post:
+      summary: 修改主密码
+      operationId: changeMasterPassword
+      tags:
+        - Vault
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeMasterPasswordRequest'
+      responses:
+        '200':
+          description: 修改成功
+        '401':
+          description: 旧密码错误
+
+  /vault/status:
+    get:
+      summary: 获取应用状态（是否已初始化、是否已解锁）
+      operationId: getVaultStatus
+      tags:
+        - Vault
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VaultStatusResponse'
+
+components:
+  schemas:
+    InitializeVaultRequest:
+      type: object
+      required:
+        - masterPassword
+      properties:
+        masterPassword:
+          type: string
+          minLength: 8
+          example: "MyStrongP@ssw0rd!"
+
+    UnlockVaultRequest:
+      type: object
+      required:
+        - masterPassword
+      properties:
+        masterPassword:
+          type: string
+          example: "MyStrongP@ssw0rd!"
+
+    ChangeMasterPasswordRequest:
+      type: object
+      required:
+        - oldPassword
+        - newPassword
+      properties:
+        oldPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 8
+
+    VaultSessionResponse:
+      type: object
+      required:
+        - sessionToken
+        - expiresAt
+      properties:
+        sessionToken:
+          type: string
+          description: 会话令牌（后续API请求需携带）
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expiresAt:
+          type: string
+          format: date-time
+          description: 会话过期时间（可选：自动锁定）
+
+    VaultStatusResponse:
+      type: object
+      required:
+        - isInitialized
+        - isUnlocked
+      properties:
+        isInitialized:
+          type: boolean
+          description: 是否已初始化（设置过主密码）
+          example: true
+        isUnlocked:
+          type: boolean
+          description: 是否已解锁
+          example: false

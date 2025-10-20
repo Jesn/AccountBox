@@ -1,0 +1,45 @@
+version: '3.8'
+
+# ============================================
+# AccountBox - Single Image Deployment
+# ============================================
+# 单镜像部署 - 前端和后端打包在一个镜像中
+# 包含 SQLite 数据库支持
+#
+# 启动方式:
+#   docker-compose up
+#
+# 访问方式:
+#   - 应用: http://localhost:5095
+#   - API: http://localhost:5095/api
+#   - Swagger: http://localhost:5095/swagger
+# ============================================
+
+services:
+  # 单镜像应用 - 包含前端和后端
+  accountbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: accountbox-all-in-one
+    restart: unless-stopped
+    ports:
+      - "5095:5093"  # API 和前端都通过这个端口访问
+    volumes:
+      # 持久化数据库
+      - accountbox-data:/app/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DATABASE_PATH=/app/data/accountbox.db
+      - ASPNETCORE_URLS=http://+:5093
+      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5093/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  accountbox-data:
+    driver: local

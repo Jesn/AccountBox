@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库（生产环境）
+  postgres:
+    image: postgres:16-alpine
+    container_name: accountbox-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-accountbox}
+      POSTGRES_USER: ${POSTGRES_USER:-accountbox}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-accountbox123}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      # 持久化数据
+      - postgres_data:/var/lib/postgresql/data
+      # 挂载迁移脚本
+      - ./migrations/postgresql:/docker-entrypoint-initdb.d/migrations:ro
+      - ./docker/postgres/initdb.d:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-accountbox}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - accountbox-network
+
+  # MySQL 数据库（生产环境）
+  mysql:
+    image: mysql:8.0
+    container_name: accountbox-mysql-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-accountbox}
+      MYSQL_USER: ${MYSQL_USER:-accountbox}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-accountbox123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+    volumes:
+      # 持久化数据
+      - mysql_data:/var/lib/mysql
+      # 挂载迁移脚本
+      - ./migrations/mysql:/docker-entrypoint-initdb.d/migrations:ro
+      - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root123}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - accountbox-network
+
+  # AccountBox 后端服务
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: accountbox-backend-prod
+    restart: unless-stopped
+    environment:
+      # 数据库配置（根据需要选择 postgresql 或 mysql）
+      DB_PROVIDER: ${DB_PROVIDER:-postgresql}
+      CONNECTION_STRING: ${CONNECTION_STRING:-Host=postgres;Port=5432;Database=accountbox;Username=accountbox;Password=accountbox123}
+
+      # JWT 配置
+      JwtSettings__SecretKey: ${JWT_SECRET_KEY:-your-super-secret-key-change-in-production}
+      JwtSettings__Issuer: ${JWT_ISSUER:-AccountBox}
+      JwtSettings__Audience: ${JWT_AUDIENCE:-AccountBox-Web}
+      JwtSettings__ExpirationMinutes: ${JWT_EXPIRATION:-1440}
+
+      # CORS 配置
+      Cors__AllowedOrigins__0: ${CORS_ORIGIN:-http://localhost:5173}
+
+      # ASP.NET Core 配置
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: http://+:5093
+    ports:
+      - "${BACKEND_PORT:-5093}:5093"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - accountbox-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5093/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+  mysql_data:
+    driver: local
+
+networks:
+  accountbox-network:
+    driver: bridge

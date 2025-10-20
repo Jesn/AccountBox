@@ -1,0 +1,61 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Documentation
+*.md
+LICENSE
+.editorconfig
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Node.js (frontend)
+frontend/node_modules
+frontend/dist
+frontend/.vite
+frontend/coverage
+
+# .NET (backend)
+backend/**/bin
+backend/**/obj
+backend/**/*.user
+backend/**/*.suo
+backend/**/TestResults
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Specs and docs
+specs/
+DOCKER.md
+REMOVE_ENCRYPTION_*.md
+Augment-Memories.md
+密码问题说明.md
+tailwind问题处理.md
+
+# Scripts
+*.sh

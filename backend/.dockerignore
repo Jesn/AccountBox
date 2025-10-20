@@ -1,0 +1,49 @@
+# Git 相关
+.git
+.gitignore
+.gitattributes
+
+# IDE 和编辑器
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 文档和规范
+*.md
+LICENSE
+specs/
+docs/
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Docker 相关
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# 构建产物
+**/bin/
+**/obj/
+**/publish/
+
+# 测试相关
+**/TestResults/
+**/*.Tests/
+
+# 用户设置
+**/*.user
+**/*.suo
+
+# 数据库文件
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# 日志文件
+**/logs/
+**/*.log

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="AccountBox.Api.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AccountBox.Core\AccountBox.Core.csproj" />
+    <ProjectReference Include="..\AccountBox.Data\AccountBox.Data.csproj" />
+    <ProjectReference Include="..\AccountBox.Security\AccountBox.Security.csproj" />
+  </ItemGroup>
+
+  <!-- 引入三套迁移程序集，确保运行时和 EF 工具可加载到对应迁移 -->
+  <ItemGroup>
+    <ProjectReference Include="..\AccountBox.Data.Migrations.PostgreSQL\AccountBox.Data.Migrations.PostgreSQL.csproj" />
+    <ProjectReference Include="..\AccountBox.Data.Migrations.MySQL\AccountBox.Data.Migrations.MySQL.csproj" />
+    <ProjectReference Include="..\AccountBox.Data.Migrations.Sqlite\AccountBox.Data.Migrations.Sqlite.csproj" />
+  </ItemGroup>
+
+</Project>

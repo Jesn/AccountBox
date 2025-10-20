@@ -1,0 +1,450 @@
+openapi: 3.0.3
+info:
+  title: AccountBox - Websites API
+  description: 网站管理API，支持CRUD操作、分页查询和级联删除保护
+  version: 1.0.0
+  contact:
+    name: AccountBox MVP
+servers:
+  - url: http://localhost:5000/api
+    description: 本地开发服务器
+
+paths:
+  /websites:
+    get:
+      summary: 获取网站列表（分页）
+      operationId: listWebsites
+      tags:
+        - Websites
+      parameters:
+        - name: pageNumber
+          in: query
+          description: 页码（从1开始）
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          description: 每页数量
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: sortBy
+          in: query
+          description: 排序字段
+          required: false
+          schema:
+            type: string
+            enum: [displayName, domain, createdAt]
+            default: displayName
+        - name: sortOrder
+          in: query
+          description: 排序方向
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        '200':
+          description: 成功返回网站列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedWebsiteResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      summary: 创建网站
+      operationId: createWebsite
+      tags:
+        - Websites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebsiteRequest'
+      responses:
+        '201':
+          description: 网站创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /websites/{id}:
+    get:
+      summary: 获取单个网站详情
+      operationId: getWebsite
+      tags:
+        - Websites
+      parameters:
+        - $ref: '#/components/parameters/WebsiteId'
+      responses:
+        '200':
+          description: 成功返回网站详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      summary: 更新网站
+      operationId: updateWebsite
+      tags:
+        - Websites
+      parameters:
+        - $ref: '#/components/parameters/WebsiteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebsiteRequest'
+      responses:
+        '200':
+          description: 网站更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      summary: 删除网站（带级联保护）
+      operationId: deleteWebsite
+      tags:
+        - Websites
+      description: |
+        删除网站前会检查：
+        1. 如果存在活跃账号（IsDeleted=false），返回409错误
+        2. 如果回收站中存在已删除账号，返回409并提示确认
+        3. 确认后删除网站及所有关联账号（包括回收站）
+      parameters:
+        - $ref: '#/components/parameters/WebsiteId'
+        - name: confirmed
+          in: query
+          description: 是否确认删除（当回收站有账号时需要）
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '204':
+          description: 网站删除成功
+        '409':
+          description: 删除冲突（存在活跃账号或需要确认）
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ActiveAccountsExistError'
+                  - $ref: '#/components/schemas/ConfirmationRequiredError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /websites/{id}/accounts/count:
+    get:
+      summary: 获取网站账号统计
+      operationId: getWebsiteAccountCount
+      tags:
+        - Websites
+      parameters:
+        - $ref: '#/components/parameters/WebsiteId'
+      responses:
+        '200':
+          description: 成功返回账号统计
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountCountResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  parameters:
+    WebsiteId:
+      name: id
+      in: path
+      description: 网站ID
+      required: true
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+
+  schemas:
+    WebsiteResponse:
+      type: object
+      required:
+        - id
+        - domain
+        - displayName
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        domain:
+          type: string
+          maxLength: 255
+          example: github.com
+        displayName:
+          type: string
+          maxLength: 100
+          example: GitHub
+        tags:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: 开发,代码托管
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-10-14T10:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2025-10-14T15:45:00Z'
+        activeAccountCount:
+          type: integer
+          description: 活跃账号数（未软删除）
+          example: 3
+        deletedAccountCount:
+          type: integer
+          description: 回收站账号数（已软删除）
+          example: 1
+
+    CreateWebsiteRequest:
+      type: object
+      required:
+        - displayName
+      properties:
+        domain:
+          type: string
+          maxLength: 255
+          example: github.com
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: GitHub
+        tags:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: 开发,代码托管
+
+    UpdateWebsiteRequest:
+      type: object
+      required:
+        - displayName
+      properties:
+        domain:
+          type: string
+          maxLength: 255
+          example: github.com
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: GitHub
+        tags:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: 开发,代码托管
+
+    PagedWebsiteResponse:
+      type: object
+      required:
+        - items
+        - totalCount
+        - pageNumber
+        - pageSize
+        - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebsiteResponse'
+        totalCount:
+          type: integer
+          description: 总记录数
+          example: 25
+        pageNumber:
+          type: integer
+          description: 当前页码
+          example: 1
+        pageSize:
+          type: integer
+          description: 每页数量
+          example: 10
+        totalPages:
+          type: integer
+          description: 总页数
+          example: 3
+
+    AccountCountResponse:
+      type: object
+      required:
+        - websiteId
+        - activeCount
+        - deletedCount
+      properties:
+        websiteId:
+          type: integer
+          example: 1
+        activeCount:
+          type: integer
+          description: 活跃账号数
+          example: 3
+        deletedCount:
+          type: integer
+          description: 回收站账号数
+          example: 1
+
+    ActiveAccountsExistError:
+      type: object
+      required:
+        - errorCode
+        - message
+        - details
+      properties:
+        errorCode:
+          type: string
+          enum: [ACTIVE_ACCOUNTS_EXIST]
+        message:
+          type: string
+          example: 该网站下还有活跃账号，无法删除
+        details:
+          type: object
+          properties:
+            activeAccountCount:
+              type: integer
+              example: 3
+
+    ConfirmationRequiredError:
+      type: object
+      required:
+        - errorCode
+        - message
+        - details
+      properties:
+        errorCode:
+          type: string
+          enum: [CONFIRMATION_REQUIRED]
+        message:
+          type: string
+          example: 回收站还有 2 条账号，删除网站将永久删除这些账号
+        details:
+          type: object
+          properties:
+            deletedAccountCount:
+              type: integer
+              example: 2
+
+    ErrorResponse:
+      type: object
+      required:
+        - errorCode
+        - message
+      properties:
+        errorCode:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          example: 请求参数验证失败
+        details:
+          type: object
+          additionalProperties: true
+          nullable: true
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: 未授权（未解锁应用）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errorCode: UNAUTHORIZED
+            message: 请先输入主密码解锁应用
+
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errorCode: NOT_FOUND
+            message: 网站不存在
+
+    InternalError:
+      description: 服务器内部错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errorCode: INTERNAL_ERROR
+            message: 服务器内部错误，请稍后重试
+
+  securitySchemes:
+    VaultSession:
+      type: apiKey
+      in: header
+      name: X-Vault-Session
+      description: |
+        应用解锁后的会话令牌。前端在用户输入主密码解锁后获取，
+        后续所有API请求都需携带此令牌。
+
+security:
+  - VaultSession: []

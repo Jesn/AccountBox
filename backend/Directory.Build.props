@@ -1,0 +1,29 @@
+<Project>
+  <!-- ========================================
+       统一构建输出配置
+       ======================================== -->
+
+  <PropertyGroup>
+    <!-- 将所有构建输出集中到 backend/build 目录 -->
+    <BaseOutputPath>$(MSBuildThisFileDirectory)build\$(MSBuildProjectName)\bin\</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)build\$(MSBuildProjectName)\obj\</BaseIntermediateOutputPath>
+
+    <!-- EF Core 工具需要知道项目扩展路径 -->
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+
+    <!-- 确保输出路径在项目加载时创建 -->
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <!-- ========================================
+       通用项目属性
+       ======================================== -->
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>
