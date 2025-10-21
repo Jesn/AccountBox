@@ -136,8 +136,8 @@ builder.Services.AddSingleton(secretsManager);
 // 获取或生成 JWT 密钥
 var jwtSecretKey = secretsManager.GetOrGenerateJwtSecretKey();
 
-// 获取或生成主密码
-var masterPassword = secretsManager.GetOrGenerateMasterPassword();
+// 获取或生成主密码哈希（启动时初始化，确保密码文件存在）
+var masterPasswordHash = secretsManager.GetOrGenerateMasterPasswordHash();
 
 // 配置JWT设置（从appsettings.json读取，但密钥从密钥管理器获取）
 builder.Services.Configure<JwtSettings>(options =>

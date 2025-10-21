@@ -49,16 +49,16 @@ public class AuthController : ControllerBase
 
         try
         {
-            // 从密钥管理器获取主密码
-            var masterPassword = _secretsManager.GetOrGenerateMasterPassword();
-            if (string.IsNullOrEmpty(masterPassword))
+            // 从密钥管理器获取主密码哈希
+            var masterPasswordHash = _secretsManager.GetOrGenerateMasterPasswordHash();
+            if (string.IsNullOrEmpty(masterPasswordHash))
             {
-                _logger.LogError("MasterPassword is not available");
+                _logger.LogError("MasterPasswordHash is not available");
                 return StatusCode(500, new { error = new { code = "INTERNAL_ERROR", message = "Authentication system is not properly configured" } });
             }
 
-            // 验证主密码
-            if (request.MasterPassword != masterPassword)
+            // 验证主密码（使用 BCrypt 验证，内置恒定时间比对）
+            if (!_secretsManager.VerifyMasterPassword(request.MasterPassword, masterPasswordHash))
             {
                 // 记录登录失败
                 await RecordLoginAttempt(ipAddress, userAgent, isSuccessful: false, failureReason: "Incorrect password");

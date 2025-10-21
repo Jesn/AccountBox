@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using BCrypt.Net;
 
 namespace AccountBox.Api.Services;
 
@@ -78,16 +79,18 @@ public class SecretsManager
     }
 
     /// <summary>
-    /// 获取或生成主密码
+    /// 获取或生成主密码哈希
     /// </summary>
-    public string GetOrGenerateMasterPassword()
+    /// <returns>主密码的 BCrypt 哈希值</returns>
+    public string GetOrGenerateMasterPasswordHash()
     {
-        // 优先级1: 环境变量
+        // 优先级1: 环境变量（支持明文密码，自动转换为哈希）
         var envPassword = Environment.GetEnvironmentVariable("MASTER_PASSWORD");
         if (!string.IsNullOrWhiteSpace(envPassword))
         {
             _logger.LogInformation("使用环境变量中的主密码");
-            return envPassword;
+            // 如果环境变量是明文密码，返回其哈希值（不存储）
+            return BCrypt.Net.BCrypt.HashPassword(envPassword, workFactor: 12);
         }
 
         // 优先级2: 持久化文件
@@ -95,11 +98,24 @@ public class SecretsManager
         {
             try
             {
-                var password = File.ReadAllText(_masterPasswordPath).Trim();
-                if (!string.IsNullOrWhiteSpace(password))
+                var storedHash = File.ReadAllText(_masterPasswordPath).Trim();
+                if (!string.IsNullOrWhiteSpace(storedHash))
                 {
-                    _logger.LogInformation("从持久化文件加载主密码");
-                    return password;
+                    // 检查是否是 BCrypt 哈希（以 $2a$, $2b$, $2y$ 开头）
+                    if (storedHash.StartsWith("$2"))
+                    {
+                        _logger.LogInformation("从持久化文件加载主密码哈希");
+                        return storedHash;
+                    }
+                    else
+                    {
+                        // 迁移：将明文密码转换为哈希
+                        _logger.LogWarning("检测到明文主密码，正在迁移到哈希存储...");
+                        var hash = BCrypt.Net.BCrypt.HashPassword(storedHash, workFactor: 12);
+                        File.WriteAllText(_masterPasswordPath, hash);
+                        _logger.LogInformation("主密码已成功迁移到哈希存储");
+                        return hash;
+                    }
                 }
             }
             catch (Exception ex)
@@ -111,23 +127,50 @@ public class SecretsManager
         // 优先级3: 生成随机密码并显示
         _logger.LogWarning("未找到主密码，正在生成随机密码...");
         var newPassword = GenerateReadablePassword(16);
+        var newHash = BCrypt.Net.BCrypt.HashPassword(newPassword, workFactor: 12);
 
         try
         {
-            File.WriteAllText(_masterPasswordPath, newPassword);
+            File.WriteAllText(_masterPasswordPath, newHash);
             _logger.LogWarning("=".PadRight(80, '='));
             _logger.LogWarning("首次启动 - 已生成随机主密码");
             _logger.LogWarning("主密码: {Password}", newPassword);
-            _logger.LogWarning("请妥善保存此密码！密码已保存到: {Path}", _masterPasswordPath);
+            _logger.LogWarning("请妥善保存此密码！密码哈希已保存到: {Path}", _masterPasswordPath);
+            _logger.LogWarning("注意：密码哈希使用 BCrypt 算法存储，无法反向解密");
             _logger.LogWarning("=".PadRight(80, '='));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "保存主密码失败");
+            _logger.LogError(ex, "保存主密码哈希失败");
             _logger.LogWarning("临时主密码（仅本次有效）: {Password}", newPassword);
         }
 
-        return newPassword;
+        return newHash;
+    }
+
+    /// <summary>
+    /// 验证主密码
+    /// </summary>
+    /// <param name="inputPassword">用户输入的密码</param>
+    /// <param name="storedHash">存储的密码哈希</param>
+    /// <returns>密码是否正确</returns>
+    public bool VerifyMasterPassword(string inputPassword, string storedHash)
+    {
+        if (string.IsNullOrWhiteSpace(inputPassword) || string.IsNullOrWhiteSpace(storedHash))
+        {
+            return false;
+        }
+
+        try
+        {
+            // 使用 BCrypt 验证密码（内置恒定时间比对）
+            return BCrypt.Net.BCrypt.Verify(inputPassword, storedHash);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "验证主密码时发生错误");
+            return false;
+        }
     }
 
     /// <summary>
