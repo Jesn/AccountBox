@@ -1,7 +1,9 @@
-import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { Toaster } from '@/components/ui/sonner'
+import { toast } from 'sonner'
+import { eventBus, AUTH_EVENTS } from '@/lib/eventBus'
 
 // 懒加载页面组件
 const WebsitesPage = lazy(() => import('@/pages/WebsitesPage').then(m => ({ default: m.WebsitesPage })))
@@ -34,11 +36,29 @@ function LoadingFallback() {
   )
 }
 
-function App() {
+/**
+ * 路由内部组件 - 用于访问 useNavigate
+ */
+function AppRoutes() {
+  const navigate = useNavigate()
+
+  // 监听未授权事件
+  useEffect(() => {
+    const unsubscribe = eventBus.on(AUTH_EVENTS.UNAUTHORIZED, () => {
+      // 显示提示
+      toast.error('登录已过期，请重新登录')
+
+      // 导航到登录页
+      navigate('/login', { replace: true })
+    })
+
+    // 清理订阅
+    return unsubscribe
+  }, [navigate])
+
   return (
-    <BrowserRouter>
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
           {/* 公开路由 - 登录页面 */}
           <Route path="/login" element={<LoginPage />} />
 
@@ -92,11 +112,18 @@ function App() {
           }
         />
 
-          {/* 默认路由 */}
-          <Route path="/" element={<Navigate to="/websites" replace />} />
-          <Route path="*" element={<Navigate to="/websites" replace />} />
-        </Routes>
-      </Suspense>
+        {/* 默认路由 */}
+        <Route path="/" element={<Navigate to="/websites" replace />} />
+        <Route path="*" element={<Navigate to="/websites" replace />} />
+      </Routes>
+    </Suspense>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
       <Toaster />
     </BrowserRouter>
   )

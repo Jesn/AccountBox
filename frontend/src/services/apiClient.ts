@@ -2,6 +2,7 @@ import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
 import type { ApiResponse, ErrorResponse } from '@/types/common'
 import { authService } from './authService'
+import { eventBus, AUTH_EVENTS } from '@/lib/eventBus'
 
 /**
  * API 客户端基类
@@ -108,18 +109,17 @@ class ApiClient {
    */
   private handleError(error: AxiosError<ApiResponse<unknown>>): Promise<never> {
     if (error.response) {
-      // 401 未授权：Token过期或无效，清除Token并跳转登录页
+      // 401 未授权：Token过期或无效，清除Token并触发登出事件
       if (error.response.status === 401) {
         authService.logout()
 
-        // 仅在非登录页面时跳转（避免登录页面无限循环）
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login'
-        }
+        // 触发未授权事件，由 App 组件统一处理导航和提示
+        // 避免在 service 层直接操作 window.location
+        eventBus.emit(AUTH_EVENTS.UNAUTHORIZED)
 
         return Promise.reject({
           errorCode: 'UNAUTHORIZED',
-          message: 'Session expired. Please login again.',
+          message: '登录已过期，请重新登录',
         } as ErrorResponse)
       }
 

@@ -4,6 +4,7 @@ import type {
   GeneratePasswordRequest,
   PasswordStrength,
 } from '@/services/passwordGeneratorService'
+import { useDebounce } from '@/hooks/useDebounce'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -55,6 +56,13 @@ export function PasswordGeneratorDialog({
     useState<PasswordStrength | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
 
+  // 使用防抖：只有当用户停止调整滑块 500ms 后才触发生成
+  const debouncedLength = useDebounce(length, 500)
+  const debouncedUppercasePercentage = useDebounce(uppercasePercentage, 500)
+  const debouncedLowercasePercentage = useDebounce(lowercasePercentage, 500)
+  const debouncedNumbersPercentage = useDebounce(numbersPercentage, 500)
+  const debouncedSymbolsPercentage = useDebounce(symbolsPercentage, 500)
+
   // 生成密码
   const generatePassword = async () => {
     setIsGenerating(true)
@@ -103,24 +111,24 @@ export function PasswordGeneratorDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  // 配置改变时自动重新生成
+  // 配置改变时自动重新生成（使用防抖后的值）
   useEffect(() => {
     if (open && generatedPassword) {
       generatePassword()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    length,
+    debouncedLength, // 使用防抖后的长度
     includeUppercase,
     includeLowercase,
     includeNumbers,
     includeSymbols,
     excludeAmbiguous,
     useCharacterDistribution,
-    uppercasePercentage,
-    lowercasePercentage,
-    numbersPercentage,
-    symbolsPercentage,
+    debouncedUppercasePercentage, // 使用防抖后的百分比
+    debouncedLowercasePercentage,
+    debouncedNumbersPercentage,
+    debouncedSymbolsPercentage,
   ])
 
   return (
