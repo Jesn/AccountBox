@@ -176,8 +176,17 @@ public class SecretsManager
     /// <summary>
     /// 生成安全的随机密钥（Base64编码）
     /// </summary>
+    /// <param name="length">原始字节长度（生成前的字节数）</param>
+    /// <returns>Base64 编码的密钥字符串</returns>
     private string GenerateSecureKey(int length)
     {
+        // 确保至少生成 32 字节（256 位）以满足 HS256 要求
+        if (length < 32)
+        {
+            _logger.LogWarning("密钥长度 {Length} 小于 32 字节，已自动调整为 32 字节", length);
+            length = 32;
+        }
+
         var key = new byte[length];
         using (var rng = RandomNumberGenerator.Create())
         {

@@ -20,8 +20,28 @@ public class JwtService : IJwtService
     public JwtService(IOptions<JwtSettings> jwtSettings)
     {
         _jwtSettings = jwtSettings.Value;
-        _signingKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+
+        // 尝试将密钥作为 Base64 解码，如果失败则使用 UTF-8 编码
+        byte[] keyBytes;
+        try
+        {
+            keyBytes = Convert.FromBase64String(_jwtSettings.SecretKey);
+        }
+        catch
+        {
+            // 如果不是 Base64，则使用 UTF-8 编码
+            keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
+        }
+
+        // 确保密钥长度至少为 32 字节（256 位）
+        if (keyBytes.Length < 32)
+        {
+            throw new InvalidOperationException(
+                $"JWT 密钥长度不足：需要至少 32 字节（256 位），当前为 {keyBytes.Length} 字节。" +
+                "请删除旧的密钥文件并重新生成，或设置环境变量 JWT_SECRET_KEY。");
+        }
+
+        _signingKey = new SymmetricSecurityKey(keyBytes);
         _tokenHandler = new JwtSecurityTokenHandler();
     }
 

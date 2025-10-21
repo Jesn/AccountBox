@@ -72,7 +72,7 @@ services:
       - DB_PROVIDER=mysql
       - CONNECTION_STRING=Server=mysql;Port=3306;Database=accountbox;User=accountbox;Password=accountbox123
       - ASPNETCORE_URLS=http://+:5093
-      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
+      - MASTER_PASSWORD=${MASTER_PASSWORD:-admin123}
     depends_on:
       mysql:
         condition: service_healthy

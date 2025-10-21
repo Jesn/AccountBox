@@ -196,7 +196,7 @@ docker run -d \
   -v accountbox_data:/app/data \
   -e ASPNETCORE_ENVIRONMENT=Production \
   -e ASPNETCORE_URLS=http://+:8080 \
-  -e Authentication__MasterPassword=your_master_password \
+  -e MASTER_PASSWORD=your_master_password \
   docker.cnb.cool/rich/public/accountbox:latest
 ```
 
@@ -208,7 +208,7 @@ docker run -d \
   -p 5093:8080 \
   -e ASPNETCORE_ENVIRONMENT=Production \
   -e ASPNETCORE_URLS=http://+:8080 \
-  -e Authentication__MasterPassword=your_master_password \
+  -e MASTER_PASSWORD=your_master_password \
   -e ConnectionStrings__DefaultConnection="Host=postgres;Port=5432;Database=accountbox;Username=postgres;Password=your_password" \
   --link postgres:postgres \
   docker.cnb.cool/rich/public/accountbox:latest
@@ -233,7 +233,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - DATABASE_PATH=/app/data/accountbox.db
       - ASPNETCORE_URLS=http://+:5093
-      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
+      - MASTER_PASSWORD=${MASTER_PASSWORD:-admin123}
     restart: unless-stopped
 
 volumes:
@@ -274,7 +274,7 @@ services:
       - DB_PROVIDER=postgresql
       - CONNECTION_STRING=Host=postgres;Port=5432;Database=accountbox;Username=accountbox;Password=accountbox123
       - ASPNETCORE_URLS=http://+:5093
-      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
+      - MASTER_PASSWORD=${MASTER_PASSWORD:-admin123}
     depends_on:
       - postgres
     restart: unless-stopped
@@ -316,7 +316,7 @@ services:
       - DB_PROVIDER=mysql
       - CONNECTION_STRING=Server=mysql;Port=3306;Database=accountbox;User=accountbox;Password=accountbox123
       - ASPNETCORE_URLS=http://+:5093
-      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
+      - MASTER_PASSWORD=${MASTER_PASSWORD:-admin123}
     depends_on:
       - mysql
     restart: unless-stopped
