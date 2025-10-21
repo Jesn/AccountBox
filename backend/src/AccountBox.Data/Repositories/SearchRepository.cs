@@ -8,7 +8,7 @@ namespace AccountBox.Data.Repositories;
 /// 搜索仓储
 /// 提供全局账号搜索功能
 /// </summary>
-public class SearchRepository
+public class SearchRepository : ISearchRepository
 {
     private readonly AccountBoxDbContext _context;
 

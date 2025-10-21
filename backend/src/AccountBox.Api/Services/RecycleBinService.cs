@@ -10,9 +10,9 @@ namespace AccountBox.Api.Services;
 /// </summary>
 public class RecycleBinService
 {
-    private readonly AccountRepository _accountRepository;
+    private readonly IAccountRepository _accountRepository;
 
-    public RecycleBinService(AccountRepository accountRepository)
+    public RecycleBinService(IAccountRepository accountRepository)
     {
         _accountRepository = accountRepository ?? throw new ArgumentNullException(nameof(accountRepository));
     }

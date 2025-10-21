@@ -98,9 +98,9 @@ builder.Services.AddDbContext<AccountBoxDbContext>(options =>
 });
 
 // 配置依赖注入 - 仓储层
-builder.Services.AddScoped<WebsiteRepository>();
-builder.Services.AddScoped<AccountRepository>();
-builder.Services.AddScoped<SearchRepository>();
+builder.Services.AddScoped<IWebsiteRepository, WebsiteRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<ISearchRepository, SearchRepository>();
 
 // 配置依赖注入 - 业务服务层
 builder.Services.AddScoped<WebsiteService>();

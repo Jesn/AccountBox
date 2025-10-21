@@ -10,9 +10,9 @@ namespace AccountBox.Api.Services;
 /// </summary>
 public class SearchService
 {
-    private readonly SearchRepository _searchRepository;
+    private readonly ISearchRepository _searchRepository;
 
-    public SearchService(SearchRepository searchRepository)
+    public SearchService(ISearchRepository searchRepository)
     {
         _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
     }

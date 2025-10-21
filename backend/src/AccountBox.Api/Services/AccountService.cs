@@ -12,12 +12,12 @@ namespace AccountBox.Api.Services;
 /// </summary>
 public class AccountService
 {
-    private readonly AccountRepository _accountRepository;
-    private readonly WebsiteRepository _websiteRepository;
+    private readonly IAccountRepository _accountRepository;
+    private readonly IWebsiteRepository _websiteRepository;
 
     public AccountService(
-        AccountRepository accountRepository,
-        WebsiteRepository websiteRepository)
+        IAccountRepository accountRepository,
+        IWebsiteRepository websiteRepository)
     {
         _accountRepository = accountRepository ?? throw new ArgumentNullException(nameof(accountRepository));
         _websiteRepository = websiteRepository ?? throw new ArgumentNullException(nameof(websiteRepository));

@@ -12,9 +12,9 @@ namespace AccountBox.Api.Services;
 /// </summary>
 public class WebsiteService
 {
-    private readonly WebsiteRepository _websiteRepository;
+    private readonly IWebsiteRepository _websiteRepository;
 
-    public WebsiteService(WebsiteRepository websiteRepository)
+    public WebsiteService(IWebsiteRepository websiteRepository)
     {
         _websiteRepository = websiteRepository ?? throw new ArgumentNullException(nameof(websiteRepository));
     }

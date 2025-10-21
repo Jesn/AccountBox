@@ -8,7 +8,7 @@ namespace AccountBox.Data.Repositories;
 /// Website 仓储
 /// 管理网站的 CRUD 操作、分页查询和账号统计
 /// </summary>
-public class WebsiteRepository
+public class WebsiteRepository : IWebsiteRepository
 {
     private readonly AccountBoxDbContext _context;
 

@@ -9,7 +9,7 @@ namespace AccountBox.Data.Repositories;
 /// Account 仓储
 /// 管理账号的 CRUD 操作、分页查询和软删除支持
 /// </summary>
-public class AccountRepository
+public class AccountRepository : IAccountRepository
 {
     private readonly AccountBoxDbContext _context;
 
