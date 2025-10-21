@@ -4,6 +4,8 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { eventBus, AUTH_EVENTS } from '@/lib/eventBus'
+import { ErrorBoundary } from '@/components/error/ErrorBoundary'
+import { ErrorPage } from '@/components/error/ErrorPage'
 
 // 懒加载页面组件
 const WebsitesPage = lazy(() => import('@/pages/WebsitesPage').then(m => ({ default: m.WebsitesPage })))
@@ -122,10 +124,20 @@ function AppRoutes() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppRoutes />
-      <Toaster />
-    </BrowserRouter>
+    <ErrorBoundary
+      fallback={<ErrorPage />}
+      onError={(error, errorInfo) => {
+        // 这里可以添加错误上报逻辑
+        // 例如：发送到 Sentry、LogRocket 等错误监控服务
+        console.error('应用错误:', error)
+        console.error('错误信息:', errorInfo)
+      }}
+    >
+      <BrowserRouter>
+        <AppRoutes />
+        <Toaster />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 
