@@ -90,8 +90,8 @@ export function AccountList({
             <TableRow key={account.id}>
               {/* 用户名 */}
               <TableCell className="font-medium py-2 px-3 w-[250px]">
-                <div className="flex items-center gap-2">
-                  <span title={account.username}>
+                <div className="flex items-center justify-between gap-2">
+                  <span title={account.username} className="truncate">
                     {account.username}
                   </span>
                   <CopyButton
