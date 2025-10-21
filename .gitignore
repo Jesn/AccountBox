@@ -104,6 +104,11 @@ appsettings.Production.json
 *.key
 *.pem
 
+# Secrets directory (auto-generated keys)
+.secrets/
+*/.secrets/
+data/.secrets/
+
 # ========================================
 # OS Generated
 # ========================================

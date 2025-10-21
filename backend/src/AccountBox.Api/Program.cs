@@ -119,19 +119,56 @@ builder.Services.AddHttpContextAccessor();
 // 配置控制器
 builder.Services.AddControllers();
 
-// 配置JWT设置（从appsettings.json读取）
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+// ========================================
+// 密钥管理服务（首次启动自动生成密钥）
+// ========================================
+// 创建临时的 LoggerFactory 用于初始化 SecretsManager
+using var loggerFactory = LoggerFactory.Create(loggingBuilder =>
+{
+    loggingBuilder.AddConsole();
+    loggingBuilder.SetMinimumLevel(LogLevel.Information);
+});
+var logger = loggerFactory.CreateLogger<SecretsManager>();
+
+var secretsManager = new SecretsManager(logger, builder.Configuration);
+builder.Services.AddSingleton(secretsManager);
+
+// 获取或生成 JWT 密钥
+var jwtSecretKey = secretsManager.GetOrGenerateJwtSecretKey();
+
+// 获取或生成主密码
+var masterPassword = secretsManager.GetOrGenerateMasterPassword();
+
+// 配置JWT设置（从appsettings.json读取，但密钥从密钥管理器获取）
+builder.Services.Configure<JwtSettings>(options =>
+{
+    var jwtConfig = builder.Configuration.GetSection("JwtSettings");
+    options.SecretKey = jwtSecretKey; // 使用动态生成的密钥
+    options.Issuer = jwtConfig["Issuer"] ?? "AccountBox";
+    options.Audience = jwtConfig["Audience"] ?? "AccountBox-Web";
+    options.ExpirationHours = int.Parse(jwtConfig["ExpirationHours"] ?? "24");
+    options.ValidateIssuer = bool.Parse(jwtConfig["ValidateIssuer"] ?? "true");
+    options.ValidateAudience = bool.Parse(jwtConfig["ValidateAudience"] ?? "true");
+    options.ValidateLifetime = bool.Parse(jwtConfig["ValidateLifetime"] ?? "true");
+    options.ValidateIssuerSigningKey = bool.Parse(jwtConfig["ValidateIssuerSigningKey"] ?? "true");
+});
 
 // 注册JWT服务和MemoryCache
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddMemoryCache();
 
 // 配置JWT认证
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-if (jwtSettings == null)
+var jwtSettings = new JwtSettings
 {
-    throw new InvalidOperationException("JwtSettings配置缺失，请检查appsettings.json");
-}
+    SecretKey = jwtSecretKey,
+    Issuer = builder.Configuration["JwtSettings:Issuer"] ?? "AccountBox",
+    Audience = builder.Configuration["JwtSettings:Audience"] ?? "AccountBox-Web",
+    ExpirationHours = int.Parse(builder.Configuration["JwtSettings:ExpirationHours"] ?? "24"),
+    ValidateIssuer = bool.Parse(builder.Configuration["JwtSettings:ValidateIssuer"] ?? "true"),
+    ValidateAudience = bool.Parse(builder.Configuration["JwtSettings:ValidateAudience"] ?? "true"),
+    ValidateLifetime = bool.Parse(builder.Configuration["JwtSettings:ValidateLifetime"] ?? "true"),
+    ValidateIssuerSigningKey = bool.Parse(builder.Configuration["JwtSettings:ValidateIssuerSigningKey"] ?? "true")
+};
 
 builder.Services.AddAuthentication(options =>
 {

@@ -60,13 +60,22 @@ services:
       dockerfile: Dockerfile
     container_name: accountbox-backend-prod
     restart: unless-stopped
+    volumes:
+      # 持久化密钥（与数据库分离）
+      - backend-secrets:/app/data
     environment:
       # 数据库配置（根据需要选择 postgresql 或 mysql）
       DB_PROVIDER: ${DB_PROVIDER:-postgresql}
       CONNECTION_STRING: ${CONNECTION_STRING:-Host=postgres;Port=5432;Database=accountbox;Username=accountbox;Password=accountbox123}
+      DATA_PATH: /app/data
+
+      # 安全配置（可选 - 如果不设置将自动生成）
+      # JWT 密钥和主密码将在首次启动时自动生成并保存到 /app/data/.secrets/
+      # 生产环境强烈建议通过环境变量设置：
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      MASTER_PASSWORD: ${MASTER_PASSWORD}
 
       # JWT 配置
-      JwtSettings__SecretKey: ${JWT_SECRET_KEY:-your-super-secret-key-change-in-production}
       JwtSettings__Issuer: ${JWT_ISSUER:-AccountBox}
       JwtSettings__Audience: ${JWT_AUDIENCE:-AccountBox-Web}
       JwtSettings__ExpirationMinutes: ${JWT_EXPIRATION:-1440}
@@ -96,6 +105,8 @@ volumes:
   postgres_data:
     driver: local
   mysql_data:
+    driver: local
+  backend-secrets:
     driver: local
 
 networks:

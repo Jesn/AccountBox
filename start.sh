@@ -229,12 +229,27 @@ main() {
     echo -e "${GREEN}前端服务: http://localhost:${FRONTEND_PORT}${NC}"
     echo -e "${GREEN}Swagger API 文档: http://localhost:${BACKEND_PORT}/swagger${NC}"
 
-    # 显示开发环境主密码
+    # 读取实际生成的主密码
+    SECRETS_DIR="backend/data/.secrets"
+    MASTER_PASSWORD_FILE="$SECRETS_DIR/master.key"
+
     echo -e "\n${YELLOW}╔════════════════════════════════════════╗${NC}"
     echo -e "${YELLOW}║     开发环境JWT认证信息                 ║${NC}"
     echo -e "${YELLOW}╠════════════════════════════════════════╣${NC}"
     echo -e "${YELLOW}║                                        ║${NC}"
-    echo -e "${YELLOW}║        主密码: ${GREEN}admin123${YELLOW}              ║${NC}"
+
+    if [ -f "$MASTER_PASSWORD_FILE" ]; then
+        MASTER_PASSWORD=$(cat "$MASTER_PASSWORD_FILE")
+        echo -e "${YELLOW}║  主密码: ${GREEN}${MASTER_PASSWORD}${YELLOW}        ║${NC}"
+        echo -e "${YELLOW}║                                        ║${NC}"
+        echo -e "${YELLOW}║  密码已保存到:                         ║${NC}"
+        echo -e "${YELLOW}║  ${MASTER_PASSWORD_FILE}  ║${NC}"
+    else
+        echo -e "${YELLOW}║  主密码: ${GREEN}(首次启动时自动生成)${YELLOW}      ║${NC}"
+        echo -e "${YELLOW}║                                        ║${NC}"
+        echo -e "${YELLOW}║  请查看后端启动日志获取主密码           ║${NC}"
+    fi
+
     echo -e "${YELLOW}║                                        ║${NC}"
     echo -e "${YELLOW}║  使用此密码在前端登录页面进行登录       ║${NC}"
     echo -e "${YELLOW}║                                        ║${NC}"

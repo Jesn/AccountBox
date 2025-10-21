@@ -1,3 +1,4 @@
+using AccountBox.Api.Services;
 using AccountBox.Core.Interfaces;
 using AccountBox.Core.Models.Auth;
 using AccountBox.Data.DbContext;
@@ -17,18 +18,18 @@ public class AuthController : ControllerBase
 {
     private readonly IJwtService _jwtService;
     private readonly AccountBoxDbContext _dbContext;
-    private readonly IConfiguration _configuration;
+    private readonly SecretsManager _secretsManager;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         IJwtService jwtService,
         AccountBoxDbContext dbContext,
-        IConfiguration configuration,
+        SecretsManager secretsManager,
         ILogger<AuthController> logger)
     {
         _jwtService = jwtService;
         _dbContext = dbContext;
-        _configuration = configuration;
+        _secretsManager = secretsManager;
         _logger = logger;
     }
 
@@ -48,11 +49,11 @@ public class AuthController : ControllerBase
 
         try
         {
-            // 从配置中读取主密码
-            var masterPassword = _configuration["Authentication:MasterPassword"];
+            // 从密钥管理器获取主密码
+            var masterPassword = _secretsManager.GetOrGenerateMasterPassword();
             if (string.IsNullOrEmpty(masterPassword))
             {
-                _logger.LogError("MasterPassword configuration is missing");
+                _logger.LogError("MasterPassword is not available");
                 return StatusCode(500, new { error = new { code = "INTERNAL_ERROR", message = "Authentication system is not properly configured" } });
             }
 

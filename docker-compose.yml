@@ -26,13 +26,23 @@ services:
     ports:
       - "5095:5093"  # API 和前端都通过这个端口访问
     volumes:
-      # 持久化数据库
+      # 持久化数据库和密钥
       - accountbox-data:/app/data
     environment:
+      # 运行环境
       - ASPNETCORE_ENVIRONMENT=Production
-      - DATABASE_PATH=/app/data/accountbox.db
       - ASPNETCORE_URLS=http://+:5093
-      - Authentication__MasterPassword=${MASTER_PASSWORD:-admin123}
+
+      # 数据库配置
+      - DB_PROVIDER=sqlite
+      - DATABASE_PATH=/app/data/accountbox.db
+      - DATA_PATH=/app/data
+
+      # 安全配置（可选 - 如果不设置将自动生成）
+      # JWT 密钥和主密码将在首次启动时自动生成并保存到 /app/data/.secrets/
+      # 如需自定义，请取消注释以下行：
+      # - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      # - MASTER_PASSWORD=${MASTER_PASSWORD}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5093/health"]
       interval: 30s
