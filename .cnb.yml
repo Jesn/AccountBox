@@ -92,6 +92,7 @@
               MQTT_USERNAME: $MQTT_USERNAME
               MQTT_PASSWORD: $MQTT_PASSWORD
               MQTT_QOS: 2
+              MQTT_DEBUG: true
               MQTT_MESSAGE: |-
                 {
                   "projectName": "accountbox",
