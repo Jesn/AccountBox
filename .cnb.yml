@@ -88,14 +88,14 @@
             image: docker.cnb.cool/rich/plugins/mqtt:latest
             settings:
               MQTT_URL: $MQTT_URL
-              MQTT_TOPIC: cnb/accountbox
+              MQTT_TOPIC: cnb/deploy
               MQTT_USERNAME: $MQTT_USERNAME
               MQTT_PASSWORD: $MQTT_PASSWORD
               MQTT_QOS: 2
               MQTT_MESSAGE: |-
                 {
                   "projectName": "accountbox",
-                  "buildTime": ${CNB_BUILD_START_TIME},
+                  "timestamp": ${CNB_BUILD_START_TIME},
                   "commitHash": ${CNB_COMMIT_SHORT}
                   "imageUrl": "${IMAGE_TAG}"
                 }
