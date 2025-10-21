@@ -19,15 +19,15 @@ namespace AccountBox.Api.Controllers;
 [Route("api/external")]
 public class ExternalApiController : ControllerBase
 {
-    private readonly AccountService _accountService;
+    private readonly IAccountService _accountService;
     private readonly IWebsiteRepository _websiteRepository;
-    private readonly RandomAccountService _randomAccountService;
+    private readonly IRandomAccountService _randomAccountService;
     private readonly PasswordGeneratorService _passwordGeneratorService;
 
     public ExternalApiController(
-        AccountService accountService,
+        IAccountService accountService,
         IWebsiteRepository websiteRepository,
-        RandomAccountService randomAccountService,
+        IRandomAccountService randomAccountService,
         PasswordGeneratorService passwordGeneratorService)
     {
         _accountService = accountService;

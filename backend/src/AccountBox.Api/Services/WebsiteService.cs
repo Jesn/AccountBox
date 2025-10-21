@@ -10,7 +10,7 @@ namespace AccountBox.Api.Services;
 /// Website 业务服务
 /// 管理网站的 CRUD 操作、分页和业务验证
 /// </summary>
-public class WebsiteService
+public class WebsiteService : IWebsiteService
 {
     private readonly IWebsiteRepository _websiteRepository;
 

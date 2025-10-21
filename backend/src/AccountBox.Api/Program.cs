@@ -103,15 +103,15 @@ builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<ISearchRepository, SearchRepository>();
 
 // 配置依赖注入 - 业务服务层
-builder.Services.AddScoped<WebsiteService>();
-builder.Services.AddScoped<AccountService>();
-builder.Services.AddScoped<RecycleBinService>();
-builder.Services.AddScoped<SearchService>();
+builder.Services.AddScoped<IWebsiteService, WebsiteService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IRecycleBinService, RecycleBinService>();
+builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<AccountBox.Core.Services.PasswordGeneratorService>();
 builder.Services.AddScoped<AccountBox.Core.Services.IApiKeyService, ApiKeyService>();
 
-builder.Services.AddScoped<ApiKeysManagementService>();
-builder.Services.AddScoped<RandomAccountService>();
+builder.Services.AddScoped<IApiKeysManagementService, ApiKeysManagementService>();
+builder.Services.AddScoped<IRandomAccountService, RandomAccountService>();
 
 // HTTP Context Accessor（用于获取当前请求上下文）
 builder.Services.AddHttpContextAccessor();

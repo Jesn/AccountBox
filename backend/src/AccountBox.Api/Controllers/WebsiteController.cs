@@ -16,9 +16,9 @@ namespace AccountBox.Api.Controllers;
 [Authorize]
 public class WebsiteController : ControllerBase
 {
-    private readonly WebsiteService _websiteService;
+    private readonly IWebsiteService _websiteService;
 
-    public WebsiteController(WebsiteService websiteService)
+    public WebsiteController(IWebsiteService websiteService)
     {
         _websiteService = websiteService ?? throw new ArgumentNullException(nameof(websiteService));
     }

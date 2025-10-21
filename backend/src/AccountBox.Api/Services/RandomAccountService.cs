@@ -11,7 +11,7 @@ namespace AccountBox.Api.Services;
 /// 提供随机选择启用账号的功能（适用于外部API调用场景，如爬虫轮询）
 /// 带24小时缓存防重复功能
 /// </summary>
-public class RandomAccountService
+public class RandomAccountService : IRandomAccountService
 {
     private readonly AccountBoxDbContext _context;
     // 使用字典存储已分配的账号：Key = $"{apiKeyId}_{websiteId}", Value = (accountId, 过期时间)

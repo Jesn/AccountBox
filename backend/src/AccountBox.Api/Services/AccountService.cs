@@ -10,7 +10,7 @@ namespace AccountBox.Api.Services;
 /// Account 业务服务
 /// 管理账号的 CRUD 操作（明文存储，适用于个人自托管场景）
 /// </summary>
-public class AccountService
+public class AccountService : IAccountService
 {
     private readonly IAccountRepository _accountRepository;
     private readonly IWebsiteRepository _websiteRepository;

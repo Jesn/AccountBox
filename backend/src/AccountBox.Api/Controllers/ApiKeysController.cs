@@ -14,9 +14,9 @@ namespace AccountBox.Api.Controllers;
 [Authorize]
 public class ApiKeysController : ControllerBase
 {
-    private readonly ApiKeysManagementService _apiKeysService;
+    private readonly IApiKeysManagementService _apiKeysService;
 
-    public ApiKeysController(ApiKeysManagementService apiKeysService)
+    public ApiKeysController(IApiKeysManagementService apiKeysService)
     {
         _apiKeysService = apiKeysService ?? throw new ArgumentNullException(nameof(apiKeysService));
     }

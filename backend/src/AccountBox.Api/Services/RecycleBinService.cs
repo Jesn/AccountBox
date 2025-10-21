@@ -8,7 +8,7 @@ namespace AccountBox.Api.Services;
 /// 回收站业务服务
 /// 管理已删除账号的查看、恢复和永久删除（明文存储模式）
 /// </summary>
-public class RecycleBinService
+public class RecycleBinService : IRecycleBinService
 {
     private readonly IAccountRepository _accountRepository;
 

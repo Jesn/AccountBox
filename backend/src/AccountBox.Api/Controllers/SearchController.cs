@@ -15,9 +15,9 @@ namespace AccountBox.Api.Controllers;
 [Authorize]
 public class SearchController : ControllerBase
 {
-    private readonly SearchService _searchService;
+    private readonly ISearchService _searchService;
 
-    public SearchController(SearchService searchService)
+    public SearchController(ISearchService searchService)
     {
         _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
     }

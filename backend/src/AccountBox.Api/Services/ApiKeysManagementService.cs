@@ -11,7 +11,7 @@ namespace AccountBox.Api.Services;
 /// <summary>
 /// API密钥管理服务（明文存储模式，无需 Vault）
 /// </summary>
-public class ApiKeysManagementService
+public class ApiKeysManagementService : IApiKeysManagementService
 {
     private readonly AccountBoxDbContext _context;
     private readonly IApiKeyService _apiKeyService;

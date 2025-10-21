@@ -15,9 +15,9 @@ namespace AccountBox.Api.Controllers;
 [Authorize]
 public class RecycleBinController : ControllerBase
 {
-    private readonly RecycleBinService _recycleBinService;
+    private readonly IRecycleBinService _recycleBinService;
 
-    public RecycleBinController(RecycleBinService recycleBinService)
+    public RecycleBinController(IRecycleBinService recycleBinService)
     {
         _recycleBinService = recycleBinService ?? throw new ArgumentNullException(nameof(recycleBinService));
     }

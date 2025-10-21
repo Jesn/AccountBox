@@ -8,7 +8,7 @@ namespace AccountBox.Api.Services;
 /// 搜索业务服务
 /// 提供全局账号搜索功能，支持搜索网站名、域名、用户名、标签、备注（明文存储模式）
 /// </summary>
-public class SearchService
+public class SearchService : ISearchService
 {
     private readonly ISearchRepository _searchRepository;
 
