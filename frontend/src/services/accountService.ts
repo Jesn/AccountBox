@@ -1,39 +1,14 @@
 import apiClient from './apiClient'
-import type { ApiResponse, PagedResult } from '../types/common'
+import type {
+  ApiResponse,
+  PagedResult,
+  AccountResponse,
+  CreateAccountRequest,
+  UpdateAccountRequest,
+} from '@/types'
 
-export interface AccountResponse {
-  id: number
-  websiteId: number
-  websiteDomain: string
-  websiteDisplayName?: string
-  username: string
-  password: string
-  notes?: string
-  tags?: string
-  status: 'Active' | 'Disabled'
-  extendedData?: Record<string, unknown>
-  createdAt: string
-  updatedAt: string
-  isDeleted: boolean
-  deletedAt?: string
-}
-
-export interface CreateAccountRequest {
-  websiteId: number
-  username: string
-  password: string
-  notes?: string
-  tags?: string
-  extendedData?: Record<string, unknown>
-}
-
-export interface UpdateAccountRequest {
-  username: string
-  password: string
-  notes?: string
-  tags?: string
-  extendedData?: Record<string, unknown>
-}
+// 重新导出类型供外部使用
+export type { AccountResponse, CreateAccountRequest, UpdateAccountRequest }
 
 class AccountService {
   private readonly baseUrl = '/api/accounts'

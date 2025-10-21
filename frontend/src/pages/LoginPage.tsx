@@ -62,7 +62,8 @@ export default function LoginPage() {
    */
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isLoading) {
-      handleSubmit(e as any)
+      e.preventDefault()
+      handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>)
     }
   }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -26,11 +26,24 @@ export function ExtendedFieldsEditor({
   onChange,
   maxSizeKB = 10,
 }: ExtendedFieldsEditorProps) {
-  const [fields, setFields] = useState<FieldEntry[]>([])
+  const isInitialMount = useRef(true)
+  const [fields, setFields] = useState<FieldEntry[]>(() => {
+    // 初始化时从 value 生成字段列表
+    return Object.entries(value).map(([key, val]) => ({
+      id: Math.random().toString(36).substring(7),
+      key,
+      value: typeof val === 'string' ? val : JSON.stringify(val),
+    }))
+  })
   const [sizeError, setSizeError] = useState<string>('')
 
-  // 初始化字段列表
+  // 只在外部 value 变化时同步（跳过初始挂载）
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
+
     const entries = Object.entries(value).map(([key, val]) => ({
       id: Math.random().toString(36).substring(7),
       key,

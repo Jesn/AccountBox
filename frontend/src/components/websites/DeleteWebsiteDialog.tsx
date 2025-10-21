@@ -57,9 +57,6 @@ export function DeleteWebsiteDialog({
 
     try {
       const params = confirmed ? '?confirmed=true' : ''
-      console.log(
-        `删除网站 ID=${website.id}, confirmed=${confirmed}, params=${params}`
-      )
       const response = await websiteService.delete(website.id, params)
 
       if (response.success) {
@@ -68,21 +65,21 @@ export function DeleteWebsiteDialog({
         setDeletedAccountCount(0)
         onSuccess()
       }
-    } catch (err: any) {
-      console.error('删除网站失败:', err)
+    } catch (err) {
+      const error = err as { errorCode?: string; message?: string; details?: { activeAccountCount?: number; deletedAccountCount?: number } }
+      console.error('删除网站失败:', error)
 
       // 检查是否是业务错误（来自后端的错误响应）
-      if (err.errorCode === 'ACTIVE_ACCOUNTS_EXIST') {
+      if (error.errorCode === 'ACTIVE_ACCOUNTS_EXIST') {
         setError(
-          `无法删除网站：该网站下还有 ${err.details?.activeAccountCount || 0} 个活跃账号。\n请先删除或移至回收站所有账号。`
+          `无法删除网站：该网站下还有 ${error.details?.activeAccountCount || 0} 个活跃账号。\n请先删除或移至回收站所有账号。`
         )
-      } else if (err.errorCode === 'CONFIRMATION_REQUIRED') {
+      } else if (error.errorCode === 'CONFIRMATION_REQUIRED') {
         // 显示确认提示
-        console.log('需要二次确认，设置 needsConfirmation = true')
         setNeedsConfirmation(true)
-        setDeletedAccountCount(err.details?.deletedAccountCount || 0)
+        setDeletedAccountCount(error.details?.deletedAccountCount || 0)
       } else {
-        setError(err.message || '删除网站时发生错误，请重试')
+        setError(error.message || '删除网站时发生错误，请重试')
       }
     } finally {
       setIsDeleting(false)

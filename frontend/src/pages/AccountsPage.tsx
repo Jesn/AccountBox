@@ -68,44 +68,7 @@ export function AccountsPage() {
     }
   }, [websiteId])
 
-  // 在页面、搜索、状态筛选变化时加载账号列表
-  useEffect(() => {
-    if (!websiteId) return
-
-    let cancelled = false
-
-    const fetchAccounts = async () => {
-      setIsLoading(true)
-      try {
-        const response = await accountService.getAll(
-          currentPage,
-          pageSize,
-          parseInt(websiteId),
-          searchTerm,
-          statusFilter !== 'all' ? statusFilter : undefined
-        )
-        if (!cancelled && response.success && response.data) {
-          setAccounts(response.data.items as AccountResponse[])
-          setTotalPages(response.data.totalPages)
-        }
-      } catch (error) {
-        if (!cancelled) {
-          console.error('加载账号列表失败:', error)
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    fetchAccounts()
-
-    return () => {
-      cancelled = true
-    }
-  }, [websiteId, currentPage, searchTerm, statusFilter])
-
+  // 加载账号列表
   const loadAccounts = async () => {
     if (!websiteId) return
 
@@ -128,6 +91,12 @@ export function AccountsPage() {
       setIsLoading(false)
     }
   }
+
+  // 在页面、搜索、状态筛选变化时加载账号列表
+  useEffect(() => {
+    loadAccounts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [websiteId, currentPage, searchTerm, statusFilter])
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)

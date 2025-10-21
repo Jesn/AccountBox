@@ -2,7 +2,9 @@
  * 通用类型定义
  */
 
-// API 响应格式
+/**
+ * API 错误响应
+ */
 export interface ErrorResponse {
   errorCode: string
   message: string
@@ -10,6 +12,9 @@ export interface ErrorResponse {
   details?: unknown
 }
 
+/**
+ * API 统一响应格式
+ */
 export interface ApiResponse<T> {
   success: boolean
   data?: T
@@ -17,7 +22,9 @@ export interface ApiResponse<T> {
   timestamp: string
 }
 
-// 分页响应
+/**
+ * 分页响应
+ */
 export interface PagedResponse<T> {
   items: T[]
   totalCount: number
@@ -28,31 +35,7 @@ export interface PagedResponse<T> {
   hasNextPage: boolean
 }
 
-// PagedResult 是 PagedResponse 的别名（兼容后端命名）
+/**
+ * PagedResult 是 PagedResponse 的别名（兼容后端命名）
+ */
 export type PagedResult<T> = PagedResponse<T>
-
-// Website 实体
-export interface Website {
-  id: number
-  domain: string
-  displayName: string
-  tags?: string
-  createdAt: string
-  updatedAt: string
-}
-
-// Account 实体
-export interface Account {
-  id: number
-  websiteId: number
-  username: string
-  password: string // 明文密码（2025-10-17架构变更：从加密存储切换为明文存储）
-  notes?: string // 明文备注
-  tags?: string
-  status: 'Active' | 'Disabled' // 账号状态
-  extendedData?: Record<string, unknown> // 扩展字段（JSON 键值对）
-  isDeleted: boolean
-  deletedAt?: string
-  createdAt: string
-  updatedAt: string
-}

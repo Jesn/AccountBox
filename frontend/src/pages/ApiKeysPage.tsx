@@ -39,9 +39,10 @@ export function ApiKeysPage() {
       if (websitesData.data) {
         setWebsites(websitesData.data.items)
       }
-    } catch (err: any) {
-      console.error('加载数据失败:', err)
-      setError(err.message || '加载数据失败，请重试')
+    } catch (err) {
+      const error = err as { message?: string }
+      console.error('加载数据失败:', error)
+      setError(error.message || '加载数据失败，请重试')
     } finally {
       setIsLoading(false)
     }

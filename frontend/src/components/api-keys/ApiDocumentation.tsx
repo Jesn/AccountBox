@@ -364,7 +364,7 @@ export function ApiDocumentation() {
                         size="sm"
                         onClick={() =>
                           handleCopy(
-                            endpoint.requestBody!,
+                            endpoint.requestBody || '',
                             `request-${endpoint.id}`
                           )
                         }
@@ -430,7 +430,7 @@ export function ApiDocumentation() {
                         size="sm"
                         onClick={() =>
                           handleCopy(
-                            endpoint.errorResponse!,
+                            endpoint.errorResponse || '',
                             `error-${endpoint.id}`
                           )
                         }

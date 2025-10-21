@@ -1,35 +1,15 @@
 import apiClient from './apiClient'
-import type { ApiResponse, PagedResult } from '../types/common'
+import type {
+  ApiResponse,
+  PagedResult,
+  WebsiteResponse,
+  CreateWebsiteRequest,
+  UpdateWebsiteRequest,
+  AccountCountResponse,
+} from '@/types'
 
-export interface WebsiteResponse {
-  id: number
-  domain: string
-  displayName?: string
-  tags?: string
-  createdAt: string
-  updatedAt: string
-  activeAccountCount: number
-  disabledAccountCount: number
-  deletedAccountCount: number
-}
-
-export interface CreateWebsiteRequest {
-  domain: string
-  displayName?: string
-  tags?: string
-}
-
-export interface UpdateWebsiteRequest {
-  domain: string
-  displayName?: string
-  tags?: string
-}
-
-export interface AccountCountResponse {
-  activeCount: number
-  deletedCount: number
-  totalCount: number
-}
+// 重新导出类型供外部使用
+export type { WebsiteResponse, CreateWebsiteRequest, UpdateWebsiteRequest, AccountCountResponse }
 
 class WebsiteService {
   private readonly baseUrl = '/api/websites'

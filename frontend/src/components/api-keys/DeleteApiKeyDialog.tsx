@@ -39,10 +39,11 @@ export function DeleteApiKeyDialog({
       await apiKeyService.delete(apiKey.id)
       onOpenChange(false)
       onSuccess()
-    } catch (err: any) {
-      console.error('删除API密钥失败:', err)
+    } catch (err) {
+      const error = err as { response?: { data?: { error?: { message?: string } } }; message?: string }
+      console.error('删除API密钥失败:', error)
       setError(
-        err.response?.data?.error?.message || '删除API密钥时发生错误，请重试'
+        error.response?.data?.error?.message || '删除API密钥时发生错误，请重试'
       )
     } finally {
       setIsDeleting(false)

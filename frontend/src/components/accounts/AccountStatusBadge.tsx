@@ -1,7 +1,7 @@
-import type { Account } from '@/types/common'
+import type { AccountStatus } from '@/types'
 
 interface AccountStatusBadgeProps {
-  status: Account['status']
+  status: AccountStatus
   className?: string
 }
 
