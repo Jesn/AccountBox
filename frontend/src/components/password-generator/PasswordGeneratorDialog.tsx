@@ -17,8 +17,8 @@ import { Slider } from '@/components/ui/slider'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator'
-import { RefreshCw, Copy, Check } from 'lucide-react'
-import { copyToClipboard } from '@/lib/clipboard'
+import { CopyButton } from '@/components/common/CopyButton'
+import { RefreshCw } from 'lucide-react'
 
 interface PasswordGeneratorDialogProps {
   open: boolean
@@ -54,12 +54,10 @@ export function PasswordGeneratorDialog({
   const [passwordStrength, setPasswordStrength] =
     useState<PasswordStrength | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
 
   // 生成密码
   const generatePassword = async () => {
     setIsGenerating(true)
-    setIsCopied(false)
 
     try {
       const request: GeneratePasswordRequest = {
@@ -86,17 +84,6 @@ export function PasswordGeneratorDialog({
       console.error('生成密码失败:', error)
     } finally {
       setIsGenerating(false)
-    }
-  }
-
-  // 复制密码
-  const copyPassword = async () => {
-    if (generatedPassword) {
-      const success = await copyToClipboard(generatedPassword)
-      if (success) {
-        setIsCopied(true)
-        setTimeout(() => setIsCopied(false), 2000)
-      }
     }
   }
 
@@ -152,19 +139,13 @@ export function PasswordGeneratorDialog({
               <div className="flex-1 rounded-md border px-3 py-2 font-mono text-sm break-all">
                 {generatedPassword || '...'}
               </div>
-              <Button
-                type="button"
+              <CopyButton
+                text={generatedPassword}
                 variant="outline"
                 size="icon"
-                onClick={copyPassword}
-                disabled={!generatedPassword}
-              >
-                {isCopied ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
+                successMessage="密码已复制到剪贴板"
+                title="复制密码"
+              />
             </div>
           </div>
 
