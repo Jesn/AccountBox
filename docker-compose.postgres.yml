@@ -87,7 +87,7 @@ services:
       interval: 30s
       timeout: 3s
       retries: 3
-      start_period: 10s
+      start_period: 40s  # 增加启动等待时间，确保数据库迁移完成
 
 networks:
   accountbox-network:

@@ -1,3 +1,5 @@
+using AccountBox.Core.Constants;
+
 namespace AccountBox.Core.Models.Search;
 
 /// <summary>
@@ -13,12 +15,12 @@ public class SearchRequest
     /// <summary>
     /// 页码（从1开始）
     /// </summary>
-    public int PageNumber { get; set; } = 1;
+    public int PageNumber { get; set; } = PaginationConstants.DefaultPageNumber;
 
     /// <summary>
     /// 每页记录数
     /// </summary>
-    public int PageSize { get; set; } = 10;
+    public int PageSize { get; set; } = PaginationConstants.DefaultPageSize;
 }
 
 /// <summary>

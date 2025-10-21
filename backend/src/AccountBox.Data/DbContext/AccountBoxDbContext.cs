@@ -58,8 +58,33 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
         // 应用实体配置
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AccountBoxDbContext).Assembly);
 
-        // 全局查询过滤器：默认不查询软删除的账号
-        modelBuilder.Entity<Account>().HasQueryFilter(a => !a.IsDeleted);
+        // Website 配置
+        modelBuilder.Entity<Website>(entity =>
+        {
+            // 索引：域名唯一索引（防止重复域名，提升查询性能）
+            entity.HasIndex(e => e.Domain)
+                .IsUnique()
+                .HasDatabaseName("IX_Websites_Domain");
+        });
+
+        // Account 配置
+        modelBuilder.Entity<Account>(entity =>
+        {
+            // 全局查询过滤器：默认不查询软删除的账号
+            entity.HasQueryFilter(a => !a.IsDeleted);
+
+            // 索引：用户名搜索（用于 GetPagedAsync 中的模糊搜索）
+            entity.HasIndex(e => e.Username)
+                .HasDatabaseName("IX_Accounts_Username");
+
+            // 索引：网站+用户名组合（用于 UsernameExistsAsync 唯一性检查）
+            entity.HasIndex(e => new { e.WebsiteId, e.Username })
+                .HasDatabaseName("IX_Accounts_WebsiteId_Username");
+
+            // 索引：软删除查询（用于回收站查询和过滤）
+            entity.HasIndex(e => new { e.IsDeleted, e.DeletedAt })
+                .HasDatabaseName("IX_Accounts_IsDeleted_DeletedAt");
+        });
 
         // ApiKey 配置
         modelBuilder.Entity<ApiKey>(entity =>

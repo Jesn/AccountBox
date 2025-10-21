@@ -1,3 +1,4 @@
+using AccountBox.Core.Constants;
 using AccountBox.Data.DbContext;
 using AccountBox.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -31,14 +32,14 @@ public class SearchRepository : ISearchRepository
             return (new List<Account>(), 0);
         }
 
-        if (pageNumber < 1)
+        if (pageNumber < PaginationConstants.DefaultPageNumber)
         {
-            throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
+            throw new ArgumentException($"Page number must be greater than or equal to {PaginationConstants.DefaultPageNumber}", nameof(pageNumber));
         }
 
-        if (pageSize < 1 || pageSize > 100)
+        if (pageSize < PaginationConstants.MinPageSize || pageSize > PaginationConstants.MaxPageSize)
         {
-            throw new ArgumentException("Page size must be between 1 and 100", nameof(pageSize));
+            throw new ArgumentException($"Page size must be between {PaginationConstants.MinPageSize} and {PaginationConstants.MaxPageSize}", nameof(pageSize));
         }
 
         // 去除首尾空格并转小写（大小写不敏感）
