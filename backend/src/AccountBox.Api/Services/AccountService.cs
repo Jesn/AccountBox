@@ -3,6 +3,7 @@ using AccountBox.Core.Models;
 using AccountBox.Core.Models.Account;
 using AccountBox.Data.Entities;
 using AccountBox.Data.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace AccountBox.Api.Services;
 
@@ -14,13 +15,16 @@ public class AccountService : IAccountService
 {
     private readonly IAccountRepository _accountRepository;
     private readonly IWebsiteRepository _websiteRepository;
+    private readonly ILogger<AccountService> _logger;
 
     public AccountService(
         IAccountRepository accountRepository,
-        IWebsiteRepository websiteRepository)
+        IWebsiteRepository websiteRepository,
+        ILogger<AccountService> logger)
     {
         _accountRepository = accountRepository ?? throw new ArgumentNullException(nameof(accountRepository));
         _websiteRepository = websiteRepository ?? throw new ArgumentNullException(nameof(websiteRepository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -231,9 +235,10 @@ public class AccountService : IAccountService
             {
                 extendedData = JsonSerializer.Deserialize<Dictionary<string, object>>(account.ExtendedData);
             }
-            catch
+            catch (JsonException ex)
             {
-                // 如果解析失败，返回 null
+                _logger.LogWarning(ex, "Failed to parse ExtendedData for account {AccountId}. Data: {ExtendedData}",
+                    account.Id, account.ExtendedData);
                 extendedData = null;
             }
         }
