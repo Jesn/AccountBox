@@ -96,8 +96,8 @@
               MQTT_MESSAGE: |-
                 {
                   "projectName": "accountbox",
-                  "timestamp": ${CNB_BUILD_START_TIME},
-                  "commitHash": ${CNB_COMMIT_SHORT},
+                  "timestamp": "${CNB_BUILD_START_TIME}",
+                  "commitHash": "${CNB_COMMIT_SHORT}",
                   "imageUrl": "${IMAGE_TAG}"
                 }
   
