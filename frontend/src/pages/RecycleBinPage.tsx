@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { recycleBinService } from '@/services/recycleBinService'
+import { websiteService } from '@/services/websiteService'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { RecycleBinList } from '@/components/recycle-bin/RecycleBinList'
 import { EmptyRecycleBinDialog } from '@/components/recycle-bin/EmptyRecycleBinDialog'
 import { PermanentDeleteDialog } from '@/components/recycle-bin/PermanentDeleteDialog'
 import Pagination from '@/components/common/Pagination'
-import { ArrowLeft, Trash2 } from 'lucide-react'
+import { ArrowLeft, Trash2, Search, X } from 'lucide-react'
 import type { DeletedAccountResponse } from '@/services/recycleBinService'
+import type { WebsiteResponse } from '@/types'
 
 /**
  * 回收站页面
@@ -25,19 +35,52 @@ export function RecycleBinPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [websites, setWebsites] = useState<WebsiteResponse[]>([])
+  const [selectedWebsiteId, setSelectedWebsiteId] = useState<string>('all')
+  const [searchText, setSearchText] = useState('')
   const pageSize = 10
 
+  // 加载网站列表
+  useEffect(() => {
+    loadWebsites()
+  }, [])
+
+  // 当筛选或搜索条件改变时，重置到第一页并重新加载
+  useEffect(() => {
+    setCurrentPage(1)
+    loadDeletedAccounts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedWebsiteId, searchText])
+
+  // 当页码改变时重新加载
   useEffect(() => {
     loadDeletedAccounts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage])
 
+  const loadWebsites = async () => {
+    try {
+      // 获取所有网站用于筛选（使用大的pageSize）
+      const response = await websiteService.getAll(1, 1000)
+      if (response.success && response.data) {
+        setWebsites(response.data.items as WebsiteResponse[])
+      }
+    } catch (error) {
+      console.error('加载网站列表失败:', error)
+    }
+  }
+
   const loadDeletedAccounts = async () => {
     setIsLoading(true)
     try {
+      const websiteId = selectedWebsiteId === 'all' ? undefined : Number(selectedWebsiteId)
+      const search = searchText.trim() || undefined
+
       const response = await recycleBinService.getDeletedAccounts(
         currentPage,
-        pageSize
+        pageSize,
+        websiteId,
+        search
       )
       if (response.success && response.data) {
         setDeletedAccounts(response.data.items as DeletedAccountResponse[])
@@ -100,6 +143,10 @@ export function RecycleBinPage() {
     navigate('/websites')
   }
 
+  const handleClearSearch = () => {
+    setSearchText('')
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl">
@@ -125,6 +172,49 @@ export function RecycleBinPage() {
               清空回收站
             </Button>
           )}
+        </div>
+
+        {/* 筛选和搜索区域 */}
+        <div className="mb-6 flex gap-4">
+          {/* 网站筛选 */}
+          <div className="w-64">
+            <Select
+              value={selectedWebsiteId}
+              onValueChange={setSelectedWebsiteId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="选择网站" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">所有网站</SelectItem>
+                {websites.map((website) => (
+                  <SelectItem key={website.id} value={website.id.toString()}>
+                    {website.displayName || website.domain}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 账号搜索 */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="搜索账号名、标签或备注..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchText && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         <RecycleBinList

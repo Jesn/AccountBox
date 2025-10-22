@@ -23,9 +23,10 @@ public class RecycleBinService : IRecycleBinService
     public async Task<PagedResult<DeletedAccountResponse>> GetDeletedAccountsAsync(
         int pageNumber,
         int pageSize,
-        int? websiteId)
+        int? websiteId,
+        string? searchTerm = null)
     {
-        var (items, totalCount) = await _accountRepository.GetDeletedPagedAsync(pageNumber, pageSize, websiteId);
+        var (items, totalCount) = await _accountRepository.GetDeletedPagedAsync(pageNumber, pageSize, websiteId, searchTerm);
 
         var deletedAccountResponses = items.Select(MapToDeletedResponse).ToList();
 

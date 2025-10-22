@@ -15,7 +15,8 @@ public interface IRecycleBinService
     Task<PagedResult<DeletedAccountResponse>> GetDeletedAccountsAsync(
         int pageNumber,
         int pageSize,
-        int? websiteId);
+        int? websiteId,
+        string? searchTerm = null);
 
     /// <summary>
     /// 恢复账号（从回收站恢复到活跃状态）

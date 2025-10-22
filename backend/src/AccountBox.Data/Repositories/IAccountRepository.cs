@@ -62,7 +62,8 @@ public interface IAccountRepository
     Task<(List<Account> Items, int TotalCount)> GetDeletedPagedAsync(
         int pageNumber,
         int pageSize,
-        int? websiteId = null);
+        int? websiteId = null,
+        string? searchTerm = null);
 
     /// <summary>
     /// 清空回收站（永久删除所有已删除的账号）

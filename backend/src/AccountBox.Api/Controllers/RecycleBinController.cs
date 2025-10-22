@@ -24,15 +24,16 @@ public class RecycleBinController : ControllerBase
 
     /// <summary>
     /// 获取回收站中的分页账号列表
-    /// GET /api/recycle-bin?pageNumber=1&pageSize=10&websiteId=1
+    /// GET /api/recycle-bin?pageNumber=1&pageSize=10&websiteId=1&searchText=username
     /// </summary>
     [HttpGet]
     public async Task<ActionResult<ApiResponse<PagedResult<DeletedAccountResponse>>>> GetDeletedAccounts(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
-        [FromQuery] int? websiteId = null)
+        [FromQuery] int? websiteId = null,
+        [FromQuery] string? searchText = null)
     {
-        var result = await _recycleBinService.GetDeletedAccountsAsync(pageNumber, pageSize, websiteId);
+        var result = await _recycleBinService.GetDeletedAccountsAsync(pageNumber, pageSize, websiteId, searchText);
         return Ok(ApiResponse<PagedResult<DeletedAccountResponse>>.Ok(result));
     }
 

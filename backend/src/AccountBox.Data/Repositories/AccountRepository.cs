@@ -207,7 +207,8 @@ public class AccountRepository : IAccountRepository
     public async Task<(List<Account> Items, int TotalCount)> GetDeletedPagedAsync(
         int pageNumber,
         int pageSize,
-        int? websiteId = null)
+        int? websiteId = null,
+        string? searchTerm = null)
     {
         if (pageNumber < PaginationConstants.DefaultPageNumber)
         {
@@ -229,6 +230,17 @@ public class AccountRepository : IAccountRepository
         if (websiteId.HasValue)
         {
             query = query.Where(a => a.WebsiteId == websiteId.Value);
+        }
+
+        // 搜索过滤（支持用户名、标签、备注模糊搜索）
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(a =>
+                a.Username.ToLower().Contains(term) ||
+                (a.Tags != null && a.Tags.ToLower().Contains(term)) ||
+                (a.Notes != null && a.Notes.ToLower().Contains(term))
+            );
         }
 
         var totalCount = await query.CountAsync();

@@ -21,7 +21,8 @@ class RecycleBinService {
   async getDeletedAccounts(
     pageNumber: number = 1,
     pageSize: number = 10,
-    websiteId?: number
+    websiteId?: number,
+    searchText?: string
   ): Promise<ApiResponse<PagedResult<DeletedAccountResponse>>> {
     const params = new URLSearchParams({
       pageNumber: pageNumber.toString(),
@@ -30,6 +31,10 @@ class RecycleBinService {
 
     if (websiteId) {
       params.append('websiteId', websiteId.toString())
+    }
+
+    if (searchText && searchText.trim()) {
+      params.append('searchText', searchText.trim())
     }
 
     return await apiClient.get<PagedResult<DeletedAccountResponse>>(
