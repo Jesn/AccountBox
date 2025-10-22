@@ -202,6 +202,19 @@ var jwtSettings = new JwtSettings
     ValidateIssuerSigningKey = bool.Parse(builder.Configuration["JwtSettings:ValidateIssuerSigningKey"] ?? "true")
 };
 
+// 统一密钥处理方式：如果是 Base64 则先解码，否则按 UTF-8 文本处理
+// 这样与 JwtService 中的密钥处理逻辑保持一致，避免签发/验证使用不同字节导致 401
+byte[] signingKeyBytes;
+try
+{
+    signingKeyBytes = Convert.FromBase64String(jwtSettings.SecretKey);
+}
+catch
+{
+    signingKeyBytes = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+}
+var signingKey = new SymmetricSecurityKey(signingKeyBytes);
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -221,7 +234,7 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero, // 不允许时钟偏移
 
         ValidateIssuerSigningKey = jwtSettings.ValidateIssuerSigningKey,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+        IssuerSigningKey = signingKey
     };
 });
 
