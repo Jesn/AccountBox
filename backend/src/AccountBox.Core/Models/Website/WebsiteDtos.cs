@@ -57,3 +57,14 @@ public class AccountCountResponse
     public int DeletedCount { get; set; }
     public int TotalCount { get; set; }
 }
+
+/// <summary>
+/// 网站选项响应 DTO - 用于下拉选择等场景
+/// 只包含必要的字段，减少数据传输
+/// </summary>
+public class WebsiteOptionResponse
+{
+    public int Id { get; set; }
+    public string Domain { get; set; } = string.Empty;
+    public string? DisplayName { get; set; }
+}

@@ -129,4 +129,15 @@ public class WebsiteController : ControllerBase
         var count = await _websiteService.GetAccountCountAsync(id);
         return Ok(ApiResponse<AccountCountResponse>.Ok(count));
     }
+
+    /// <summary>
+    /// 获取所有网站选项（用于下拉选择等场景）
+    /// GET /api/websites/options
+    /// </summary>
+    [HttpGet("options")]
+    public async Task<ActionResult<ApiResponse<List<WebsiteOptionResponse>>>> GetOptions()
+    {
+        var options = await _websiteService.GetOptionsAsync();
+        return Ok(ApiResponse<List<WebsiteOptionResponse>>.Ok(options));
+    }
 }

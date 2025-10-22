@@ -38,4 +38,10 @@ public interface IWebsiteService
     /// 获取网站的账号统计
     /// </summary>
     Task<AccountCountResponse> GetAccountCountAsync(int id);
+
+    /// <summary>
+    /// 获取所有网站选项（用于下拉选择等场景）
+    /// 只返回必要字段，不包含统计信息
+    /// </summary>
+    Task<List<WebsiteOptionResponse>> GetOptionsAsync();
 }

@@ -242,6 +242,7 @@ start_backend() {
 
     # 启动后端
     echo -e "${YELLOW}启动后端服务 (端口: ${BACKEND_PORT})...${NC}"
+    export MASTER_PASSWORD="admin123"
     dotnet run &
     BACKEND_PID=$!
 
@@ -373,27 +374,14 @@ main() {
     echo -e "${BLUE}║                                        ║${NC}"
     echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
 
-    # 读取实际生成的主密码
-    SECRETS_DIR="backend/data/.secrets"
-    MASTER_PASSWORD_FILE="$SECRETS_DIR/master.key"
+    # 显示默认主密码
+    MASTER_PASSWORD_DEFAULT="admin123"
 
     echo -e "\n${YELLOW}╔════════════════════════════════════════╗${NC}"
     echo -e "${YELLOW}║     开发环境JWT认证信息                 ║${NC}"
     echo -e "${YELLOW}╠════════════════════════════════════════╣${NC}"
     echo -e "${YELLOW}║                                        ║${NC}"
-
-    if [ -f "$MASTER_PASSWORD_FILE" ]; then
-        MASTER_PASSWORD=$(cat "$MASTER_PASSWORD_FILE")
-        echo -e "${YELLOW}║  主密码: ${GREEN}${MASTER_PASSWORD}${YELLOW}        ║${NC}"
-        echo -e "${YELLOW}║                                        ║${NC}"
-        echo -e "${YELLOW}║  密码已保存到:                         ║${NC}"
-        echo -e "${YELLOW}║  ${MASTER_PASSWORD_FILE}  ║${NC}"
-    else
-        echo -e "${YELLOW}║  主密码: ${GREEN}(首次启动时自动生成)${YELLOW}      ║${NC}"
-        echo -e "${YELLOW}║                                        ║${NC}"
-        echo -e "${YELLOW}║  请查看后端启动日志获取主密码           ║${NC}"
-    fi
-
+    echo -e "${YELLOW}║  主密码: ${GREEN}${MASTER_PASSWORD_DEFAULT}${YELLOW}              ║${NC}"
     echo -e "${YELLOW}║                                        ║${NC}"
     echo -e "${YELLOW}║  使用此密码在前端登录页面进行登录       ║${NC}"
     echo -e "${YELLOW}║                                        ║${NC}"

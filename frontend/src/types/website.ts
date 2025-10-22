@@ -49,3 +49,13 @@ export interface AccountCountResponse {
   deletedCount: number
   totalCount: number
 }
+
+/**
+ * 网站选项响应（用于下拉选择等场景）
+ * 只包含必要字段，减少数据传输
+ */
+export interface WebsiteOptionResponse {
+  id: number
+  domain: string
+  displayName?: string
+}

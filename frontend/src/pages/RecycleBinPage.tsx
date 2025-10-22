@@ -17,7 +17,7 @@ import { PermanentDeleteDialog } from '@/components/recycle-bin/PermanentDeleteD
 import Pagination from '@/components/common/Pagination'
 import { ArrowLeft, Trash2, Search, X } from 'lucide-react'
 import type { DeletedAccountResponse } from '@/services/recycleBinService'
-import type { WebsiteResponse } from '@/types'
+import type { WebsiteOptionResponse } from '@/types'
 
 /**
  * 回收站页面
@@ -35,7 +35,7 @@ export function RecycleBinPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const [websites, setWebsites] = useState<WebsiteResponse[]>([])
+  const [websites, setWebsites] = useState<WebsiteOptionResponse[]>([])
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<string>('all')
   const [searchText, setSearchText] = useState('')
   const pageSize = 10
@@ -60,10 +60,10 @@ export function RecycleBinPage() {
 
   const loadWebsites = async () => {
     try {
-      // 获取所有网站用于筛选（使用大的pageSize）
-      const response = await websiteService.getAll(1, 1000)
+      // 获取网站选项用于筛选（只返回必要字段）
+      const response = await websiteService.getOptions()
       if (response.success && response.data) {
-        setWebsites(response.data.items as WebsiteResponse[])
+        setWebsites(response.data)
       }
     } catch (error) {
       console.error('加载网站列表失败:', error)

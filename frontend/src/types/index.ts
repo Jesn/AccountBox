@@ -25,6 +25,7 @@ export type {
   CreateWebsiteRequest,
   UpdateWebsiteRequest,
   AccountCountResponse,
+  WebsiteOptionResponse,
 } from './website'
 
 // API密钥相关
