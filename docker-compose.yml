@@ -36,7 +36,7 @@ services:
       # 数据库配置
       - DB_PROVIDER=sqlite
       - DATABASE_PATH=/app/data/accountbox.db
-      - DATA_PATH=/app/data
+      # - DATA_PATH=/app/data
 
       # 安全配置（可选 - 如果不设置将自动生成）
       # JWT 密钥和主密码将在首次启动时自动生成并保存到 /app/data/.secrets/
