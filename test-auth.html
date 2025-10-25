@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Auth Test</title>
+</head>
+
+<body>
+    <h1>Authentication Test</h1>
+
+    <div>
+        <h2>Login</h2>
+        <input type="password" id="password" placeholder="Master Password" value="admin123">
+        <button onclick="login()">Login</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div>
+        <h2>Test API</h2>
+        <button onclick="testApi()">Test /api/websites</button>
+        <div id="apiResult"></div>
+    </div>
+
+    <div>
+        <h2>Token Info</h2>
+        <button onclick="showToken()">Show Token</button>
+        <div id="tokenInfo"></div>
+    </div>
+
+    <script>
+        let token = null;
+
+        async function login() {
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ masterPassword: password })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    token = data.data.token;
+                    localStorage.setItem('accountbox_token', token);
+                    localStorage.setItem('accountbox_token_expiry', data.data.expiresAt);
+
+                    resultDiv.innerHTML = `<p style="color: green;">Login successful! Token: ${token.substring(0, 50)}...</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">Login failed: ${data.error?.message || 'Unknown error'}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testApi() {
+            const resultDiv = document.getElementById('apiResult');
+            const currentToken = token || localStorage.getItem('accountbox_token');
+
+            if (!currentToken) {
+                resultDiv.innerHTML = '<p style="color: red;">No token available. Please login first.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/websites?pageNumber=1&pageSize=15', {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<p style="color: green;">API call successful! Data: ${JSON.stringify(data, null, 2)}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">API call failed: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function showToken() {
+            const resultDiv = document.getElementById('tokenInfo');
+            const currentToken = token || localStorage.getItem('accountbox_token');
+            const expiry = localStorage.getItem('accountbox_token_expiry');
+
+            if (currentToken) {
+                resultDiv.innerHTML = `
+                    <p><strong>Token:</strong> ${currentToken.substring(0, 50)}...</p>
+                    <p><strong>Expiry:</strong> ${expiry}</p>
+                    <p><strong>Is Valid:</strong> ${new Date(expiry) > new Date() ? 'Yes' : 'No'}</p>
+                `;
+            } else {
+                resultDiv.innerHTML = '<p>No token found</p>';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -74,7 +74,7 @@ public class AccountRepository : IAccountRepository
         var totalCount = await query.CountAsync();
 
         var items = await query
-            .OrderBy(a => a.Username) // 按用户名字母序
+            .OrderByDescending(a => a.UpdatedAt) // 按更新时间倒序排列
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
