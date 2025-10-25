@@ -1,4 +1,5 @@
 import apiClient from './apiClient'
+import { API_ENDPOINTS } from '@/lib/constants'
 import type {
   ApiResponse,
   PagedResult,
@@ -13,7 +14,7 @@ import type {
 export type { WebsiteResponse, CreateWebsiteRequest, UpdateWebsiteRequest, AccountCountResponse, WebsiteOptionResponse }
 
 class WebsiteService {
-  private readonly baseUrl = '/api/websites'
+  private readonly baseUrl = API_ENDPOINTS.WEBSITES
 
   async getAll(
     pageNumber: number = 1,

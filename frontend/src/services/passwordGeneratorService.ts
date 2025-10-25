@@ -1,4 +1,5 @@
 import apiClient from './apiClient'
+import { API_ENDPOINTS } from '@/lib/constants'
 import type { ApiResponse } from '../types/common'
 
 // 请求类型
@@ -42,7 +43,7 @@ export interface PasswordStrengthResponse {
 }
 
 class PasswordGeneratorService {
-  private readonly baseUrl = '/api/password-generator'
+  private readonly baseUrl = API_ENDPOINTS.PASSWORD_GENERATOR
 
   /**
    * 生成密码

@@ -1,13 +1,15 @@
 using System.Security.Cryptography;
 using System.Text;
-using BCrypt.Net;
+using AccountBox.Core.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
-namespace AccountBox.Api.Services;
+namespace AccountBox.Security;
 
 /// <summary>
 /// 密钥管理服务 - 负责生成、存储和加载应用密钥
 /// </summary>
-public class SecretsManager
+public class SecretsManager : ISecretsManager
 {
     private readonly ILogger<SecretsManager> _logger;
     private readonly string _secretsDirectory;
@@ -132,12 +134,13 @@ public class SecretsManager
         try
         {
             File.WriteAllText(_masterPasswordPath, newHash);
-            _logger.LogWarning("=".PadRight(80, '='));
+            const string separator = "================================================================================";
+            _logger.LogWarning(separator);
             _logger.LogWarning("首次启动 - 已生成随机主密码");
             _logger.LogWarning("主密码: {Password}", newPassword);
             _logger.LogWarning("请妥善保存此密码！密码哈希已保存到: {Path}", _masterPasswordPath);
             _logger.LogWarning("注意：密码哈希使用 BCrypt 算法存储，无法反向解密");
-            _logger.LogWarning("=".PadRight(80, '='));
+            _logger.LogWarning(separator);
         }
         catch (Exception ex)
         {
@@ -229,7 +232,7 @@ public class SecretsManager
     /// <summary>
     /// 从字符集中随机选择一个字符
     /// </summary>
-    private char GetRandomChar(RandomNumberGenerator rng, string chars)
+    private static char GetRandomChar(RandomNumberGenerator rng, string chars)
     {
         var randomBytes = new byte[4];
         rng.GetBytes(randomBytes);

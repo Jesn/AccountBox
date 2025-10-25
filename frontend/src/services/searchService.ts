@@ -1,4 +1,5 @@
 import apiClient from './apiClient'
+import { API_ENDPOINTS } from '@/lib/constants'
 import type { ApiResponse, PagedResult } from '../types/common'
 
 export interface SearchResultItem {
@@ -16,7 +17,7 @@ export interface SearchResultItem {
 }
 
 class SearchService {
-  private readonly baseUrl = '/api/search'
+  private readonly baseUrl = API_ENDPOINTS.SEARCH
 
   async search(
     query: string,

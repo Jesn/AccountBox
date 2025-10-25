@@ -6,7 +6,7 @@ using AccountBox.Core.Models.Auth;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AccountBox.Api.Services;
+namespace AccountBox.Core.Services;
 
 /// <summary>
 /// JWT Token服务实现

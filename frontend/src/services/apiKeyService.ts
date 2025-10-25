@@ -1,4 +1,5 @@
 import apiClient from './apiClient'
+import { API_ENDPOINTS } from '@/lib/constants'
 import type { ApiKey, CreateApiKeyRequest } from '../types/ApiKey'
 
 /**
@@ -9,7 +10,7 @@ export const apiKeyService = {
    * 获取所有API密钥
    */
   async getAll(): Promise<ApiKey[]> {
-    const response = await apiClient.get<ApiKey[]>('/api/api-keys')
+    const response = await apiClient.get<ApiKey[]>(API_ENDPOINTS.API_KEYS)
     if (!response.data) {
       throw new Error('Invalid response data')
     }
@@ -20,7 +21,7 @@ export const apiKeyService = {
    * 创建新的API密钥
    */
   async create(request: CreateApiKeyRequest): Promise<ApiKey> {
-    const response = await apiClient.post<ApiKey>('/api/api-keys', request)
+    const response = await apiClient.post<ApiKey>(API_ENDPOINTS.API_KEYS, request)
     if (!response.data) {
       throw new Error('Invalid response data')
     }

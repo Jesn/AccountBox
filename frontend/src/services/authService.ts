@@ -1,11 +1,6 @@
-import axios, { type AxiosError } from 'axios';
-import type { ErrorResponse } from '@/types/common';
-
-// 在生产环境（Docker容器内）使用相对路径
-// 在开发环境使用完整URL（通过Vite代理）
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
-const TOKEN_KEY = 'accountbox_token';
-const TOKEN_EXPIRY_KEY = 'accountbox_token_expiry';
+import { apiClient } from './apiClient';
+import { STORAGE_KEYS, API_ENDPOINTS } from '@/lib/constants';
+import { ErrorHandler, createError } from '@/lib/errorHandler';
 
 export interface LoginRequest {
   masterPassword: string;
@@ -26,60 +21,30 @@ class AuthService {
    * @returns 登录响应（包含Token和过期时间）
    */
   async login(masterPassword: string): Promise<LoginResponse> {
-    try {
-      const response = await axios.post<LoginResponse>(
-        `${API_BASE_URL}/api/auth/login`,
-        { masterPassword } as LoginRequest
-      );
+    const response = await apiClient.post<LoginResponse>(
+      API_ENDPOINTS.AUTH.LOGIN,
+      { masterPassword } as LoginRequest
+    );
 
+    if (response.success && response.data) {
       const { token, expiresAt } = response.data;
-
+      
+      // 将 DateTime 转换为 ISO 字符串存储
+      const expiryString = typeof expiresAt === 'string' ? expiresAt : new Date(expiresAt).toISOString();
+      
       // 存储Token和过期时间到localStorage
-      localStorage.setItem(TOKEN_KEY, token);
-      localStorage.setItem(TOKEN_EXPIRY_KEY, expiresAt);
-
-      return response.data;
-    } catch (error) {
-      // 处理axios错误
-      const axiosError = error as AxiosError<{ error?: { code?: string; message?: string } }>;
-
-      if (axiosError.response) {
-        // 服务器返回错误响应
-        const errorData = axiosError.response.data?.error;
-
-        if (errorData) {
-          // 后端返回了结构化错误信息
-          throw {
-            errorCode: errorData.code || 'UNKNOWN_ERROR',
-            message: errorData.message || '登录失败，请稍后重试',
-          } as ErrorResponse;
-        }
-
-        // 根据HTTP状态码返回友好的错误消息
-        if (axiosError.response.status === 401) {
-          throw {
-            errorCode: 'PASSWORD_INCORRECT',
-            message: '主密码错误，请重试',
-          } as ErrorResponse;
-        }
-
-        throw {
-          errorCode: 'SERVER_ERROR',
-          message: '服务器错误，请稍后重试',
-        } as ErrorResponse;
-      } else if (axiosError.request) {
-        // 请求发送但没有收到响应
-        throw {
-          errorCode: 'NETWORK_ERROR',
-          message: '网络连接失败，请检查网络',
-        } as ErrorResponse;
-      } else {
-        // 其他错误
-        throw {
-          errorCode: 'CLIENT_ERROR',
-          message: '登录过程中发生错误，请稍后重试',
-        } as ErrorResponse;
-      }
+      this.setToken(token, expiryString);
+      
+      return {
+        token,
+        expiresAt: expiryString
+      };
+    } else {
+      const error = response.error || createError('LOGIN_FAILED', '登录失败');
+      throw createError(
+        error.errorCode,
+        ErrorHandler.formatError(error)
+      );
     }
   }
 
@@ -87,9 +52,8 @@ class AuthService {
    * 用户登出
    */
   logout(): void {
-    // 清除localStorage中的Token
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(TOKEN_EXPIRY_KEY);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_EXPIRES);
   }
 
   /**
@@ -97,8 +61,8 @@ class AuthService {
    * @returns JWT Token字符串或null
    */
   getToken(): string | null {
-    const token = localStorage.getItem(TOKEN_KEY);
-    const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    const expiry = localStorage.getItem(STORAGE_KEYS.AUTH_EXPIRES);
 
     // 如果Token不存在，返回null
     if (!token || !expiry) {
@@ -129,8 +93,32 @@ class AuthService {
    * @returns Token过期时间或null
    */
   getTokenExpiry(): Date | null {
-    const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
+    const expiry = localStorage.getItem(STORAGE_KEYS.AUTH_EXPIRES);
     return expiry ? new Date(expiry) : null;
+  }
+
+  /**
+   * 设置Token和过期时间
+   * @private
+   */
+  private setToken(token: string, expiresAt: string): void {
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+    localStorage.setItem(STORAGE_KEYS.AUTH_EXPIRES, expiresAt);
+  }
+
+  /**
+   * 检查Token是否即将过期
+   * @returns 是否需要刷新Token
+   */
+  shouldRefreshToken(): boolean {
+    const expiry = this.getTokenExpiry();
+    if (!expiry) return false;
+    
+    const now = new Date();
+    const timeUntilExpiry = expiry.getTime() - now.getTime();
+    
+    // 如果Token在5分钟内过期，建议刷新
+    return timeUntilExpiry < 5 * 60 * 1000;
   }
 }
 

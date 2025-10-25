@@ -1,4 +1,5 @@
 import apiClient from './apiClient'
+import { API_ENDPOINTS } from '@/lib/constants'
 import type {
   ApiResponse,
   PagedResult,
@@ -11,7 +12,7 @@ import type {
 export type { AccountResponse, CreateAccountRequest, UpdateAccountRequest }
 
 class AccountService {
-  private readonly baseUrl = '/api/accounts'
+  private readonly baseUrl = API_ENDPOINTS.ACCOUNTS
 
   async getAll(
     pageNumber: number = 1,

@@ -3,16 +3,14 @@ using AccountBox.Api.Middleware;
 using AccountBox.Api.Services;
 using AccountBox.Core.Interfaces;
 using AccountBox.Core.Models.Auth;
+using AccountBox.Core.Services;
 using AccountBox.Data.DbContext;
 using AccountBox.Data.Repositories;
+using AccountBox.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -144,6 +142,7 @@ builder.Services.AddScoped<AccountBox.Core.Services.IApiKeyService, ApiKeyServic
 
 builder.Services.AddScoped<IApiKeysManagementService, ApiKeysManagementService>();
 builder.Services.AddScoped<IRandomAccountService, RandomAccountService>();
+builder.Services.AddScoped<ILoginAttemptService, LoginAttemptService>();
 
 // HTTP Context Accessor（用于获取当前请求上下文）
 builder.Services.AddHttpContextAccessor();
@@ -163,7 +162,7 @@ using var loggerFactory = LoggerFactory.Create(loggingBuilder =>
 var logger = loggerFactory.CreateLogger<SecretsManager>();
 
 var secretsManager = new SecretsManager(logger, builder.Configuration);
-builder.Services.AddSingleton(secretsManager);
+builder.Services.AddSingleton<ISecretsManager>(secretsManager);
 
 // 获取或生成 JWT 密钥
 var jwtSecretKey = secretsManager.GetOrGenerateJwtSecretKey();
@@ -185,8 +184,9 @@ builder.Services.Configure<JwtSettings>(options =>
     options.ValidateIssuerSigningKey = bool.Parse(jwtConfig["ValidateIssuerSigningKey"] ?? "true");
 });
 
-// 注册JWT服务和MemoryCache
+// 注册JWT服务、认证服务和MemoryCache
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddMemoryCache();
 
 // 配置JWT认证

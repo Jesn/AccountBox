@@ -1,7 +1,7 @@
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
 import type { ApiResponse, ErrorResponse } from '@/types/common'
-import { authService } from './authService'
+import { STORAGE_KEYS, API_ENDPOINTS } from '@/lib/constants'
 import { eventBus, AUTH_EVENTS } from '@/lib/eventBus'
 
 /**
@@ -29,15 +29,25 @@ class ApiClient {
     // 请求拦截器：自动附加JWT Token
     this.client.interceptors.request.use(
       (config) => {
-        // 跳过登录请求（避免循环）
-        if (config.url === '/api/auth/login') {
+        // 跳过登录请求（避免循环依赖）
+        if (config.url === API_ENDPOINTS.AUTH.LOGIN) {
           return config
         }
 
-        // 从authService获取Token
-        const token = authService.getToken()
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`
+        // 直接从localStorage获取Token（避免循环依赖）
+        const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+        const expiry = localStorage.getItem(STORAGE_KEYS.AUTH_EXPIRES)
+        
+        // 检查Token是否存在且未过期
+        if (token && expiry) {
+          const expiryDate = new Date(expiry)
+          if (expiryDate > new Date()) {
+            config.headers.Authorization = `Bearer ${token}`
+          } else {
+            // Token已过期，清除
+            localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+            localStorage.removeItem(STORAGE_KEYS.AUTH_EXPIRES)
+          }
         }
 
         return config
@@ -111,7 +121,9 @@ class ApiClient {
     if (error.response) {
       // 401 未授权：Token过期或无效，清除Token并触发登出事件
       if (error.response.status === 401) {
-        authService.logout()
+        // 清除Token（避免循环依赖）
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+        localStorage.removeItem(STORAGE_KEYS.AUTH_EXPIRES)
 
         // 触发未授权事件，由 App 组件统一处理导航和提示
         // 避免在 service 层直接操作 window.location

@@ -1,4 +1,5 @@
 import apiClient from './apiClient'
+import { API_ENDPOINTS } from '@/lib/constants'
 import type { ApiResponse, PagedResult } from '../types/common'
 
 export interface DeletedAccountResponse {
@@ -16,7 +17,7 @@ export interface DeletedAccountResponse {
 }
 
 class RecycleBinService {
-  private readonly baseUrl = '/api/recycle-bin'
+  private readonly baseUrl = API_ENDPOINTS.RECYCLE_BIN
 
   async getDeletedAccounts(
     pageNumber: number = 1,
