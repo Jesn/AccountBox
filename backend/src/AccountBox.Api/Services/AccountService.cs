@@ -3,7 +3,9 @@ using AccountBox.Core.Models;
 using AccountBox.Core.Models.Account;
 using AccountBox.Data.Entities;
 using AccountBox.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace AccountBox.Api.Services;
 
@@ -92,6 +94,13 @@ public class AccountService : IAccountService
             throw new KeyNotFoundException($"Website with ID {request.WebsiteId} not found");
         }
 
+        // 幂等性检查：检查指定网站下用户名是否已存在（防止重复创建）
+        var username = request.Username.Trim();
+        if (await _accountRepository.UsernameExistsAsync(request.WebsiteId, username))
+        {
+            throw new InvalidOperationException($"Username '{username}' already exists for this website. Please use a different username.");
+        }
+
         // 序列化扩展字段
         var extendedDataJson = request.ExtendedData != null && request.ExtendedData.Count > 0
             ? JsonSerializer.Serialize(request.ExtendedData)
@@ -100,23 +109,43 @@ public class AccountService : IAccountService
         var account = new Data.Entities.Account
         {
             WebsiteId = request.WebsiteId,
-            Username = request.Username.Trim(),
+            Username = username,
             Password = request.Password, // 明文存储
             Notes = request.Notes?.Trim(),
             Tags = request.Tags?.Trim(),
             ExtendedData = extendedDataJson
         };
 
-        var created = await _accountRepository.CreateAsync(account);
-
-        // 重新加载以包含导航属性
-        var reloaded = await _accountRepository.GetByIdAsync(created.Id);
-        if (reloaded == null)
+        try
         {
-            throw new InvalidOperationException("Failed to reload created account");
-        }
+            var created = await _accountRepository.CreateAsync(account);
+            _logger.LogInformation("Successfully created account with ID {AccountId} for website {WebsiteId}, username {Username}",
+                created.Id, request.WebsiteId, username);
 
-        return MapToResponse(reloaded);
+            // 重新加载以包含导航属性
+            var reloaded = await _accountRepository.GetByIdAsync(created.Id);
+            if (reloaded == null)
+            {
+                throw new InvalidOperationException("Failed to reload created account");
+            }
+
+            return MapToResponse(reloaded);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is NpgsqlException pgEx && pgEx.SqlState == "23505")
+        {
+            // 数据库唯一性约束冲突（主键或唯一索引）
+            _logger.LogWarning(ex, "Database unique constraint violation while creating account for website {WebsiteId}, username {Username}. This may indicate a race condition or duplicate request.",
+                request.WebsiteId, username);
+
+            // 再次检查用户名是否存在（可能并发请求导致）
+            if (await _accountRepository.UsernameExistsAsync(request.WebsiteId, username))
+            {
+                throw new InvalidOperationException($"Username '{username}' already exists for this website. Please use a different username.", ex);
+            }
+
+            // 如果不是用户名冲突，则抛出原始错误
+            throw new InvalidOperationException("Failed to create account due to a database constraint violation. Please try again.", ex);
+        }
     }
 
     /// <summary>

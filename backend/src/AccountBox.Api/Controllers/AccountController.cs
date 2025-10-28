@@ -61,11 +61,34 @@ public class AccountController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ApiResponse<AccountResponse>>> Create([FromBody] CreateAccountRequest request)
     {
-        var created = await _accountService.CreateAsync(request);
-        return CreatedAtAction(
-            nameof(GetById),
-            new { id = created.Id },
-            ApiResponse<AccountResponse>.Ok(created));
+        try
+        {
+            var created = await _accountService.CreateAsync(request);
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = created.Id },
+                ApiResponse<AccountResponse>.Ok(created));
+        }
+        catch (InvalidOperationException ex)
+        {
+            // 用户名已存在的业务逻辑错误，返回409 Conflict
+            if (ex.Message.Contains("already exists"))
+            {
+                return Conflict(ApiResponse<AccountResponse>.Fail("USERNAME_ALREADY_EXISTS", ex.Message));
+            }
+            // 其他业务逻辑错误
+            return BadRequest(ApiResponse<AccountResponse>.Fail("INVALID_OPERATION", ex.Message));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            // 网站不存在
+            return NotFound(ApiResponse<AccountResponse>.Fail("WEBSITE_NOT_FOUND", ex.Message));
+        }
+        catch (ArgumentException ex)
+        {
+            // 参数验证错误
+            return BadRequest(ApiResponse<AccountResponse>.Fail("INVALID_ARGUMENT", ex.Message));
+        }
     }
 
     /// <summary>
