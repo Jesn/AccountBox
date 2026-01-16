@@ -185,6 +185,7 @@ builder.Services.Configure<JwtSettings>(options =>
 });
 
 // 注册JWT服务、认证服务和MemoryCache
+builder.Services.AddScoped<IJwtKeyRotationService, JwtKeyRotationService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddMemoryCache();
