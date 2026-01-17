@@ -100,11 +100,11 @@ public class ExternalApiController : ControllerBase
 
             // 验证并解析扩展字段JSON格式
             Dictionary<string, object>? extendedData = null;
-            if (!string.IsNullOrEmpty(request.ExtendedData))
+            if (!string.IsNullOrEmpty(request.Extend))
             {
                 try
                 {
-                    extendedData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(request.ExtendedData);
+                    extendedData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(request.Extend);
                 }
                 catch
                 {
@@ -134,6 +134,7 @@ public class ExternalApiController : ControllerBase
                 websiteId = accountResponse.WebsiteId,
                 username = accountResponse.Username,
                 status = accountResponse.Status,
+                extend = accountResponse.ExtendedData,
                 createdAt = accountResponse.CreatedAt
             }));
         }

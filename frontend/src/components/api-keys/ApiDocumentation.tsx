@@ -59,7 +59,7 @@ const API_ENDPOINTS: ApiEndpoint[] = [
     title: '创建账号',
     method: 'POST',
     path: '/api/external/accounts',
-    description: '为指定网站创建新账号。密码不能为空,但不进行强度验证。',
+    description: '为指定网站创建新账号。密码不能为空,但不进行强度验证。extend 为可选的扩展字段,需要是有效的 JSON 字符串。',
     curlExample: `curl -X POST 'http://localhost:5093/api/external/accounts' \\
   -H 'Content-Type: application/json' \\
   -H 'X-API-Key: YOUR_API_KEY' \\
@@ -68,14 +68,16 @@ const API_ENDPOINTS: ApiEndpoint[] = [
     "username": "user@example.com",
     "password": "MyPassword123",
     "tags": "测试账号",
-    "notes": "通过API创建的测试账号"
+    "notes": "通过API创建的测试账号",
+    "extend": "{\\"phone\\": \\"13800138000\\"}"
   }'`,
     requestBody: `{
-  "websiteId": 1,
-  "username": "user@example.com",
-  "password": "MyPassword123",
-  "tags": "测试账号",
-  "notes": "通过API创建的测试账号"
+  "websiteId": 1,          // 必填: 网站ID
+  "username": "user@example.com",  // 必填: 用户名
+  "password": "MyPassword123",     // 必填: 密码
+  "tags": "测试账号",       // 可选: 标签
+  "notes": "备注信息",      // 可选: 备注
+  "extend": "{\\"key\\": \\"value\\"}"  // 可选: 扩展字段(JSON字符串)
 }`,
     successResponse: `{
   "success": true,

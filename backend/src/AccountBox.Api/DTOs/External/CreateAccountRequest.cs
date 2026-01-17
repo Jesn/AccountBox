@@ -35,5 +35,5 @@ public class ExternalCreateAccountRequest
     /// 扩展字段(可选,JSON 字符串)
     /// 格式:{"key1": "value1", "key2": "value2"}
     /// </summary>
-    public string? ExtendedData { get; set; }
+    public string? Extend { get; set; }
 }
