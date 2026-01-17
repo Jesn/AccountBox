@@ -19,7 +19,7 @@ export const API_ENDPOINTS = {
   ACCOUNTS: '/api/accounts',
   SEARCH: '/api/search',
   RECYCLE_BIN: '/api/recycle-bin',
-  API_KEYS: '/api/apikeys',
+  API_KEYS: '/api/api-keys',
   PASSWORD_GENERATOR: '/api/password-generator',
   EXTERNAL_API: '/api/external',
 } as const

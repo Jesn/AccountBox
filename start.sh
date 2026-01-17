@@ -73,13 +73,16 @@ start_backend() {
     # 检查并清理端口
     kill_port $BACKEND_PORT "后端"
 
+    # 统一的 SQLite 数据文件路径（放在 backend/data/accountbox.db）
+    # 在进入后端目录之前计算绝对路径
+    DATA_DIR_FULL="$(pwd)/backend/data"
+    mkdir -p "$DATA_DIR_FULL"
+
     # 进入后端目录
     cd $BACKEND_DIR
 
-    # 统一的 SQLite 数据文件路径（放在 backend/data/accountbox.db）
     DATA_DIR="../../data"
     DATA_DB_PATH="$DATA_DIR/accountbox.db"
-    mkdir -p "$DATA_DIR"
 
     # 可选：在初始化前删除本地 SQLite DB（非交互）
     if [ "$INIT_DB" = "1" ] && [ "$RESET_DB" = "1" ]; then
@@ -133,7 +136,8 @@ start_backend() {
     echo -e "${YELLOW}启动后端服务 (端口: ${BACKEND_PORT})...${NC}"
     # 运行时通过 DATABASE_PATH 覆盖 appsettings.json 中的相对路径，避免工作目录差异导致的找不到数据库文件
     export DB_PROVIDER=sqlite
-    export DATABASE_PATH="$(cd "$DATA_DIR" && pwd)/accountbox.db"
+    export DATA_PATH="$DATA_DIR_FULL"
+    export DATABASE_PATH="$DATA_DIR_FULL/accountbox.db"
     export MASTER_PASSWORD="admin123"
     dotnet run &
     BACKEND_PID=$!
