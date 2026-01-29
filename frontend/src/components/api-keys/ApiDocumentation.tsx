@@ -318,14 +318,14 @@ export function ApiDocumentation() {
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-3 sm:space-y-4 pt-2">
+              <div className="space-y-3 sm:space-y-4 pt-2 min-w-0">
                 {/* 描述 */}
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   {endpoint.description}
                 </p>
 
                 {/* curl 示例 */}
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs sm:text-sm font-medium">curl 示例</span>
                     <Button
@@ -337,7 +337,7 @@ export function ApiDocumentation() {
                           `curl-${endpoint.id}`
                         )
                       }
-                      className="h-7 sm:h-8 text-xs"
+                      className="h-7 sm:h-8 text-xs flex-shrink-0"
                     >
                       {copiedId === `curl-${endpoint.id}` ? (
                         <>
@@ -352,14 +352,14 @@ export function ApiDocumentation() {
                       )}
                     </Button>
                   </div>
-                  <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm">
-                    <code>{endpoint.curlExample}</code>
+                  <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm max-w-full">
+                    <code className="block">{endpoint.curlExample}</code>
                   </pre>
                 </div>
 
                 {/* 请求体 */}
                 {endpoint.requestBody && (
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs sm:text-sm font-medium">请求体</span>
                       <Button
@@ -371,7 +371,7 @@ export function ApiDocumentation() {
                             `request-${endpoint.id}`
                           )
                         }
-                        className="h-7 sm:h-8 text-xs"
+                        className="h-7 sm:h-8 text-xs flex-shrink-0"
                       >
                         {copiedId === `request-${endpoint.id}` ? (
                           <>
@@ -386,14 +386,14 @@ export function ApiDocumentation() {
                         )}
                       </Button>
                     </div>
-                    <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm">
-                      <code>{endpoint.requestBody}</code>
+                    <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm max-w-full">
+                      <code className="block">{endpoint.requestBody}</code>
                     </pre>
                   </div>
                 )}
 
                 {/* 成功响应 */}
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs sm:text-sm font-medium">成功响应</span>
                     <Button
@@ -405,7 +405,7 @@ export function ApiDocumentation() {
                           `success-${endpoint.id}`
                         )
                       }
-                      className="h-7 sm:h-8 text-xs"
+                      className="h-7 sm:h-8 text-xs flex-shrink-0"
                     >
                       {copiedId === `success-${endpoint.id}` ? (
                         <>
@@ -420,14 +420,14 @@ export function ApiDocumentation() {
                       )}
                     </Button>
                   </div>
-                  <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm">
-                    <code>{endpoint.successResponse}</code>
+                  <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm max-w-full">
+                    <code className="block">{endpoint.successResponse}</code>
                   </pre>
                 </div>
 
                 {/* 错误响应 */}
                 {endpoint.errorResponse && (
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs sm:text-sm font-medium">错误响应示例</span>
                       <Button
@@ -439,7 +439,7 @@ export function ApiDocumentation() {
                             `error-${endpoint.id}`
                           )
                         }
-                        className="h-7 sm:h-8 text-xs"
+                        className="h-7 sm:h-8 text-xs flex-shrink-0"
                       >
                         {copiedId === `error-${endpoint.id}` ? (
                           <>
@@ -454,8 +454,8 @@ export function ApiDocumentation() {
                         )}
                       </Button>
                     </div>
-                    <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm">
-                      <code>{endpoint.errorResponse}</code>
+                    <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm max-w-full">
+                      <code className="block">{endpoint.errorResponse}</code>
                     </pre>
                   </div>
                 )}
