@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { WebsiteResponse } from '@/services/websiteService'
 import { Eye, Edit, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface WebsiteCardViewProps {
   websites: WebsiteResponse[]
@@ -22,6 +23,12 @@ export function WebsiteCardView({
 }: WebsiteCardViewProps) {
   if (websites.length === 0) {
     return null
+  }
+
+  const handleCopyId = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    navigator.clipboard.writeText(id.toString())
+    toast.success('ID 已复制到剪贴板')
   }
 
   return (
@@ -45,7 +52,11 @@ export function WebsiteCardView({
                   </p>
                 )}
               </div>
-              <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
+              <span
+                className="text-xs text-gray-500 ml-2 flex-shrink-0 cursor-pointer hover:text-gray-700 hover:underline"
+                onClick={(e) => handleCopyId(website.id, e)}
+                title="点击复制 ID"
+              >
                 ID: {website.id}
               </span>
             </div>
