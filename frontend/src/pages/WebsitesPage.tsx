@@ -164,6 +164,14 @@ export function WebsitesPage() {
           <div className="flex gap-2">
             {/* 移动端：只显示图标 */}
             <Button
+              size="icon"
+              onClick={() => setShowCreateWebsiteDialog(true)}
+              className="md:hidden"
+              title="添加网站"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            <Button
               variant="outline"
               size="icon"
               onClick={() => navigate('/api-keys')}
@@ -182,14 +190,6 @@ export function WebsitesPage() {
               <Trash2 className="h-4 w-4" />
             </Button>
             <Button
-              size="icon"
-              onClick={() => setShowCreateWebsiteDialog(true)}
-              className="md:hidden"
-              title="添加网站"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-            <Button
               variant="destructive"
               size="icon"
               onClick={handleLogout}
@@ -200,6 +200,10 @@ export function WebsitesPage() {
             </Button>
 
             {/* 桌面端：显示图标和文字 */}
+            <Button onClick={() => setShowCreateWebsiteDialog(true)} className="hidden md:inline-flex">
+              <Plus className="mr-2 h-4 w-4" />
+              添加网站
+            </Button>
             <Button variant="outline" onClick={() => navigate('/api-keys')} className="hidden md:inline-flex">
               <Key className="mr-2 h-4 w-4" />
               API密钥
@@ -207,10 +211,6 @@ export function WebsitesPage() {
             <Button variant="outline" onClick={() => navigate('/recycle-bin')} className="hidden md:inline-flex">
               <Trash2 className="mr-2 h-4 w-4" />
               回收站
-            </Button>
-            <Button onClick={() => setShowCreateWebsiteDialog(true)} className="hidden md:inline-flex">
-              <Plus className="mr-2 h-4 w-4" />
-              添加网站
             </Button>
             <Button variant="destructive" onClick={handleLogout} className="hidden md:inline-flex">
               <LogOut className="mr-2 h-4 w-4" />
