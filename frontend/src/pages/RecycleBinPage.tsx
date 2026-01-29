@@ -14,6 +14,7 @@ import {
 import { RecycleBinList } from '@/components/recycle-bin/RecycleBinList'
 import { EmptyRecycleBinDialog } from '@/components/recycle-bin/EmptyRecycleBinDialog'
 import { PermanentDeleteDialog } from '@/components/recycle-bin/PermanentDeleteDialog'
+import { RestoreAccountDialog } from '@/components/recycle-bin/RestoreAccountDialog'
 import Pagination from '@/components/common/Pagination'
 import { ArrowLeft, Trash2, Search, X } from 'lucide-react'
 import type { DeletedAccountResponse } from '@/services/recycleBinService'
@@ -27,6 +28,7 @@ export function RecycleBinPage() {
   const navigate = useNavigate()
   const [showEmptyDialog, setShowEmptyDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false)
   const [selectedAccount, setSelectedAccount] = useState<DeletedAccountResponse | null>(null)
   const [deletedAccounts, setDeletedAccounts] = useState<
     DeletedAccountResponse[]
@@ -94,7 +96,13 @@ export function RecycleBinPage() {
     }
   }
 
-  const handleRestore = async (account: DeletedAccountResponse) => {
+  const handleRestore = (account: DeletedAccountResponse) => {
+    // 打开确认对话框
+    setSelectedAccount(account)
+    setShowRestoreDialog(true)
+  }
+
+  const handleConfirmRestore = async (account: DeletedAccountResponse) => {
     try {
       const response = await recycleBinService.restoreAccount(account.id)
       if (response.success) {
@@ -258,6 +266,13 @@ export function RecycleBinPage() {
         onOpenChange={setShowEmptyDialog}
         onSuccess={handleEmptySuccess}
         totalCount={totalCount}
+      />
+
+      <RestoreAccountDialog
+        open={showRestoreDialog}
+        onOpenChange={setShowRestoreDialog}
+        account={selectedAccount}
+        onConfirm={handleConfirmRestore}
       />
 
       <PermanentDeleteDialog
