@@ -272,12 +272,22 @@ const API_ENDPOINTS: ApiEndpoint[] = [
 export function ApiDocumentation() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
+  // 获取当前访问的地址（协议+主机+端口）
+  const apiBaseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'http://localhost:5093'
+
   const handleCopy = async (text: string, id: string) => {
     const success = await copyToClipboard(text)
     if (success) {
       setCopiedId(id)
       setTimeout(() => setCopiedId(null), 2000)
     }
+  }
+
+  // 替换示例中的 localhost 地址为当前访问地址
+  const replaceBaseUrl = (text: string): string => {
+    return text.replace(/http:\/\/localhost:5093/g, apiBaseUrl)
   }
 
   return (
@@ -333,7 +343,7 @@ export function ApiDocumentation() {
                       size="sm"
                       onClick={() =>
                         handleCopy(
-                          endpoint.curlExample,
+                          replaceBaseUrl(endpoint.curlExample),
                           `curl-${endpoint.id}`
                         )
                       }
@@ -353,7 +363,7 @@ export function ApiDocumentation() {
                     </Button>
                   </div>
                   <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm max-w-full">
-                    <code className="block">{endpoint.curlExample}</code>
+                    <code className="block">{replaceBaseUrl(endpoint.curlExample)}</code>
                   </pre>
                 </div>
 
@@ -367,7 +377,7 @@ export function ApiDocumentation() {
                         size="sm"
                         onClick={() =>
                           handleCopy(
-                            endpoint.requestBody || '',
+                            replaceBaseUrl(endpoint.requestBody || ''),
                             `request-${endpoint.id}`
                           )
                         }
@@ -387,7 +397,7 @@ export function ApiDocumentation() {
                       </Button>
                     </div>
                     <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm max-w-full">
-                      <code className="block">{endpoint.requestBody}</code>
+                      <code className="block">{replaceBaseUrl(endpoint.requestBody)}</code>
                     </pre>
                   </div>
                 )}
@@ -401,7 +411,7 @@ export function ApiDocumentation() {
                       size="sm"
                       onClick={() =>
                         handleCopy(
-                          endpoint.successResponse,
+                          replaceBaseUrl(endpoint.successResponse),
                           `success-${endpoint.id}`
                         )
                       }
@@ -421,7 +431,7 @@ export function ApiDocumentation() {
                     </Button>
                   </div>
                   <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm max-w-full">
-                    <code className="block">{endpoint.successResponse}</code>
+                    <code className="block">{replaceBaseUrl(endpoint.successResponse)}</code>
                   </pre>
                 </div>
 
@@ -435,7 +445,7 @@ export function ApiDocumentation() {
                         size="sm"
                         onClick={() =>
                           handleCopy(
-                            endpoint.errorResponse || '',
+                            replaceBaseUrl(endpoint.errorResponse || ''),
                             `error-${endpoint.id}`
                           )
                         }
@@ -455,7 +465,7 @@ export function ApiDocumentation() {
                       </Button>
                     </div>
                     <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm max-w-full">
-                      <code className="block">{endpoint.errorResponse}</code>
+                      <code className="block">{replaceBaseUrl(endpoint.errorResponse)}</code>
                     </pre>
                   </div>
                 )}
