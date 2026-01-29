@@ -27,6 +27,7 @@ export function ExtendedFieldsEditor({
   maxSizeKB = 10,
 }: ExtendedFieldsEditorProps) {
   const isInitialMount = useRef(true)
+  const previousValueRef = useRef(value)
   const [fields, setFields] = useState<FieldEntry[]>(() => {
     // 初始化时从 value 生成字段列表
     return Object.entries(value).map(([key, val]) => ({
@@ -41,15 +42,30 @@ export function ExtendedFieldsEditor({
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
+      previousValueRef.current = value
       return
     }
 
-    const entries = Object.entries(value).map(([key, val]) => ({
-      id: Math.random().toString(36).substring(7),
-      key,
-      value: typeof val === 'string' ? val : JSON.stringify(val),
-    }))
-    setFields(entries)
+    // 检查 value 是否真的变化了（深度比较）
+    if (JSON.stringify(previousValueRef.current) === JSON.stringify(value)) {
+      return // 数据相同，不需要更新
+    }
+
+    previousValueRef.current = value
+
+    // 保持现有字段的 ID，避免重新渲染导致失焦
+    setFields((currentFields) => {
+      const entries = Object.entries(value).map(([key, val]) => {
+        // 尝试找到已存在的字段，保持其 ID
+        const existingField = currentFields.find((f) => f.key === key)
+        return {
+          id: existingField?.id || Math.random().toString(36).substring(7),
+          key,
+          value: typeof val === 'string' ? val : JSON.stringify(val),
+        }
+      })
+      return entries
+    })
   }, [value])
 
   // 计算当前数据大小（字节）

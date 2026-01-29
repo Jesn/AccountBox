@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { accountService } from '@/services/accountService'
 import type { CreateAccountRequest } from '@/services/accountService'
+import { passwordGeneratorService } from '@/services/passwordGeneratorService'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -15,7 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { PasswordGeneratorDialog } from '@/components/password-generator/PasswordGeneratorDialog'
 import { ExtendedFieldsEditor } from '@/components/accounts/ExtendedFieldsEditor'
-import { Eye, EyeOff, KeyRound } from 'lucide-react'
+import { Eye, EyeOff, Zap, Settings2 } from 'lucide-react'
 
 interface CreateAccountDialogProps {
   open: boolean
@@ -43,6 +44,7 @@ export function CreateAccountDialog({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPasswordGenerator, setShowPasswordGenerator] = useState(false)
+  const [isGeneratingPassword, setIsGeneratingPassword] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -105,6 +107,23 @@ export function CreateAccountDialog({
     onOpenChange(false)
   }
 
+  // 快速生成密码（使用默认配置）
+  const handleQuickGenerate = async () => {
+    setIsGeneratingPassword(true)
+    try {
+      const response = await passwordGeneratorService.generateQuick()
+      if (response.success && response.data) {
+        setPassword(response.data.password)
+        setShowPassword(true) // 自动显示生成的密码
+      }
+    } catch (error) {
+      console.error('生成密码失败:', error)
+      setError('生成密码失败，请重试')
+    } finally {
+      setIsGeneratingPassword(false)
+    }
+  }
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -148,11 +167,21 @@ export function CreateAccountDialog({
                     type="button"
                     variant="outline"
                     size="icon"
+                    onClick={handleQuickGenerate}
+                    disabled={isSubmitting || isGeneratingPassword}
+                    title="快速生成密码"
+                  >
+                    <Zap className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
                     onClick={() => setShowPasswordGenerator(true)}
                     disabled={isSubmitting}
-                    title="生成密码"
+                    title="高级生成"
                   >
-                    <KeyRound className="h-4 w-4" />
+                    <Settings2 className="h-4 w-4" />
                   </Button>
                   <Button
                     type="button"

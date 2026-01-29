@@ -133,13 +133,13 @@ export function PasswordGeneratorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>密码生成器</DialogTitle>
           <DialogDescription>配置参数生成安全密码</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 py-3 overflow-y-auto flex-1">
           {/* 生成的密码显示 */}
           <div className="space-y-2">
             <Label>生成的密码</Label>
@@ -183,7 +183,7 @@ export function PasswordGeneratorDialog({
           </div>
 
           {/* 字符集配置 */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label>字符类型</Label>
 
             <div className="flex items-center space-x-2">
@@ -268,7 +268,7 @@ export function PasswordGeneratorDialog({
           </div>
 
           {/* 字符比例控制 */}
-          <div className="space-y-3 border-t pt-3">
+          <div className="space-y-2 border-t pt-2">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="useDistribution"
@@ -286,7 +286,7 @@ export function PasswordGeneratorDialog({
             </div>
 
             {useCharacterDistribution && (
-              <div className="space-y-3 pl-6">
+              <div className="space-y-2 pl-6">
                 {/* 大写字母比例 */}
                 {includeUppercase && (
                   <div className="space-y-1">
@@ -383,7 +383,7 @@ export function PasswordGeneratorDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-shrink-0">
           <Button
             type="button"
             variant="outline"

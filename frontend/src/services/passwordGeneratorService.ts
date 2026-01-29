@@ -58,6 +58,26 @@ class PasswordGeneratorService {
   }
 
   /**
+   * 使用默认配置快速生成密码
+   */
+  async generateQuick(): Promise<ApiResponse<GeneratePasswordResponse>> {
+    const defaultRequest: GeneratePasswordRequest = {
+      length: 16,
+      includeUppercase: true,
+      includeLowercase: true,
+      includeNumbers: true,
+      includeSymbols: true,
+      excludeAmbiguous: true,
+      uppercasePercentage: 30,
+      lowercasePercentage: 45,
+      numbersPercentage: 20,
+      symbolsPercentage: 5,
+      useCharacterDistribution: false,
+    }
+    return await this.generate(defaultRequest)
+  }
+
+  /**
    * 计算密码强度
    */
   async calculateStrength(
