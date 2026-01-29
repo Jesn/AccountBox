@@ -150,71 +150,90 @@ export function RecycleBinPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" onClick={handleBack}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              返回
-            </Button>
-            <h1 className="text-2xl sm:text-3xl font-bold">回收站</h1>
+        {/* 头部区域 */}
+        <div className="mb-6">
+          {/* 返回按钮和标题 */}
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Button variant="outline" size="sm" onClick={handleBack} className="-ml-2">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                返回
+              </Button>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">回收站</h1>
+              {totalCount > 0 && (
+                <span className="text-xs sm:text-sm text-gray-600 flex-shrink-0">
+                  ({totalCount})
+                </span>
+              )}
+            </div>
+            {/* 清空回收站按钮 */}
             {totalCount > 0 && (
-              <span className="text-sm text-gray-600">
-                共 {totalCount} 个已删除账号
-              </span>
+              <>
+                {/* 移动端：图标按钮 */}
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => setShowEmptyDialog(true)}
+                  className="md:hidden flex-shrink-0"
+                  title="清空回收站"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+                {/* 桌面端：完整按钮 */}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowEmptyDialog(true)}
+                  className="hidden md:inline-flex"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  清空回收站
+                </Button>
+              </>
             )}
           </div>
-          {totalCount > 0 && (
-            <Button
-              variant="destructive"
-              onClick={() => setShowEmptyDialog(true)}
-              className="w-full sm:w-auto"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              清空回收站
-            </Button>
-          )}
-        </div>
 
-        {/* 筛选和搜索区域 */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          {/* 网站筛选 */}
-          <div className="w-full sm:w-64">
-            <Select
-              value={selectedWebsiteId}
-              onValueChange={setSelectedWebsiteId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="选择网站" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">所有网站</SelectItem>
-                {websites.map((website) => (
-                  <SelectItem key={website.id} value={website.id.toString()}>
-                    {website.displayName || website.domain}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* 账号搜索 */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="搜索账号名、标签或备注..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="pl-10 pr-10"
-            />
-            {searchText && (
-              <button
-                onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          {/* 筛选和搜索区域 */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            {/* 网站筛选 */}
+            <div className="w-full sm:w-48">
+              <Select
+                value={selectedWebsiteId}
+                onValueChange={setSelectedWebsiteId}
               >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+                <SelectTrigger>
+                  <SelectValue placeholder="选择网站" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">所有网站</SelectItem>
+                  {websites.map((website) => (
+                    <SelectItem key={website.id} value={website.id.toString()}>
+                      {website.displayName || website.domain}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 账号搜索 */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="搜索账号..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="pl-10 pr-10"
+              />
+              {searchText && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

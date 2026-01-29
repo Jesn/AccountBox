@@ -58,36 +58,58 @@ export function RecycleBinList({
 
   // 已删除账号列表
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-3">
       {deletedAccounts.map((account) => (
         <Card key={account.id}>
-          <CardContent className="p-4">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold">{account.username}</h3>
-                <p className="text-sm text-gray-600">
+          <CardContent className="p-3">
+            <div className="flex justify-between items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold truncate">{account.username}</h3>
+                <p className="text-sm text-gray-600 truncate">
                   {account.websiteDisplayName || account.websiteDomain}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  删除时间: {formatDeletedAt(account.deletedAt)}
+                <p className="text-xs text-gray-500 mt-1">
+                  {formatDeletedAt(account.deletedAt)}
                 </p>
                 {account.tags && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    标签: {account.tags}
+                  <p className="text-xs text-gray-500 mt-1 truncate">
+                    {account.tags}
                   </p>
                 )}
                 {account.notes && (
-                  <p className="text-sm text-gray-500 mt-1 truncate max-w-md">
-                    备注: {account.notes}
+                  <p className="text-xs text-gray-500 mt-1 truncate">
+                    {account.notes}
                   </p>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 flex-shrink-0">
+                {/* 移动端：图标按钮 */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => onRestore(account)}
+                  title="恢复"
+                  className="md:hidden h-8 w-8"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => onPermanentlyDelete(account)}
+                  title="永久删除"
+                  className="md:hidden h-8 w-8"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+
+                {/* 桌面端：完整按钮 */}
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => onRestore(account)}
                   title="恢复此账号"
+                  className="hidden md:inline-flex"
                 >
                   <RotateCcw className="mr-2 h-4 w-4" />
                   恢复
@@ -97,6 +119,7 @@ export function RecycleBinList({
                   size="sm"
                   onClick={() => onPermanentlyDelete(account)}
                   title="永久删除此账号"
+                  className="hidden md:inline-flex"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   永久删除
