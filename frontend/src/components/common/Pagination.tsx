@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -12,6 +13,38 @@ export default function Pagination({
   totalPages,
   onPageChange,
 }: PaginationProps) {
+  const [maxVisiblePages, setMaxVisiblePages] = useState(5)
+
+  useEffect(() => {
+    const calculateMaxPages = () => {
+      const width = window.innerWidth
+      
+      // 桌面端（>= 640px）固定显示5个
+      if (width >= 640) {
+        setMaxVisiblePages(5)
+        return
+      }
+      
+      // 移动端根据宽度动态计算
+      // 预留空间：左右内边距(16px) + 上一页按钮(32px) + 下一页按钮(32px) + 按钮间距
+      const reservedSpace = 16 + 32 + 32 + 8 // 总共约88px
+      const availableSpace = width - reservedSpace
+      
+      // 每个页码按钮约32px宽 + 4px间距
+      const buttonWidth = 36
+      const calculatedMax = Math.floor(availableSpace / buttonWidth)
+      
+      // 限制在3-7之间
+      const finalMax = Math.max(3, Math.min(7, calculatedMax))
+      setMaxVisiblePages(finalMax)
+    }
+
+    calculateMaxPages()
+    window.addEventListener('resize', calculateMaxPages)
+    
+    return () => window.removeEventListener('resize', calculateMaxPages)
+  }, [])
+
   const handlePrevious = () => {
     if (currentPage > 1) {
       onPageChange(currentPage - 1)
@@ -24,10 +57,10 @@ export default function Pagination({
     }
   }
 
-  // 生成页码按钮（移动端最多显示3个，桌面端显示5个）
-  const getPageNumbers = (isMobile: boolean) => {
+  // 生成页码按钮
+  const getPageNumbers = () => {
     const pages: number[] = []
-    const maxVisible = isMobile ? 3 : 5
+    const maxVisible = maxVisiblePages
 
     if (totalPages <= maxVisible) {
       // 如果总页数小于等于最大可见页数，显示所有页码
@@ -64,32 +97,21 @@ export default function Pagination({
         size="sm"
         onClick={handlePrevious}
         disabled={currentPage === 1}
-        className="h-8 sm:h-9"
+        className="h-8 sm:h-9 flex-shrink-0"
       >
         <ChevronLeft className="h-4 w-4" />
         <span className="hidden sm:inline ml-1">上一页</span>
       </Button>
 
-      {/* 页码按钮 - 移动端显示3个，桌面端显示5个 */}
-      <div className="flex gap-1">
-        {getPageNumbers(true).map((page) => (
+      {/* 页码按钮 - 根据屏幕宽度动态显示 */}
+      <div className="flex gap-1 flex-shrink-0">
+        {getPageNumbers().map((page) => (
           <Button
             key={page}
             variant={page === currentPage ? 'default' : 'outline'}
             size="sm"
             onClick={() => onPageChange(page)}
-            className="min-w-8 sm:min-w-10 h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm sm:hidden"
-          >
-            {page}
-          </Button>
-        ))}
-        {getPageNumbers(false).map((page) => (
-          <Button
-            key={page}
-            variant={page === currentPage ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => onPageChange(page)}
-            className="hidden sm:inline-flex min-w-10 h-9"
+            className="min-w-8 sm:min-w-10 h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
           >
             {page}
           </Button>
@@ -102,7 +124,7 @@ export default function Pagination({
         size="sm"
         onClick={handleNext}
         disabled={currentPage === totalPages}
-        className="h-8 sm:h-9"
+        className="h-8 sm:h-9 flex-shrink-0"
       >
         <span className="hidden sm:inline mr-1">下一页</span>
         <ChevronRight className="h-4 w-4" />
