@@ -118,7 +118,7 @@ export function CreateApiKeyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:w-full sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>创建API密钥</DialogTitle>

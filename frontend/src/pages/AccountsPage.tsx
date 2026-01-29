@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { AccountList } from '@/components/accounts/AccountList'
+import { AccountCardView } from '@/components/accounts/AccountCardView'
 import { CreateAccountDialog } from '@/components/accounts/CreateAccountDialog'
 import { EditAccountDialog } from '@/components/accounts/EditAccountDialog'
 import { DeleteAccountDialog } from '@/components/accounts/DeleteAccountDialog'
@@ -156,8 +157,8 @@ export function AccountsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-[1400px]">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
+      <div className="mx-auto max-w-[1400px] px-4 md:px-0">
         <div className="mb-8">
           <Button
             variant="ghost"
@@ -168,23 +169,23 @@ export function AccountsPage() {
             返回网站列表
           </Button>
 
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-3xl font-bold">
+              <h1 className="text-2xl sm:text-3xl font-bold">
                 {website?.displayName || website?.domain || '账号管理'}
               </h1>
               {website && website.domain && website.displayName && (
                 <p className="text-gray-600 mt-1">{website.domain}</p>
               )}
             </div>
-            <Button onClick={() => setShowCreateAccountDialog(true)}>
+            <Button onClick={() => setShowCreateAccountDialog(true)} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               添加账号
             </Button>
           </div>
 
           {/* 搜索和筛选区域 */}
-          <div className="flex gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <Input
@@ -199,7 +200,7 @@ export function AccountsPage() {
               value={statusFilter}
               onValueChange={handleStatusFilterChange}
             >
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full sm:w-[160px]">
                 <SelectValue placeholder="筛选状态" />
               </SelectTrigger>
               <SelectContent>
@@ -219,13 +220,27 @@ export function AccountsPage() {
           </Card>
         ) : (
           <>
-            <AccountList
-              accounts={accounts}
-              onEdit={handleEditAccount}
-              onDelete={handleDeleteAccount}
-              onEnable={handleEnableAccount}
-              onDisable={handleDisableAccount}
-            />
+            {/* 桌面端：表格视图 */}
+            <div className="hidden md:block">
+              <AccountList
+                accounts={accounts}
+                onEdit={handleEditAccount}
+                onDelete={handleDeleteAccount}
+                onEnable={handleEnableAccount}
+                onDisable={handleDisableAccount}
+              />
+            </div>
+
+            {/* 移动端：卡片视图 */}
+            <div className="block md:hidden">
+              <AccountCardView
+                accounts={accounts}
+                onEdit={handleEditAccount}
+                onDelete={handleDeleteAccount}
+                onEnable={handleEnableAccount}
+                onDisable={handleDisableAccount}
+              />
+            </div>
 
             {!isLoading && accounts.length > 0 && (
               <Pagination

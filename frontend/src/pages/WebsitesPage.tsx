@@ -10,6 +10,7 @@ import { CreateWebsiteDialog } from '@/components/websites/CreateWebsiteDialog'
 import { EditWebsiteDialog } from '@/components/websites/EditWebsiteDialog'
 import { DeleteWebsiteDialog } from '@/components/websites/DeleteWebsiteDialog'
 import { WebsiteList } from '@/components/websites/WebsiteList'
+import { WebsiteCardView } from '@/components/websites/WebsiteCardView'
 import { Plus, Trash2, Search as SearchIcon, X, Key, LogOut } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 import type { WebsiteResponse } from '@/services/websiteService'
@@ -156,24 +157,24 @@ export function WebsitesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">网站管理</h1>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/api-keys')}>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl px-4 md:px-0">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold">网站管理</h1>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => navigate('/api-keys')} className="w-full sm:w-auto">
               <Key className="mr-2 h-4 w-4" />
               API密钥
             </Button>
-            <Button variant="outline" onClick={() => navigate('/recycle-bin')}>
+            <Button variant="outline" onClick={() => navigate('/recycle-bin')} className="w-full sm:w-auto">
               <Trash2 className="mr-2 h-4 w-4" />
               回收站
             </Button>
-            <Button onClick={() => setShowCreateWebsiteDialog(true)}>
+            <Button onClick={() => setShowCreateWebsiteDialog(true)} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               添加网站
             </Button>
-            <Button variant="destructive" onClick={handleLogout}>
+            <Button variant="destructive" onClick={handleLogout} className="w-full sm:w-auto">
               <LogOut className="mr-2 h-4 w-4" />
               登出
             </Button>
@@ -217,14 +218,45 @@ export function WebsitesPage() {
         {/* 网站列表和分页 */}
         {(!searchQuery || websites.length > 0) && (
           <>
-            <WebsiteList
-              websites={websites}
-              isLoading={isLoading}
-              onViewAccounts={handleViewAccounts}
-              onEdit={handleEditWebsite}
-              onDelete={handleDeleteWebsite}
-              onCreateNew={() => setShowCreateWebsiteDialog(true)}
-            />
+            {/* 桌面端：表格视图 */}
+            <div className="hidden md:block">
+              <WebsiteList
+                websites={websites}
+                isLoading={isLoading}
+                onViewAccounts={handleViewAccounts}
+                onEdit={handleEditWebsite}
+                onDelete={handleDeleteWebsite}
+                onCreateNew={() => setShowCreateWebsiteDialog(true)}
+              />
+            </div>
+
+            {/* 移动端：卡片视图 */}
+            <div className="block md:hidden">
+              {isLoading ? (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <p className="text-gray-600">加载中...</p>
+                  </CardContent>
+                </Card>
+              ) : websites.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <p className="text-gray-600 mb-4">还没有添加任何网站</p>
+                    <Button onClick={() => setShowCreateWebsiteDialog(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      添加第一个网站
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <WebsiteCardView
+                  websites={websites}
+                  onViewAccounts={handleViewAccounts}
+                  onEdit={handleEditWebsite}
+                  onDelete={handleDeleteWebsite}
+                />
+              )}
+            </div>
 
             {!isLoading && websites.length > 0 && !isSearching && (
               <Pagination

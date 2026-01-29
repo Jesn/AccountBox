@@ -10,7 +10,7 @@ export function ApiDocumentationPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="container mx-auto py-6 px-4 max-w-4xl">
+    <div className="container mx-auto py-4 md:py-6 px-4 max-w-4xl">
       {/* 页头 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -25,7 +25,7 @@ export function ApiDocumentationPage() {
           <div>
             <div className="flex items-center gap-2">
               <BookOpen className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold">外部 API 使用文档</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold">外部 API 使用文档</h1>
             </div>
             <p className="text-muted-foreground mt-1">
               详细的 API 端点说明和 curl 使用示例

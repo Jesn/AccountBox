@@ -148,15 +148,15 @@ export function RecycleBinPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-8 flex items-center justify-between">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
+      <div className="mx-auto max-w-6xl px-4 md:px-0">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
             <Button variant="outline" size="sm" onClick={handleBack}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               返回
             </Button>
-            <h1 className="text-3xl font-bold">回收站</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">回收站</h1>
             {totalCount > 0 && (
               <span className="text-sm text-gray-600">
                 共 {totalCount} 个已删除账号
@@ -167,6 +167,7 @@ export function RecycleBinPage() {
             <Button
               variant="destructive"
               onClick={() => setShowEmptyDialog(true)}
+              className="w-full sm:w-auto"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               清空回收站
@@ -175,9 +176,9 @@ export function RecycleBinPage() {
         </div>
 
         {/* 筛选和搜索区域 */}
-        <div className="mb-6 flex gap-4">
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
           {/* 网站筛选 */}
-          <div className="w-64">
+          <div className="w-full sm:w-64">
             <Select
               value={selectedWebsiteId}
               onValueChange={setSelectedWebsiteId}

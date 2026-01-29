@@ -59,7 +59,7 @@ export function DeleteApiKeyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-[95vw] sm:w-full sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>删除API密钥</DialogTitle>
           <DialogDescription>

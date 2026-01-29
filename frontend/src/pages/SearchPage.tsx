@@ -116,8 +116,8 @@ export function SearchPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-7xl">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl px-4 md:px-0">
         {/* 头部 */}
         <div className="mb-8">
           <Button
@@ -129,7 +129,7 @@ export function SearchPage() {
             返回网站列表
           </Button>
 
-          <h1 className="text-3xl font-bold mb-2">全局搜索</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">全局搜索</h1>
           <p className="text-gray-600">
             搜索范围：网站名、域名、账号用户名、标签、备注
           </p>
@@ -137,7 +137,7 @@ export function SearchPage() {
 
         {/* 搜索框 */}
         <div className="mb-6">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -149,7 +149,7 @@ export function SearchPage() {
                 className="pl-10"
               />
             </div>
-            <Button onClick={() => handleSearch(1)} disabled={isLoading}>
+            <Button onClick={() => handleSearch(1)} disabled={isLoading} className="w-full sm:w-auto">
               {isLoading ? '搜索中...' : '搜索'}
             </Button>
           </div>

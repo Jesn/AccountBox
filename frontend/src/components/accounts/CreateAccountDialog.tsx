@@ -127,7 +127,7 @@ export function CreateAccountDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="w-[95vw] sm:w-full sm:max-w-[600px]">
           <form onSubmit={handleSubmit}>
             <DialogHeader>
               <DialogTitle>添加账号</DialogTitle>

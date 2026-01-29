@@ -133,7 +133,7 @@ export function PasswordGeneratorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
+      <DialogContent className="w-[95vw] sm:w-full sm:max-w-[500px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>密码生成器</DialogTitle>
           <DialogDescription>配置参数生成安全密码</DialogDescription>

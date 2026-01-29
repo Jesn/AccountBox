@@ -63,7 +63,7 @@ export function ApiKeysPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 px-4 max-w-4xl">
+    <div className="container mx-auto py-4 md:py-6 px-4 max-w-4xl">
       {/* 页头 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -76,7 +76,7 @@ export function ApiKeysPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">API密钥管理</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">API密钥管理</h1>
             <p className="text-muted-foreground mt-1">
               创建和管理用于外部API调用的密钥
             </p>
