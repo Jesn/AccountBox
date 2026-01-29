@@ -283,10 +283,10 @@ export function ApiDocumentation() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold mb-2">API 使用文档</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-lg sm:text-2xl font-bold mb-2">API 端点列表</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           以下是外部 API 端点的 curl 使用示例。请将示例中的{' '}
-          <code className="bg-muted px-1 py-0.5 rounded">YOUR_API_KEY</code>{' '}
+          <code className="bg-muted px-1 py-0.5 rounded text-[10px] sm:text-xs">YOUR_API_KEY</code>{' '}
           替换为你的实际 API 密钥。
         </p>
       </div>
@@ -294,10 +294,10 @@ export function ApiDocumentation() {
       <Accordion type="single" collapsible className="w-full">
         {API_ENDPOINTS.map((endpoint) => (
           <AccordionItem key={endpoint.id} value={endpoint.id}>
-            <AccordionTrigger>
-              <div className="flex items-center gap-3 text-left">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-start gap-2 sm:gap-3 text-left w-full pr-2">
                 <span
-                  className={`px-2 py-1 text-xs font-semibold rounded ${
+                  className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded flex-shrink-0 ${
                     endpoint.method === 'GET'
                       ? 'bg-blue-100 text-blue-700'
                       : endpoint.method === 'POST'
@@ -309,25 +309,25 @@ export function ApiDocumentation() {
                 >
                   {endpoint.method}
                 </span>
-                <div>
-                  <div className="font-semibold">{endpoint.title}</div>
-                  <div className="text-sm text-muted-foreground font-mono">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm sm:text-base">{endpoint.title}</div>
+                  <div className="text-[10px] sm:text-sm text-muted-foreground font-mono break-all">
                     {endpoint.path}
                   </div>
                 </div>
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-4 pt-2">
+              <div className="space-y-3 sm:space-y-4 pt-2">
                 {/* 描述 */}
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   {endpoint.description}
                 </p>
 
                 {/* curl 示例 */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">curl 示例</span>
+                    <span className="text-xs sm:text-sm font-medium">curl 示例</span>
                     <Button
                       variant="outline"
                       size="sm"
@@ -337,21 +337,22 @@ export function ApiDocumentation() {
                           `curl-${endpoint.id}`
                         )
                       }
+                      className="h-7 sm:h-8 text-xs"
                     >
                       {copiedId === `curl-${endpoint.id}` ? (
                         <>
-                          <Check className="h-4 w-4 mr-1" />
-                          已复制
+                          <Check className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">已复制</span>
                         </>
                       ) : (
                         <>
-                          <Copy className="h-4 w-4 mr-1" />
-                          复制
+                          <Copy className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">复制</span>
                         </>
                       )}
                     </Button>
                   </div>
-                  <pre className="bg-muted p-3 rounded-md overflow-x-auto text-sm">
+                  <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm">
                     <code>{endpoint.curlExample}</code>
                   </pre>
                 </div>
@@ -360,7 +361,7 @@ export function ApiDocumentation() {
                 {endpoint.requestBody && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">请求体</span>
+                      <span className="text-xs sm:text-sm font-medium">请求体</span>
                       <Button
                         variant="outline"
                         size="sm"
@@ -370,21 +371,22 @@ export function ApiDocumentation() {
                             `request-${endpoint.id}`
                           )
                         }
+                        className="h-7 sm:h-8 text-xs"
                       >
                         {copiedId === `request-${endpoint.id}` ? (
                           <>
-                            <Check className="h-4 w-4 mr-1" />
-                            已复制
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                            <span className="hidden sm:inline">已复制</span>
                           </>
                         ) : (
                           <>
-                            <Copy className="h-4 w-4 mr-1" />
-                            复制
+                            <Copy className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                            <span className="hidden sm:inline">复制</span>
                           </>
                         )}
                       </Button>
                     </div>
-                    <pre className="bg-muted p-3 rounded-md overflow-x-auto text-sm">
+                    <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm">
                       <code>{endpoint.requestBody}</code>
                     </pre>
                   </div>
@@ -393,7 +395,7 @@ export function ApiDocumentation() {
                 {/* 成功响应 */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">成功响应</span>
+                    <span className="text-xs sm:text-sm font-medium">成功响应</span>
                     <Button
                       variant="outline"
                       size="sm"
@@ -403,21 +405,22 @@ export function ApiDocumentation() {
                           `success-${endpoint.id}`
                         )
                       }
+                      className="h-7 sm:h-8 text-xs"
                     >
                       {copiedId === `success-${endpoint.id}` ? (
                         <>
-                          <Check className="h-4 w-4 mr-1" />
-                          已复制
+                          <Check className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">已复制</span>
                         </>
                       ) : (
                         <>
-                          <Copy className="h-4 w-4 mr-1" />
-                          复制
+                          <Copy className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">复制</span>
                         </>
                       )}
                     </Button>
                   </div>
-                  <pre className="bg-muted p-3 rounded-md overflow-x-auto text-sm">
+                  <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm">
                     <code>{endpoint.successResponse}</code>
                   </pre>
                 </div>
@@ -426,7 +429,7 @@ export function ApiDocumentation() {
                 {endpoint.errorResponse && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">错误响应示例</span>
+                      <span className="text-xs sm:text-sm font-medium">错误响应示例</span>
                       <Button
                         variant="outline"
                         size="sm"
@@ -436,21 +439,22 @@ export function ApiDocumentation() {
                             `error-${endpoint.id}`
                           )
                         }
+                        className="h-7 sm:h-8 text-xs"
                       >
                         {copiedId === `error-${endpoint.id}` ? (
                           <>
-                            <Check className="h-4 w-4 mr-1" />
-                            已复制
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                            <span className="hidden sm:inline">已复制</span>
                           </>
                         ) : (
                           <>
-                            <Copy className="h-4 w-4 mr-1" />
-                            复制
+                            <Copy className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                            <span className="hidden sm:inline">复制</span>
                           </>
                         )}
                       </Button>
                     </div>
-                    <pre className="bg-muted p-3 rounded-md overflow-x-auto text-sm">
+                    <pre className="bg-muted p-2 sm:p-3 rounded-md overflow-x-auto text-[10px] sm:text-sm">
                       <code>{endpoint.errorResponse}</code>
                     </pre>
                   </div>
@@ -462,15 +466,15 @@ export function ApiDocumentation() {
       </Accordion>
 
       {/* 通用说明 */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="font-semibold text-yellow-900 mb-2">重要提示</h3>
-        <ul className="text-sm text-yellow-800 space-y-1 list-disc list-inside">
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
+        <h3 className="font-semibold text-yellow-900 mb-2 text-sm sm:text-base">重要提示</h3>
+        <ul className="text-xs sm:text-sm text-yellow-800 space-y-1 list-disc list-inside">
           <li>所有 API 请求都需要在请求头中包含 X-API-Key</li>
           <li>API 密钥的作用域控制访问范围(所有网站 或 指定网站)</li>
           <li>密码以明文形式返回,请确保在安全环境下使用</li>
-          <li>建议仅在 localhost 或 VPN 环境下访问 API</li>
+          <li className="hidden sm:list-item">建议仅在 localhost 或 VPN 环境下访问 API</li>
           <li>删除 API 密钥后,使用该密钥的请求将返回 401 错误</li>
-          <li>
+          <li className="hidden sm:list-item">
             随机获取账号接口采用 24
             小时缓存机制：相同密钥在同一网站获取的账号在 24
             小时内保持不变，避免频繁切换账号
