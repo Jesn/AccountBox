@@ -110,7 +110,7 @@ export function AccountList({
                   account.password.length > 8 ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <code className="text-sm font-mono block cursor-help truncate max-w-[80px]">
+                        <code className="text-sm font-mono block cursor-help truncate w-[80px]">
                           {account.password.substring(0, 8)}...
                         </code>
                       </TooltipTrigger>
@@ -121,7 +121,7 @@ export function AccountList({
                       </TooltipContent>
                     </Tooltip>
                   ) : (
-                    <code className="text-sm font-mono block">
+                    <code className="text-sm font-mono block w-[80px] truncate">
                       {visiblePasswords.has(account.id)
                         ? account.password
                         : '••••••••'}
