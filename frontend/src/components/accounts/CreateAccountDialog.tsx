@@ -153,16 +153,17 @@ export function CreateAccountDialog({
                 <Label htmlFor="password">
                   密码 <span className="text-red-500">*</span>
                 </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="密码"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isSubmitting}
-                    className="flex-1"
-                  />
+                <div className="flex gap-2 items-start">
+                  <div className="flex-1 min-w-0">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="密码"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isSubmitting}
+                    />
+                  </div>
                   <Button
                     type="button"
                     variant="outline"
@@ -170,6 +171,7 @@ export function CreateAccountDialog({
                     onClick={handleQuickGenerate}
                     disabled={isSubmitting || isGeneratingPassword}
                     title="快速生成密码"
+                    className="flex-shrink-0"
                   >
                     <Zap className="h-4 w-4" />
                   </Button>
@@ -180,6 +182,7 @@ export function CreateAccountDialog({
                     onClick={() => setShowPasswordGenerator(true)}
                     disabled={isSubmitting}
                     title="高级生成"
+                    className="flex-shrink-0"
                   >
                     <Settings2 className="h-4 w-4" />
                   </Button>
@@ -189,6 +192,7 @@ export function CreateAccountDialog({
                     size="icon"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isSubmitting}
+                    className="flex-shrink-0"
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
