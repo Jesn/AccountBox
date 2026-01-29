@@ -126,30 +126,6 @@ export function AccountCardView({
                   </div>
                 )}
 
-                {/* 扩展字段 */}
-                {account.extendedData &&
-                  Object.keys(account.extendedData).length > 0 && (
-                    <div className="mb-2">
-                      <div className="space-y-1">
-                        {Object.entries(account.extendedData).map(
-                          ([key, value]) => (
-                            <div
-                              key={key}
-                              className="text-xs bg-gray-50 px-2 py-1 rounded"
-                            >
-                              <span className="text-gray-600">{key}:</span>{' '}
-                              <span className="text-gray-900">
-                                {typeof value === 'string'
-                                  ? value
-                                  : JSON.stringify(value)}
-                              </span>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  )}
-
                 {/* 操作按钮 */}
                 <div className="flex gap-1.5 pt-2 border-t">
                   <Button
