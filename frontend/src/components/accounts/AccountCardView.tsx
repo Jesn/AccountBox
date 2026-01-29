@@ -59,7 +59,7 @@ export function AccountCardView({
 
   return (
     <TooltipProvider>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {accounts.map((account) => {
           const isPasswordVisible = visiblePasswords.has(account.id)
           const displayPassword = isPasswordVisible
@@ -68,61 +68,59 @@ export function AccountCardView({
 
           return (
             <Card key={account.id} className="overflow-hidden">
-              <CardContent className="p-4">
+              <CardContent className="p-3">
                 {/* 用户名和状态 */}
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start justify-between mb-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium text-base truncate">
+                      <h3 className="font-medium text-sm truncate">
                         {account.username}
                       </h3>
                       <AccountStatusBadge status={account.status} />
                     </div>
                     {account.tags && (
-                      <p className="text-sm text-gray-600 truncate">
-                        标签: {account.tags}
+                      <p className="text-xs text-gray-600 truncate">
+                        {account.tags}
                       </p>
                     )}
                   </div>
                   <CopyButton
                     text={account.username}
                     successMessage="用户名已复制"
-                    className="h-8 w-8 p-0 flex-shrink-0"
+                    className="h-7 w-7 p-0 flex-shrink-0"
                   />
                 </div>
 
                 {/* 密码 */}
-                <div className="mb-3">
-                  <label className="text-xs text-gray-500 mb-1 block">密码</label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 font-mono text-sm bg-gray-50 px-3 py-2 rounded border">
+                <div className="mb-2">
+                  <div className="flex items-center gap-1">
+                    <div className="flex-1 font-mono text-xs bg-gray-50 px-2 py-1.5 rounded border truncate">
                       {displayPassword}
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => togglePasswordVisibility(account.id)}
-                      className="h-8 w-8 flex-shrink-0"
+                      className="h-7 w-7 flex-shrink-0"
                     >
                       {isPasswordVisible ? (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="h-3.5 w-3.5" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3.5 w-3.5" />
                       )}
                     </Button>
                     <CopyButton
                       text={account.password}
                       successMessage="密码已复制"
-                      className="h-8 w-8 p-0 flex-shrink-0"
+                      className="h-7 w-7 p-0 flex-shrink-0"
                     />
                   </div>
                 </div>
 
                 {/* 备注 */}
                 {account.notes && (
-                  <div className="mb-3">
-                    <label className="text-xs text-gray-500 mb-1 block">备注</label>
-                    <p className="text-sm text-gray-700 line-clamp-2">
+                  <div className="mb-2">
+                    <p className="text-xs text-gray-700 line-clamp-2">
                       {account.notes}
                     </p>
                   </div>
@@ -131,16 +129,13 @@ export function AccountCardView({
                 {/* 扩展字段 */}
                 {account.extendedData &&
                   Object.keys(account.extendedData).length > 0 && (
-                    <div className="mb-3">
-                      <label className="text-xs text-gray-500 mb-1 block">
-                        扩展字段
-                      </label>
+                    <div className="mb-2">
                       <div className="space-y-1">
                         {Object.entries(account.extendedData).map(
                           ([key, value]) => (
                             <div
                               key={key}
-                              className="text-sm bg-gray-50 px-2 py-1 rounded"
+                              className="text-xs bg-gray-50 px-2 py-1 rounded"
                             >
                               <span className="text-gray-600">{key}:</span>{' '}
                               <span className="text-gray-900">
@@ -155,25 +150,15 @@ export function AccountCardView({
                     </div>
                   )}
 
-                {/* 时间信息 */}
-                <div className="text-xs text-gray-500 mb-3 space-y-1">
-                  <div>
-                    创建: {new Date(account.createdAt).toLocaleString('zh-CN')}
-                  </div>
-                  <div>
-                    更新: {new Date(account.updatedAt).toLocaleString('zh-CN')}
-                  </div>
-                </div>
-
                 {/* 操作按钮 */}
-                <div className="flex gap-2 pt-3 border-t">
+                <div className="flex gap-1.5 pt-2 border-t">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onEdit(account)}
-                    className="flex-1"
+                    className="flex-1 h-8 text-xs"
                   >
-                    <Edit className="h-4 w-4 mr-1" />
+                    <Edit className="h-3.5 w-3.5 mr-1" />
                     编辑
                   </Button>
 
@@ -184,11 +169,12 @@ export function AccountCardView({
                           variant="outline"
                           size="sm"
                           onClick={() => onDisable(account)}
+                          className="h-8 w-8 p-0"
                         >
-                          <XCircle className="h-4 w-4" />
+                          <XCircle className="h-3.5 w-3.5" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>禁用账号</TooltipContent>
+                      <TooltipContent>禁用</TooltipContent>
                     </Tooltip>
                   )}
 
@@ -199,11 +185,12 @@ export function AccountCardView({
                           variant="outline"
                           size="sm"
                           onClick={() => onEnable(account)}
+                          className="h-8 w-8 p-0"
                         >
-                          <CheckCircle className="h-4 w-4" />
+                          <CheckCircle className="h-3.5 w-3.5" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>启用账号</TooltipContent>
+                      <TooltipContent>启用</TooltipContent>
                     </Tooltip>
                   )}
 
@@ -213,11 +200,12 @@ export function AccountCardView({
                         variant="destructive"
                         size="sm"
                         onClick={() => onDelete(account)}
+                        className="h-8 w-8 p-0"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>删除账号</TooltipContent>
+                    <TooltipContent>删除</TooltipContent>
                   </Tooltip>
                 </div>
               </CardContent>

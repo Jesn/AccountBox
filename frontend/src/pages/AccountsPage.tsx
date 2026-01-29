@@ -159,33 +159,50 @@ export function AccountsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       <div className="mx-auto max-w-[1400px] px-4 md:px-0">
-        <div className="mb-8">
+        {/* 头部区域 */}
+        <div className="mb-6">
+          {/* 返回按钮 */}
           <Button
             variant="ghost"
             onClick={() => navigate('/websites')}
-            className="mb-4"
+            className="mb-3 -ml-2"
+            size="sm"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            返回网站列表
+            返回
           </Button>
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">
+          {/* 标题和添加按钮 */}
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">
                 {website?.displayName || website?.domain || '账号管理'}
               </h1>
               {website && website.domain && website.displayName && (
-                <p className="text-gray-600 mt-1">{website.domain}</p>
+                <p className="text-sm text-gray-600 mt-1 truncate">{website.domain}</p>
               )}
             </div>
-            <Button onClick={() => setShowCreateAccountDialog(true)} className="w-full sm:w-auto">
+            {/* 移动端：图标按钮 */}
+            <Button
+              onClick={() => setShowCreateAccountDialog(true)}
+              size="icon"
+              className="md:hidden flex-shrink-0"
+              title="添加账号"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            {/* 桌面端：完整按钮 */}
+            <Button
+              onClick={() => setShowCreateAccountDialog(true)}
+              className="hidden md:inline-flex"
+            >
               <Plus className="mr-2 h-4 w-4" />
               添加账号
             </Button>
           </div>
 
           {/* 搜索和筛选区域 */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <Input
