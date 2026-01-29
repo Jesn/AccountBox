@@ -69,20 +69,20 @@ export function ApiKeyList({ apiKeys, websites, onDelete }: ApiKeyListProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {apiKeys.map((apiKey) => {
         const isVisible = visibleKeys.has(apiKey.id)
 
         return (
           <Card key={apiKey.id}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg">{apiKey.name}</CardTitle>
-                  <CardDescription>
+            <CardHeader className="p-3 sm:p-6">
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1 flex-1 min-w-0">
+                  <CardTitle className="text-base sm:text-lg truncate">{apiKey.name}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
                     创建于 {formatDate(apiKey.createdAt)}
                     {apiKey.lastUsedAt && (
-                      <span className="ml-2">
+                      <span className="ml-2 hidden sm:inline">
                         · 最后使用: {formatDate(apiKey.lastUsedAt)}
                       </span>
                     )}
@@ -93,21 +93,45 @@ export function ApiKeyList({ apiKeys, websites, onDelete }: ApiKeyListProps) {
                   size="icon"
                   onClick={() => onDelete(apiKey)}
                   title="删除密钥"
+                  className="h-8 w-8 flex-shrink-0"
                 >
-                  <Trash2 className="h-4 w-4 text-red-500" />
+                  <Trash2 className="h-3.5 w-3.5 text-red-500" />
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 p-3 sm:px-6 sm:pb-6 pt-0">
               {/* 密钥显示 */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">密钥</span>
-                  <div className="flex gap-2">
+                  <span className="text-xs sm:text-sm font-medium">密钥</span>
+                  <div className="flex gap-1.5">
+                    {/* 移动端：图标按钮 */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => toggleKeyVisibility(apiKey.id)}
+                      className="md:hidden h-7 w-7"
+                      title={isVisible ? "隐藏" : "显示"}
+                    >
+                      {isVisible ? (
+                        <EyeOff className="h-3.5 w-3.5" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                    <CopyButton
+                      text={apiKey.keyPlaintext}
+                      successMessage="密钥已复制"
+                      variant="outline"
+                      className="md:hidden h-7 w-7 p-0"
+                    />
+
+                    {/* 桌面端：完整按钮 */}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => toggleKeyVisibility(apiKey.id)}
+                      className="hidden md:inline-flex"
                     >
                       {isVisible ? (
                         <>
@@ -123,13 +147,14 @@ export function ApiKeyList({ apiKeys, websites, onDelete }: ApiKeyListProps) {
                     </Button>
                     <CopyButton
                       text={apiKey.keyPlaintext}
-                      successMessage="API密钥已复制到剪贴板"
+                      successMessage="API密钥已复制"
                       variant="outline"
                       showText
+                      className="hidden md:inline-flex"
                     />
                   </div>
                 </div>
-                <div className="font-mono text-sm bg-muted p-3 rounded-md break-all">
+                <div className="font-mono text-xs sm:text-sm bg-muted p-2 sm:p-3 rounded-md break-all">
                   {isVisible
                     ? apiKey.keyPlaintext
                     : maskKey(apiKey.keyPlaintext)}
@@ -138,15 +163,15 @@ export function ApiKeyList({ apiKeys, websites, onDelete }: ApiKeyListProps) {
 
               {/* 作用域信息 */}
               <div className="space-y-2">
-                <span className="text-sm font-medium">作用域</span>
+                <span className="text-xs sm:text-sm font-medium">作用域</span>
                 <div className="text-sm">
                   {apiKey.scopeType === 'All' ? (
-                    <Badge variant="default" className="bg-blue-500">
+                    <Badge variant="default" className="bg-blue-500 text-xs">
                       所有网站
                     </Badge>
                   ) : (
                     <div className="space-y-2">
-                      <Badge variant="secondary">
+                      <Badge variant="secondary" className="text-xs">
                         指定网站 ({apiKey.websiteIds.length}个)
                       </Badge>
                       {apiKey.websiteIds.length > 0 && (
