@@ -149,7 +149,7 @@ export function RecycleBinPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
-      <div className="mx-auto max-w-6xl px-4 md:px-0">
+      <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
             <Button variant="outline" size="sm" onClick={handleBack}>

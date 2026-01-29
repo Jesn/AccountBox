@@ -117,7 +117,7 @@ export function SearchPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl px-4 md:px-0">
+      <div className="mx-auto max-w-7xl">
         {/* 头部 */}
         <div className="mb-8">
           <Button

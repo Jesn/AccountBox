@@ -158,7 +158,7 @@ export function AccountsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
-      <div className="mx-auto max-w-[1400px] px-4 md:px-0">
+      <div className="mx-auto max-w-[1400px]">
         {/* 头部区域 */}
         <div className="mb-6">
           {/* 返回按钮 */}

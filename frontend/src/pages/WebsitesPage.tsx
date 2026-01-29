@@ -158,7 +158,7 @@ export function WebsitesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl px-4 md:px-0">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center justify-between gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold">网站管理</h1>
           <div className="flex gap-2">
