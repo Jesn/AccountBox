@@ -50,25 +50,25 @@ export function WebsiteCardView({
               </span>
             </div>
 
-            {/* 账号统计 */}
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="bg-green-50 rounded px-3 py-2 text-center">
-                <div className="text-lg font-semibold text-green-700">
+            {/* 账号统计 - 紧凑显示 */}
+            <div className="flex items-center gap-4 mb-3 text-sm">
+              <div className="flex items-center gap-1">
+                <span className="font-semibold text-green-700">
                   {website.activeAccountCount}
-                </div>
-                <div className="text-xs text-green-600">活跃</div>
+                </span>
+                <span className="text-gray-600">活跃</span>
               </div>
-              <div className="bg-gray-50 rounded px-3 py-2 text-center">
-                <div className="text-lg font-semibold text-gray-700">
+              <div className="flex items-center gap-1">
+                <span className="font-semibold text-gray-700">
                   {website.disabledAccountCount}
-                </div>
-                <div className="text-xs text-gray-600">禁用</div>
+                </span>
+                <span className="text-gray-600">禁用</span>
               </div>
-              <div className="bg-red-50 rounded px-3 py-2 text-center">
-                <div className="text-lg font-semibold text-red-700">
+              <div className="flex items-center gap-1">
+                <span className="font-semibold text-red-700">
                   {website.deletedAccountCount}
-                </div>
-                <div className="text-xs text-red-600">回收站</div>
+                </span>
+                <span className="text-gray-600">回收</span>
               </div>
             </div>
 
