@@ -59,6 +59,13 @@ class PasswordGeneratorService {
 
   /**
    * 使用默认配置快速生成密码
+   *
+   * 配置说明：
+   * - 长度：16 位
+   * - 字符类型：大写字母、小写字母、数字、特殊符号
+   * - 排除易混淆字符：0O1lI
+   * - 字符分布：大写 30%、小写 45%、数字 20%、符号 5%
+   * - 使用字符分布模式确保每种字符类型至少出现一次
    */
   async generateQuick(): Promise<ApiResponse<GeneratePasswordResponse>> {
     const defaultRequest: GeneratePasswordRequest = {
@@ -72,7 +79,7 @@ class PasswordGeneratorService {
       lowercasePercentage: 45,
       numbersPercentage: 20,
       symbolsPercentage: 5,
-      useCharacterDistribution: false,
+      useCharacterDistribution: true,
     }
     return await this.generate(defaultRequest)
   }

@@ -17,7 +17,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import type { AccountResponse } from '@/services/accountService'
-import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 
 interface AccountListProps {
@@ -201,7 +201,6 @@ export function AccountList({
                       onClick={() => onEnable(account)}
                       title="启用账号"
                     >
-                      <CheckCircle className="h-4 w-4 mr-1" />
                       启用
                     </Button>
                   )}

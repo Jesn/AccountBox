@@ -175,6 +175,7 @@ public class PasswordGeneratorService
 
     /// <summary>
     /// 确保密码开头和结尾不是特殊字符
+    /// 通过交换位置而不是替换来保持字符类型的数量不变
     /// </summary>
     private string EnsureNoSymbolsAtEnds(string password, string charset)
     {
@@ -182,23 +183,34 @@ public class PasswordGeneratorService
             return password;
 
         var chars = password.ToCharArray();
-        var nonSymbolCharset = BuildNonSymbolCharset(charset);
 
-        if (nonSymbolCharset.Length == 0)
-            return password; // 如果没有非符号字符集，直接返回
-
-        using (var rng = RandomNumberGenerator.Create())
+        // 检查开头是否是符号
+        if (SymbolChars.Contains(chars[0]))
         {
-            // 检查并替换开头
-            if (SymbolChars.Contains(chars[0]))
+            // 在中间位置找一个非符号字符进行交换
+            for (int i = 1; i < chars.Length - 1; i++)
             {
-                chars[0] = GetRandomChar(rng, nonSymbolCharset);
+                if (!SymbolChars.Contains(chars[i]))
+                {
+                    // 交换位置
+                    (chars[0], chars[i]) = (chars[i], chars[0]);
+                    break;
+                }
             }
+        }
 
-            // 检查并替换结尾
-            if (SymbolChars.Contains(chars[^1]))
+        // 检查结尾是否是符号
+        if (SymbolChars.Contains(chars[^1]))
+        {
+            // 在中间位置找一个非符号字符进行交换
+            for (int i = chars.Length - 2; i > 0; i--)
             {
-                chars[^1] = GetRandomChar(rng, nonSymbolCharset);
+                if (!SymbolChars.Contains(chars[i]))
+                {
+                    // 交换位置
+                    (chars[^1], chars[i]) = (chars[i], chars[^1]);
+                    break;
+                }
             }
         }
 
@@ -313,6 +325,7 @@ public class PasswordGeneratorService
 
     /// <summary>
     /// 确保按比例生成的密码开头和结尾不是特殊字符
+    /// 通过交换位置而不是替换来保持字符类型的数量不变
     /// </summary>
     private string EnsureNoSymbolsAtEndsForDistribution(string password, GeneratePasswordRequest request)
     {
@@ -321,50 +334,33 @@ public class PasswordGeneratorService
 
         var chars = password.ToCharArray();
 
-        // 构建非符号字符集
-        var nonSymbolChars = new List<char>();
-
-        if (request.IncludeUppercase)
+        // 检查开头是否是符号
+        if (SymbolChars.Contains(chars[0]))
         {
-            var charset = request.ExcludeAmbiguous
-                ? RemoveAmbiguousChars(UppercaseChars)
-                : UppercaseChars;
-            nonSymbolChars.AddRange(charset);
-        }
-
-        if (request.IncludeLowercase)
-        {
-            var charset = request.ExcludeAmbiguous
-                ? RemoveAmbiguousChars(LowercaseChars)
-                : LowercaseChars;
-            nonSymbolChars.AddRange(charset);
-        }
-
-        if (request.IncludeNumbers)
-        {
-            var charset = request.ExcludeAmbiguous
-                ? RemoveAmbiguousChars(NumberChars)
-                : NumberChars;
-            nonSymbolChars.AddRange(charset);
-        }
-
-        if (nonSymbolChars.Count == 0)
-            return password; // 如果没有非符号字符集，直接返回
-
-        var nonSymbolCharset = new string(nonSymbolChars.ToArray());
-
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            // 检查并替换开头
-            if (SymbolChars.Contains(chars[0]))
+            // 在中间位置找一个非符号字符进行交换
+            for (int i = 1; i < chars.Length - 1; i++)
             {
-                chars[0] = GetRandomChar(rng, nonSymbolCharset);
+                if (!SymbolChars.Contains(chars[i]))
+                {
+                    // 交换位置
+                    (chars[0], chars[i]) = (chars[i], chars[0]);
+                    break;
+                }
             }
+        }
 
-            // 检查并替换结尾
-            if (SymbolChars.Contains(chars[^1]))
+        // 检查结尾是否是符号
+        if (SymbolChars.Contains(chars[^1]))
+        {
+            // 在中间位置找一个非符号字符进行交换
+            for (int i = chars.Length - 2; i > 0; i--)
             {
-                chars[^1] = GetRandomChar(rng, nonSymbolCharset);
+                if (!SymbolChars.Contains(chars[i]))
+                {
+                    // 交换位置
+                    (chars[^1], chars[i]) = (chars[i], chars[^1]);
+                    break;
+                }
             }
         }
 
