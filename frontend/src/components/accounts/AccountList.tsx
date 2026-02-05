@@ -187,6 +187,13 @@ export function AccountList({
               {/* 操作 */}
               <TableCell className="text-right py-2 px-3 w-[240px]">
                 <div className="flex gap-2 justify-end items-center whitespace-nowrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onEdit(account)}
+                  >
+                    编辑
+                  </Button>
                   {account.status === 'Disabled' && onEnable && (
                     <Button
                       variant="outline"
@@ -205,17 +212,9 @@ export function AccountList({
                       onClick={() => onDisable(account)}
                       title="禁用账号"
                     >
-                      <XCircle className="h-4 w-4 mr-1" />
                       禁用
                     </Button>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEdit(account)}
-                  >
-                    编辑
-                  </Button>
                   <Button
                     variant="destructive"
                     size="sm"

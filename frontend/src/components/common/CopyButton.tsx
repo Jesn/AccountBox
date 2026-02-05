@@ -44,6 +44,11 @@ interface CopyButtonProps {
    * 复制成功后图标恢复的延迟时间（毫秒），默认 2000ms
    */
   resetDelay?: number
+
+  /**
+   * 是否禁用按钮
+   */
+  disabled?: boolean
 }
 
 /**
@@ -72,6 +77,7 @@ export function CopyButton({
   className = '',
   title = '复制',
   resetDelay = 2000,
+  disabled = false,
 }: CopyButtonProps) {
   const [isCopied, setIsCopied] = useState(false)
 
@@ -97,11 +103,13 @@ export function CopyButton({
 
   return (
     <Button
+      type="button"
       variant={variant}
       size={size}
       onClick={handleCopy}
       className={className}
       title={isCopied ? '已复制' : title}
+      disabled={disabled}
     >
       {isCopied ? (
         <>

@@ -19,6 +19,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { PasswordGeneratorDialog } from '@/components/password-generator/PasswordGeneratorDialog'
 import { ExtendedFieldsEditor } from '@/components/accounts/ExtendedFieldsEditor'
+import { CopyButton } from '@/components/common/CopyButton'
+import { ConfirmGeneratePasswordDialog } from '@/components/accounts/ConfirmGeneratePasswordDialog'
 import { Eye, EyeOff, Zap, Settings2 } from 'lucide-react'
 
 interface EditAccountDialogProps {
@@ -48,6 +50,7 @@ export function EditAccountDialog({
   const [error, setError] = useState<string | null>(null)
   const [showPasswordGenerator, setShowPasswordGenerator] = useState(false)
   const [isGeneratingPassword, setIsGeneratingPassword] = useState(false)
+  const [showConfirmGenerate, setShowConfirmGenerate] = useState(false)
 
   // 当对话框打开或账号数据变化时，更新表单
   useEffect(() => {
@@ -116,6 +119,18 @@ export function EditAccountDialog({
 
   // 快速生成密码（使用默认配置）
   const handleQuickGenerate = async () => {
+    // 如果已有密码，需要二次确认
+    if (password.trim()) {
+      setShowConfirmGenerate(true)
+      return
+    }
+
+    // 密码为空，直接生成
+    await generatePassword()
+  }
+
+  // 执行密码生成
+  const generatePassword = async () => {
     setIsGeneratingPassword(true)
     try {
       const response = await passwordGeneratorService.generateQuick()
@@ -173,6 +188,15 @@ export function EditAccountDialog({
                       disabled={isSubmitting}
                     />
                   </div>
+                  <CopyButton
+                    text={password}
+                    successMessage="密码已复制到剪贴板"
+                    size="icon"
+                    variant="outline"
+                    title="复制密码"
+                    className="flex-shrink-0"
+                    disabled={!password || isSubmitting}
+                  />
                   <Button
                     type="button"
                     variant="outline"
@@ -275,6 +299,12 @@ export function EditAccountDialog({
           setPassword(generatedPassword)
           setShowPassword(true) // 自动显示生成的密码
         }}
+      />
+
+      <ConfirmGeneratePasswordDialog
+        open={showConfirmGenerate}
+        onOpenChange={setShowConfirmGenerate}
+        onConfirm={generatePassword}
       />
     </>
   )

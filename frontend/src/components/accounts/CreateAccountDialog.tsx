@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { PasswordGeneratorDialog } from '@/components/password-generator/PasswordGeneratorDialog'
 import { ExtendedFieldsEditor } from '@/components/accounts/ExtendedFieldsEditor'
+import { CopyButton } from '@/components/common/CopyButton'
 import { Eye, EyeOff, Zap, Settings2 } from 'lucide-react'
 
 interface CreateAccountDialogProps {
@@ -164,6 +165,15 @@ export function CreateAccountDialog({
                       disabled={isSubmitting}
                     />
                   </div>
+                  <CopyButton
+                    text={password}
+                    successMessage="密码已复制到剪贴板"
+                    size="icon"
+                    variant="outline"
+                    title="复制密码"
+                    className="flex-shrink-0"
+                    disabled={!password || isSubmitting}
+                  />
                   <Button
                     type="button"
                     variant="outline"
