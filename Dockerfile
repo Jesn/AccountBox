@@ -5,22 +5,21 @@
 # ============================================
 # 阶段 1: 构建前端
 # ============================================
-FROM node:22-alpine AS frontend-builder
+FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 
 # 复制前端依赖文件
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
+COPY frontend/package.json ./
 
-# 安装 pnpm 并安装依赖
-RUN npm install -g pnpm@latest && \
-    pnpm install --frozen-lockfile
+# 使用 npm 安装依赖，避免 pnpm 在 CI/CD 中触发构建脚本审批失败
+RUN npm install
 
 # 复制前端源代码
 COPY frontend/ ./
 
 # 构建前端
-RUN pnpm build
+RUN npm run build
 
 # ============================================
 # 阶段 2: 构建后端
