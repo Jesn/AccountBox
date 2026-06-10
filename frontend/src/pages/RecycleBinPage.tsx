@@ -256,6 +256,8 @@ export function RecycleBinPage() {
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={pageSize}
             onPageChange={setCurrentPage}
           />
         )}

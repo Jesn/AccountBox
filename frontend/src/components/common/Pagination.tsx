@@ -1,134 +1,278 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface PaginationProps {
   currentPage: number
   totalPages: number
   onPageChange: (page: number) => void
+  totalCount?: number
+  pageSize?: number
+  pageSizeOptions?: number[]
+  onPageSizeChange?: (pageSize: number) => void
+  showSummary?: boolean
+  showJump?: boolean
 }
+
+type PageItem = number | 'ellipsis-left' | 'ellipsis-right'
 
 export default function Pagination({
   currentPage,
   totalPages,
   onPageChange,
+  totalCount,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
+  showSummary = true,
+  showJump = true,
 }: PaginationProps) {
   const [maxVisiblePages, setMaxVisiblePages] = useState(5)
+  const [jumpPage, setJumpPage] = useState(currentPage.toString())
 
   useEffect(() => {
     const calculateMaxPages = () => {
       const width = window.innerWidth
-      
-      // 桌面端（>= 640px）固定显示5个
+
+      if (width >= 1024) {
+        setMaxVisiblePages(7)
+        return
+      }
+
       if (width >= 640) {
         setMaxVisiblePages(5)
         return
       }
-      
-      // 移动端根据宽度动态计算
-      // 预留空间：左右内边距(16px) + 上一页按钮(32px) + 下一页按钮(32px) + 按钮间距
-      const reservedSpace = 16 + 32 + 32 + 8 // 总共约88px
-      const availableSpace = width - reservedSpace
-      
-      // 每个页码按钮约32px宽 + 4px间距
-      const buttonWidth = 36
-      const calculatedMax = Math.floor(availableSpace / buttonWidth)
-      
-      // 限制在3-7之间
-      const finalMax = Math.max(3, Math.min(7, calculatedMax))
-      setMaxVisiblePages(finalMax)
+
+      setMaxVisiblePages(3)
     }
 
     calculateMaxPages()
     window.addEventListener('resize', calculateMaxPages)
-    
+
     return () => window.removeEventListener('resize', calculateMaxPages)
   }, [])
 
-  const handlePrevious = () => {
-    if (currentPage > 1) {
-      onPageChange(currentPage - 1)
+  useEffect(() => {
+    setJumpPage(currentPage.toString())
+  }, [currentPage])
+
+  const safeTotalPages = Math.max(1, totalPages)
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), safeTotalPages)
+  const hasTotal = typeof totalCount === 'number'
+  const hasPageSize = typeof pageSize === 'number' && pageSize > 0
+  const canChangePageSize =
+    hasPageSize &&
+    Array.isArray(pageSizeOptions) &&
+    pageSizeOptions.length > 0 &&
+    typeof onPageSizeChange === 'function'
+  const showPageControls = safeTotalPages > 1
+  const showBottomControls = showPageControls || canChangePageSize
+  const rangeStart = hasTotal && hasPageSize && totalCount > 0
+    ? (safeCurrentPage - 1) * pageSize + 1
+    : 0
+  const rangeEnd = hasTotal && hasPageSize
+    ? Math.min(safeCurrentPage * pageSize, totalCount)
+    : 0
+
+  const changePage = (page: number) => {
+    const nextPage = Math.min(Math.max(page, 1), safeTotalPages)
+    if (nextPage !== safeCurrentPage) {
+      onPageChange(nextPage)
     }
   }
 
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      onPageChange(currentPage + 1)
+  const handleJump = () => {
+    const parsedPage = Number(jumpPage)
+    if (!Number.isInteger(parsedPage)) {
+      setJumpPage(safeCurrentPage.toString())
+      return
     }
+
+    changePage(parsedPage)
   }
 
-  // 生成页码按钮
-  const getPageNumbers = () => {
-    const pages: number[] = []
-    const maxVisible = maxVisiblePages
-
-    if (totalPages <= maxVisible) {
-      // 如果总页数小于等于最大可见页数，显示所有页码
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
-      }
-    } else {
-      // 否则，显示当前页附近的页码
-      const halfVisible = Math.floor(maxVisible / 2)
-      let start = Math.max(1, currentPage - halfVisible)
-      const end = Math.min(totalPages, start + maxVisible - 1)
-
-      if (end - start + 1 < maxVisible) {
-        start = Math.max(1, end - maxVisible + 1)
-      }
-
-      for (let i = start; i <= end; i++) {
-        pages.push(i)
-      }
+  const getPageNumbers = (): PageItem[] => {
+    if (safeTotalPages <= maxVisiblePages + 2) {
+      return Array.from({ length: safeTotalPages }, (_, index) => index + 1)
     }
 
+    const middleSize = Math.max(1, maxVisiblePages - 2)
+    const halfVisible = Math.floor(middleSize / 2)
+    let start = Math.max(2, safeCurrentPage - halfVisible)
+    let end = Math.min(safeTotalPages - 1, start + middleSize - 1)
+
+    if (end - start + 1 < middleSize) {
+      start = Math.max(2, end - middleSize + 1)
+    }
+
+    const pages: PageItem[] = [1]
+
+    if (start > 2) {
+      pages.push('ellipsis-left')
+    }
+
+    for (let page = start; page <= end; page++) {
+      pages.push(page)
+    }
+
+    if (end < safeTotalPages - 1) {
+      pages.push('ellipsis-right')
+    }
+
+    pages.push(safeTotalPages)
     return pages
   }
 
-  if (totalPages <= 1) {
+  if (safeTotalPages <= 1 && !hasTotal) {
     return null
   }
 
   return (
-    <div className="flex items-center justify-center gap-1 sm:gap-2 mt-4 px-2">
-      {/* 上一页按钮 - 移动端只显示图标 */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handlePrevious}
-        disabled={currentPage === 1}
-        className="h-8 sm:h-9 flex-shrink-0"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        <span className="hidden sm:inline ml-1">上一页</span>
-      </Button>
+    <div className="mt-4 flex flex-col gap-3 rounded-lg border bg-white px-3 py-3 sm:px-4">
+      {showSummary && hasTotal && (
+        <div className="text-center text-xs text-gray-600 sm:text-sm">
+          共 <span className="font-semibold text-gray-900">{totalCount}</span> 条
+          {hasPageSize && totalCount > 0 && (
+            <>
+              ，当前显示第{' '}
+              <span className="font-semibold text-gray-900">{rangeStart}</span>
+              {' - '}
+              <span className="font-semibold text-gray-900">{rangeEnd}</span> 条
+            </>
+          )}
+        </div>
+      )}
 
-      {/* 页码按钮 - 根据屏幕宽度动态显示 */}
-      <div className="flex gap-1 flex-shrink-0">
-        {getPageNumbers().map((page) => (
-          <Button
-            key={page}
-            variant={page === currentPage ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => onPageChange(page)}
-            className="min-w-8 sm:min-w-10 h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
-          >
-            {page}
-          </Button>
-        ))}
-      </div>
+      {showBottomControls && (
+        <div className="flex flex-col items-center justify-between gap-3 lg:flex-row">
+          {showPageControls && (
+            <div className="flex items-center justify-center gap-1 sm:gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => changePage(1)}
+                disabled={safeCurrentPage === 1}
+                className="hidden h-8 flex-shrink-0 sm:inline-flex sm:h-9"
+              >
+                首页
+              </Button>
 
-      {/* 下一页按钮 - 移动端只显示图标 */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleNext}
-        disabled={currentPage === totalPages}
-        className="h-8 sm:h-9 flex-shrink-0"
-      >
-        <span className="hidden sm:inline mr-1">下一页</span>
-        <ChevronRight className="h-4 w-4" />
-      </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => changePage(safeCurrentPage - 1)}
+                disabled={safeCurrentPage === 1}
+                className="h-8 flex-shrink-0 sm:h-9"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1">上一页</span>
+              </Button>
+
+              <div className="flex min-w-0 gap-1">
+                {getPageNumbers().map((page) =>
+                  typeof page === 'number' ? (
+                    <Button
+                      key={page}
+                      variant={page === safeCurrentPage ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => changePage(page)}
+                      className="h-8 min-w-8 px-2 text-xs sm:h-9 sm:min-w-10 sm:px-3 sm:text-sm"
+                    >
+                      {page}
+                    </Button>
+                  ) : (
+                    <span
+                      key={page}
+                      className="flex h-8 min-w-6 items-center justify-center text-sm text-gray-500 sm:h-9 sm:min-w-8"
+                    >
+                      ...
+                    </span>
+                  )
+                )}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => changePage(safeCurrentPage + 1)}
+                disabled={safeCurrentPage === safeTotalPages}
+                className="h-8 flex-shrink-0 sm:h-9"
+              >
+                <span className="hidden sm:inline mr-1">下一页</span>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => changePage(safeTotalPages)}
+                disabled={safeCurrentPage === safeTotalPages}
+                className="hidden h-8 flex-shrink-0 sm:inline-flex sm:h-9"
+              >
+                末页
+              </Button>
+            </div>
+          )}
+
+          <div className="flex flex-col items-center justify-center gap-2 text-xs text-gray-600 sm:flex-row sm:text-sm lg:ml-auto">
+            {canChangePageSize && (
+              <div className="flex items-center justify-center gap-2">
+                <span>每页</span>
+                <Select
+                  value={pageSize.toString()}
+                  onValueChange={(value) => onPageSizeChange(Number(value))}
+                >
+                  <SelectTrigger className="h-8 w-[86px] sm:h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {pageSizeOptions.map((option) => (
+                      <SelectItem key={option} value={option.toString()}>
+                        {option} 条
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {showJump && showPageControls && (
+              <div className="flex items-center justify-center gap-2">
+                <span>跳至</span>
+                <Input
+                  value={jumpPage}
+                  onChange={(event) => setJumpPage(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      handleJump()
+                    }
+                  }}
+                  inputMode="numeric"
+                  className="h-8 w-16 text-center sm:h-9"
+                />
+                <span>页</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleJump}
+                  className="h-8 sm:h-9"
+                >
+                  跳转
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

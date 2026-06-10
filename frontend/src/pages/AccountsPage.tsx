@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { accountService } from '@/services/accountService'
 import { websiteService } from '@/services/websiteService'
 import type { AccountResponse } from '@/services/accountService'
@@ -22,6 +22,31 @@ import { DeleteAccountDialog } from '@/components/accounts/DeleteAccountDialog'
 import { ArrowLeft, Plus, Search } from 'lucide-react'
 import Pagination from '@/components/common/Pagination'
 
+const PAGE_SIZE_OPTIONS = [15, 30, 50, 100]
+const DEFAULT_PAGE_NUMBER = 1
+const DEFAULT_PAGE_SIZE = 15
+const SEARCH_DEBOUNCE_MS = 400
+
+type AccountStatusFilter = 'all' | 'Active' | 'Disabled'
+
+const parsePageNumber = (value: string | null) => {
+  const pageNumber = Number(value)
+  return Number.isInteger(pageNumber) && pageNumber > 0
+    ? pageNumber
+    : DEFAULT_PAGE_NUMBER
+}
+
+const parsePageSize = (value: string | null) => {
+  const pageSize = Number(value)
+  return PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : DEFAULT_PAGE_SIZE
+}
+
+const parseStatusFilter = (value: string | null): AccountStatusFilter => {
+  return value === 'Active' || value === 'Disabled' ? value : 'all'
+}
+
+const parseSearchTerm = (value: string | null) => value?.trim() ?? ''
+
 /**
  * 账号详情页面
  * 显示指定网站的所有账号
@@ -29,19 +54,72 @@ import Pagination from '@/components/common/Pagination'
 export function AccountsPage() {
   const { websiteId } = useParams<{ websiteId: string }>()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialSearchParams = useRef(searchParams)
   const [website, setWebsite] = useState<WebsiteResponse | null>(null)
   const [accounts, setAccounts] = useState<AccountResponse[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(() =>
+    parsePageNumber(initialSearchParams.current.get('pageNumber'))
+  )
   const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [pageSize, setPageSize] = useState(() =>
+    parsePageSize(initialSearchParams.current.get('pageSize'))
+  )
   const [isLoading, setIsLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'Active' | 'Disabled'>('all')
+  const [searchInput, setSearchInput] = useState(() =>
+    parseSearchTerm(initialSearchParams.current.get('searchTerm'))
+  )
+  const [searchTerm, setSearchTerm] = useState(() =>
+    parseSearchTerm(initialSearchParams.current.get('searchTerm'))
+  )
+  const [statusFilter, setStatusFilter] = useState<AccountStatusFilter>(() =>
+    parseStatusFilter(initialSearchParams.current.get('status'))
+  )
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false)
   const [showEditAccountDialog, setShowEditAccountDialog] = useState(false)
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
   const [selectedAccount, setSelectedAccount] =
     useState<AccountResponse | null>(null)
-  const pageSize = 15
+
+  useEffect(() => {
+    const nextSearchParams = new URLSearchParams()
+
+    if (currentPage !== DEFAULT_PAGE_NUMBER) {
+      nextSearchParams.set('pageNumber', currentPage.toString())
+    }
+
+    if (pageSize !== DEFAULT_PAGE_SIZE) {
+      nextSearchParams.set('pageSize', pageSize.toString())
+    }
+
+    if (statusFilter !== 'all') {
+      nextSearchParams.set('status', statusFilter)
+    }
+
+    if (searchTerm) {
+      nextSearchParams.set('searchTerm', searchTerm)
+    }
+
+    setSearchParams(nextSearchParams, { replace: true })
+  }, [currentPage, pageSize, searchTerm, statusFilter, setSearchParams])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      const nextSearchTerm = searchInput.trim()
+
+      setSearchTerm((currentSearchTerm) => {
+        if (currentSearchTerm === nextSearchTerm) {
+          return currentSearchTerm
+        }
+
+        setCurrentPage(1)
+        return nextSearchTerm
+      })
+    }, SEARCH_DEBOUNCE_MS)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchInput])
 
   // 只在websiteId变化时加载网站信息
   useEffect(() => {
@@ -85,6 +163,7 @@ export function AccountsPage() {
       if (response.success && response.data) {
         setAccounts(response.data.items as AccountResponse[])
         setTotalPages(response.data.totalPages)
+        setTotalCount(response.data.totalCount)
       }
     } catch (error) {
       console.error('加载账号列表失败:', error)
@@ -97,16 +176,20 @@ export function AccountsPage() {
   useEffect(() => {
     loadAccounts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [websiteId, currentPage, searchTerm, statusFilter])
+  }, [websiteId, currentPage, pageSize, searchTerm, statusFilter])
 
   const handleSearchChange = (value: string) => {
-    setSearchTerm(value)
-    setCurrentPage(1) // 搜索时重置到第一页
+    setSearchInput(value)
   }
 
   const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value as 'all' | 'Active' | 'Disabled')
+    setStatusFilter(value as AccountStatusFilter)
     setCurrentPage(1) // 状态筛选时重置到第一页
+  }
+
+  const handlePageSizeChange = (nextPageSize: number) => {
+    setPageSize(nextPageSize)
+    setCurrentPage(1)
   }
 
   const handleCreateAccountSuccess = () => {
@@ -130,7 +213,13 @@ export function AccountsPage() {
   }
 
   const handleDeleteAccountSuccess = () => {
-    // 删除成功后重新加载列表
+    const shouldMoveToPreviousPage = accounts.length === 1 && currentPage > 1
+
+    if (shouldMoveToPreviousPage) {
+      setCurrentPage((page) => Math.max(1, page - 1))
+      return
+    }
+
     loadAccounts()
   }
 
@@ -181,6 +270,9 @@ export function AccountsPage() {
               {website && website.domain && website.displayName && (
                 <p className="text-sm text-gray-600 mt-1 truncate">{website.domain}</p>
               )}
+              <p className="text-sm text-gray-600 mt-1">
+                共 <span className="font-semibold text-gray-900">{totalCount}</span> 个账号
+              </p>
             </div>
             {/* 移动端：图标按钮 */}
             <Button
@@ -208,7 +300,7 @@ export function AccountsPage() {
               <Input
                 type="text"
                 placeholder="搜索用户名、标签或备注..."
-                value={searchTerm}
+                value={searchInput}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10"
               />
@@ -259,10 +351,14 @@ export function AccountsPage() {
               />
             </div>
 
-            {!isLoading && accounts.length > 0 && (
+            {!isLoading && (accounts.length > 0 || totalCount > 0) && (
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
+                totalCount={totalCount}
+                pageSize={pageSize}
+                pageSizeOptions={PAGE_SIZE_OPTIONS}
+                onPageSizeChange={handlePageSizeChange}
                 onPageChange={setCurrentPage}
               />
             )}
