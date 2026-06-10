@@ -1,5 +1,6 @@
 using AccountBox.Api.DTOs.External;
 using AccountBox.Api.Services;
+using AccountBox.Core.Constants;
 using AccountBox.Core.Enums;
 using AccountBox.Core.Interfaces;
 using AccountBox.Core.Models;
@@ -252,30 +253,68 @@ public class ExternalApiController : ControllerBase
     }
 
     /// <summary>
-    /// 获取指定网站的账号列表（支持状态过滤）
-    /// GET /api/external/websites/{websiteId}/accounts?status=Active
+    /// 获取指定网站的分页账号列表（支持状态过滤）
+    /// GET /api/external/websites/{websiteId}/accounts?status=Active&amp;pageNumber=1&amp;pageSize=10
     /// </summary>
+    /// <param name="websiteId">网站 ID。</param>
+    /// <param name="status">账号状态，支持 Active / Disabled；留空表示不过滤。</param>
+    /// <param name="pageNumber">页码，从 1 开始，默认值为 1。</param>
+    /// <param name="pageSize">每页数量，默认值为 10，范围 1 到 100。</param>
+    /// <returns>包含分页信息和当前页账号列表的响应。</returns>
     [HttpGet("websites/{websiteId}/accounts")]
-    public async Task<ActionResult<ApiResponse<object>>> GetAccountsByWebsite(
+    [ProducesResponseType(typeof(ApiResponse<ExternalAccountsPagedResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<ExternalAccountsPagedResponse>>> GetAccountsByWebsite(
         int websiteId,
-        [FromQuery] string? status = null)
+        [FromQuery] string? status = null,
+        [FromQuery] int pageNumber = PaginationConstants.DefaultPageNumber,
+        [FromQuery] int pageSize = PaginationConstants.DefaultPageSize)
     {
         try
         {
+            if (pageNumber < PaginationConstants.DefaultPageNumber)
+            {
+                return BadRequest(ApiResponse<ExternalAccountsPagedResponse>.Fail(
+                    "INVALID_PAGE_NUMBER",
+                    $"页码必须大于或等于 {PaginationConstants.DefaultPageNumber}"));
+            }
+
+            if (pageSize < PaginationConstants.MinPageSize || pageSize > PaginationConstants.MaxPageSize)
+            {
+                return BadRequest(ApiResponse<object>.Fail(
+                    "INVALID_PAGE_SIZE",
+                    $"每页数量必须在 {PaginationConstants.MinPageSize} 到 {PaginationConstants.MaxPageSize} 之间"));
+            }
+
+            string? normalizedStatus = null;
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                if (!Enum.TryParse<AccountStatus>(status, ignoreCase: true, out var accountStatus))
+                {
+                    return BadRequest(ApiResponse<object>.Fail(
+                        "INVALID_STATUS",
+                        "账号状态只支持 Active 或 Disabled"));
+                }
+
+                normalizedStatus = accountStatus.ToString();
+            }
+
             var apiKey = GetApiKeyFromContext();
             if (apiKey == null)
             {
                 return Unauthorized(ApiResponse<object>.Fail("API_KEY_MISSING", "API密钥缺失"));
             }
 
-            // 验证网站是否存在
             var website = await _websiteRepository.GetByIdAsync(websiteId);
             if (website == null)
             {
                 return NotFound(ApiResponse<object>.Fail("WEBSITE_NOT_FOUND", "指定的网站不存在"));
             }
 
-            // 验证API密钥是否有权访问该网站
             if (!CanAccessWebsite(apiKey, websiteId))
             {
                 return StatusCode(403, ApiResponse<object>.Fail(
@@ -283,46 +322,36 @@ public class ExternalApiController : ControllerBase
                     "API密钥无权访问该网站"));
             }
 
-            // 获取账号列表（不包含已删除的）
             var pagedResult = await _accountService.GetPagedAsync(
-                pageNumber: 1,
-                pageSize: 100,
-                websiteId: websiteId);
+                pageNumber: pageNumber,
+                pageSize: pageSize,
+                websiteId: websiteId,
+                status: normalizedStatus);
 
-            var accounts = pagedResult.Items;
-
-            // 根据status参数过滤
-            if (!string.IsNullOrEmpty(status))
+            var accounts = pagedResult.Items.Select(a => new ExternalAccountResponse
             {
-                if (status.Equals("Active", StringComparison.OrdinalIgnoreCase))
-                {
-                    accounts = accounts.Where(a => a.Status == "Active").ToList();
-                }
-                else if (status.Equals("Disabled", StringComparison.OrdinalIgnoreCase))
-                {
-                    accounts = accounts.Where(a => a.Status == "Disabled").ToList();
-                }
-            }
-
-            var result = accounts.Select(a => new
-            {
-                id = a.Id,
-                websiteId = a.WebsiteId,
-                username = a.Username,
-                password = a.Password,
-                tags = a.Tags,
-                notes = a.Notes,
-                status = a.Status,
-                extendedData = a.ExtendedData,
-                createdAt = a.CreatedAt,
-                updatedAt = a.UpdatedAt
+                Id = a.Id,
+                WebsiteId = a.WebsiteId,
+                Username = a.Username,
+                Password = a.Password,
+                Tags = a.Tags,
+                Notes = a.Notes,
+                Status = a.Status,
+                ExtendedData = a.ExtendedData,
+                CreatedAt = a.CreatedAt,
+                UpdatedAt = a.UpdatedAt
             }).ToList();
 
-            return Ok(ApiResponse<object>.Ok(new
+            return Ok(ApiResponse<ExternalAccountsPagedResponse>.Ok(new ExternalAccountsPagedResponse
             {
-                websiteId = websiteId,
-                totalCount = result.Count,
-                accounts = result
+                WebsiteId = websiteId,
+                TotalCount = pagedResult.TotalCount,
+                PageNumber = pagedResult.PageNumber,
+                PageSize = pagedResult.PageSize,
+                TotalPages = pagedResult.TotalPages,
+                HasPreviousPage = pagedResult.HasPreviousPage,
+                HasNextPage = pagedResult.HasNextPage,
+                Accounts = accounts
             }));
         }
         catch (Exception ex)
