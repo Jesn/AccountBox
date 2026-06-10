@@ -150,14 +150,19 @@ const API_ENDPOINTS: ApiEndpoint[] = [
     method: 'GET',
     path: '/api/external/websites/{websiteId}/accounts',
     description:
-      '获取指定网站的账号列表。可选参数 status=Active 或 status=Disabled 进行过滤。',
-    curlExample: `curl -X GET 'http://localhost:5093/api/external/websites/1/accounts?status=Active' \\
+      '获取指定网站的分页账号列表。可选参数 status=Active 或 status=Disabled 进行状态过滤；pageNumber 从 1 开始，pageSize 默认 10，最大 100。',
+    curlExample: `curl -X GET 'http://localhost:5093/api/external/websites/1/accounts?status=Active&pageNumber=1&pageSize=10' \\
   -H 'X-API-Key: YOUR_API_KEY'`,
     successResponse: `{
   "success": true,
   "data": {
     "websiteId": 1,
     "totalCount": 5,
+    "pageNumber": 1,
+    "pageSize": 10,
+    "totalPages": 1,
+    "hasPreviousPage": false,
+    "hasNextPage": false,
     "accounts": [
       {
         "id": 123,
@@ -167,6 +172,9 @@ const API_ENDPOINTS: ApiEndpoint[] = [
         "tags": "测试账号",
         "notes": "备注信息",
         "status": "Active",
+        "extendedData": {
+          "phone": "13800138000"
+        },
         "createdAt": "2025-10-17T10:30:00Z",
         "updatedAt": "2025-10-17T10:35:00Z"
       }
