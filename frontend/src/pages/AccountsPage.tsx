@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { accountService } from '@/services/accountService'
 import { websiteService } from '@/services/websiteService'
 import type { AccountResponse } from '@/services/accountService'
@@ -54,8 +54,8 @@ const parseSearchTerm = (value: string | null) => value?.trim() ?? ''
 export function AccountsPage() {
   const { websiteId } = useParams<{ websiteId: string }>()
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const initialSearchParams = useRef(searchParams)
+  const initialSearchParams = useRef(new URLSearchParams(window.location.search))
+  const accountRequestId = useRef(0)
   const [website, setWebsite] = useState<WebsiteResponse | null>(null)
   const [accounts, setAccounts] = useState<AccountResponse[]>([])
   const [currentPage, setCurrentPage] = useState(() =>
@@ -63,6 +63,7 @@ export function AccountsPage() {
   )
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
+  const [loadedAccountsWebsiteId, setLoadedAccountsWebsiteId] = useState<string | null>(null)
   const [pageSize, setPageSize] = useState(() =>
     parsePageSize(initialSearchParams.current.get('pageSize'))
   )
@@ -81,6 +82,10 @@ export function AccountsPage() {
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
   const [selectedAccount, setSelectedAccount] =
     useState<AccountResponse | null>(null)
+  const hasLoadedCurrentWebsiteAccounts = loadedAccountsWebsiteId === websiteId
+  const isInitialLoading = isLoading && !hasLoadedCurrentWebsiteAccounts
+  const isRefreshingAccounts = isLoading && hasLoadedCurrentWebsiteAccounts
+  const listMinHeight = pageSize >= 50 ? '960px' : pageSize >= 30 ? '760px' : '620px'
 
   useEffect(() => {
     const nextSearchParams = new URLSearchParams()
@@ -101,8 +106,14 @@ export function AccountsPage() {
       nextSearchParams.set('searchTerm', searchTerm)
     }
 
-    setSearchParams(nextSearchParams, { replace: true })
-  }, [currentPage, pageSize, searchTerm, statusFilter, setSearchParams])
+    const nextQueryString = nextSearchParams.toString()
+    const nextUrl = `${window.location.pathname}${nextQueryString ? `?${nextQueryString}` : ''}${window.location.hash}`
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`
+
+    if (nextUrl !== currentUrl) {
+      window.history.replaceState(null, '', nextUrl)
+    }
+  }, [currentPage, pageSize, searchTerm, statusFilter])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -151,7 +162,9 @@ export function AccountsPage() {
   const loadAccounts = async () => {
     if (!websiteId) return
 
+    const requestId = ++accountRequestId.current
     setIsLoading(true)
+
     try {
       const response = await accountService.getAll(
         currentPage,
@@ -160,15 +173,25 @@ export function AccountsPage() {
         searchTerm,
         statusFilter !== 'all' ? statusFilter : undefined
       )
+
+      if (requestId !== accountRequestId.current) {
+        return
+      }
+
       if (response.success && response.data) {
         setAccounts(response.data.items as AccountResponse[])
         setTotalPages(response.data.totalPages)
         setTotalCount(response.data.totalCount)
+        setLoadedAccountsWebsiteId(websiteId)
       }
     } catch (error) {
-      console.error('加载账号列表失败:', error)
+      if (requestId === accountRequestId.current) {
+        console.error('加载账号列表失败:', error)
+      }
     } finally {
-      setIsLoading(false)
+      if (requestId === accountRequestId.current) {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -321,48 +344,63 @@ export function AccountsPage() {
           </div>
         </div>
 
-        {isLoading ? (
+        {isInitialLoading ? (
           <Card>
             <CardContent className="py-12 text-center">
               <p className="text-gray-600">加载中...</p>
             </CardContent>
           </Card>
         ) : (
-          <>
-            {/* 桌面端：表格视图 */}
-            <div className="hidden md:block">
-              <AccountList
-                accounts={accounts}
-                onEdit={handleEditAccount}
-                onDelete={handleDeleteAccount}
-                onEnable={handleEnableAccount}
-                onDisable={handleDisableAccount}
-              />
-            </div>
+          <div className="relative" style={{ minHeight: listMinHeight }}>
+            <div
+              className={isRefreshingAccounts ? 'pointer-events-none' : undefined}
+              aria-busy={isRefreshingAccounts}
+            >
+              {/* 桌面端：表格视图 */}
+              <div className="hidden md:block">
+                <AccountList
+                  accounts={accounts}
+                  onEdit={handleEditAccount}
+                  onDelete={handleDeleteAccount}
+                  onEnable={handleEnableAccount}
+                  onDisable={handleDisableAccount}
+                />
+              </div>
 
-            {/* 移动端：卡片视图 */}
-            <div className="block md:hidden">
-              <AccountCardView
-                accounts={accounts}
-                onEdit={handleEditAccount}
-                onDelete={handleDeleteAccount}
-                onEnable={handleEnableAccount}
-                onDisable={handleDisableAccount}
-              />
-            </div>
+              {/* 移动端：卡片视图 */}
+              <div className="block md:hidden">
+                <AccountCardView
+                  accounts={accounts}
+                  onEdit={handleEditAccount}
+                  onDelete={handleDeleteAccount}
+                  onEnable={handleEnableAccount}
+                  onDisable={handleDisableAccount}
+                />
+              </div>
 
-            {!isLoading && (accounts.length > 0 || totalCount > 0) && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalCount}
-                pageSize={pageSize}
-                pageSizeOptions={PAGE_SIZE_OPTIONS}
-                onPageSizeChange={handlePageSizeChange}
-                onPageChange={setCurrentPage}
-              />
-            )}
-          </>
+              {(accounts.length > 0 || totalCount > 0) && (
+                <div className="relative">
+                  {isRefreshingAccounts && (
+                    <div className="absolute inset-x-0 -top-3 flex justify-center">
+                      <div className="rounded-full bg-white/95 px-3 py-1 text-xs text-gray-500 shadow-sm ring-1 ring-gray-200">
+                        正在切换页面...
+                      </div>
+                    </div>
+                  )}
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    pageSize={pageSize}
+                    pageSizeOptions={PAGE_SIZE_OPTIONS}
+                    onPageSizeChange={handlePageSizeChange}
+                    onPageChange={setCurrentPage}
+                    disabled={isRefreshingAccounts}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
 

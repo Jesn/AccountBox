@@ -20,6 +20,7 @@ interface PaginationProps {
   onPageSizeChange?: (pageSize: number) => void
   showSummary?: boolean
   showJump?: boolean
+  disabled?: boolean
 }
 
 type PageItem = number | 'ellipsis-left' | 'ellipsis-right'
@@ -34,6 +35,7 @@ export default function Pagination({
   onPageSizeChange,
   showSummary = true,
   showJump = true,
+  disabled = false,
 }: PaginationProps) {
   const [maxVisiblePages, setMaxVisiblePages] = useState(5)
   const [jumpPage, setJumpPage] = useState(currentPage.toString())
@@ -84,6 +86,10 @@ export default function Pagination({
     : 0
 
   const changePage = (page: number) => {
+    if (disabled) {
+      return
+    }
+
     const nextPage = Math.min(Math.max(page, 1), safeTotalPages)
     if (nextPage !== safeCurrentPage) {
       onPageChange(nextPage)
@@ -91,6 +97,10 @@ export default function Pagination({
   }
 
   const handleJump = () => {
+    if (disabled) {
+      return
+    }
+
     const parsedPage = Number(jumpPage)
     if (!Number.isInteger(parsedPage)) {
       setJumpPage(safeCurrentPage.toString())
