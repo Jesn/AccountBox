@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { RotateCcw } from 'lucide-react'
-import type { DeletedAccountResponse } from '@/services/recycleBinService'
+import type { DeletedAccountResponse } from '@/types'
 
 interface RestoreAccountDialogProps {
   open: boolean

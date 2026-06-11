@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import type { WebsiteResponse } from '@/services/websiteService'
+import type { WebsiteResponse } from '@/types'
 import { Eye, Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 

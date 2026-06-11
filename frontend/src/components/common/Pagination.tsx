@@ -16,7 +16,7 @@ interface PaginationProps {
   onPageChange: (page: number) => void
   totalCount?: number
   pageSize?: number
-  pageSizeOptions?: number[]
+  pageSizeOptions?: readonly number[]
   onPageSizeChange?: (pageSize: number) => void
   showSummary?: boolean
   showJump?: boolean
@@ -117,7 +117,7 @@ export default function Pagination({
     const middleSize = Math.max(1, maxVisiblePages - 2)
     const halfVisible = Math.floor(middleSize / 2)
     let start = Math.max(2, safeCurrentPage - halfVisible)
-    let end = Math.min(safeTotalPages - 1, start + middleSize - 1)
+    const end = Math.min(safeTotalPages - 1, start + middleSize - 1)
 
     if (end - start + 1 < middleSize) {
       start = Math.max(2, end - middleSize + 1)

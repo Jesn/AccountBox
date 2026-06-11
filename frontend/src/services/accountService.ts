@@ -8,9 +8,6 @@ import type {
   UpdateAccountRequest,
 } from '@/types'
 
-// 重新导出类型供外部使用
-export type { AccountResponse, CreateAccountRequest, UpdateAccountRequest }
-
 class AccountService {
   private readonly baseUrl = API_ENDPOINTS.ACCOUNTS
 

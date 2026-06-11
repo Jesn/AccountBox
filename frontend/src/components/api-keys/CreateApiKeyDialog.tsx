@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { apiKeyService } from '@/services/apiKeyService'
-import { websiteService, type WebsiteResponse } from '@/services/websiteService'
-import type { CreateApiKeyRequest, ApiKeyScopeType } from '@/types/ApiKey'
+import { websiteService } from '@/services/websiteService'
+import type { WebsiteResponse } from '@/types'
+import type { CreateApiKeyRequest, ApiKeyScopeType } from '@/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { APP_CONFIG } from '@/lib/constants'
 
 interface CreateApiKeyDialogProps {
   open: boolean
@@ -47,7 +49,7 @@ export function CreateApiKeyDialog({
   const loadWebsites = async () => {
     setIsLoadingWebsites(true)
     try {
-      const response = await websiteService.getAll(1, 100) // 获取前100个网站
+      const response = await websiteService.getAll(1, APP_CONFIG.MAX_WEBSITE_OPTIONS)
       if (response.success && response.data) {
         setWebsites(response.data.items)
       }

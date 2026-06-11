@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { AlertTriangle } from 'lucide-react'
-import type { DeletedAccountResponse } from '@/services/recycleBinService'
+import type { DeletedAccountResponse } from '@/types'
 
 interface PermanentDeleteDialogProps {
   open: boolean

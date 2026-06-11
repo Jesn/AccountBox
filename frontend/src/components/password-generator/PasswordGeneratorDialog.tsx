@@ -1,10 +1,4 @@
-import { useState, useEffect } from 'react'
-import { passwordGeneratorService } from '@/services/passwordGeneratorService'
-import type {
-  GeneratePasswordRequest,
-  PasswordStrength,
-} from '@/services/passwordGeneratorService'
-import { useDebounce } from '@/hooks/useDebounce'
+import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,12 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Slider } from '@/components/ui/slider'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { PasswordStrengthIndicator } from './PasswordStrengthIndicator'
-import { CopyButton } from '@/components/common/CopyButton'
-import { RefreshCw } from 'lucide-react'
+import { CharacterDistributionSection } from '@/components/password-generator/CharacterDistributionSection'
+import { CharacterTypeSection } from '@/components/password-generator/CharacterTypeSection'
+import { GeneratedPasswordPreview } from '@/components/password-generator/GeneratedPasswordPreview'
+import { PasswordLengthSection } from '@/components/password-generator/PasswordLengthSection'
+import { PasswordStrengthIndicator } from '@/components/password-generator/PasswordStrengthIndicator'
+import { usePasswordGenerator } from '@/hooks/usePasswordGenerator'
 
 interface PasswordGeneratorDialogProps {
   open: boolean
@@ -36,100 +30,14 @@ export function PasswordGeneratorDialog({
   onOpenChange,
   onAccept,
 }: PasswordGeneratorDialogProps) {
-  const [length, setLength] = useState(16)
-  const [includeUppercase, setIncludeUppercase] = useState(true)
-  const [includeLowercase, setIncludeLowercase] = useState(true)
-  const [includeNumbers, setIncludeNumbers] = useState(true)
-  const [includeSymbols, setIncludeSymbols] = useState(true)
-  const [excludeAmbiguous, setExcludeAmbiguous] = useState(true)
+  const generator = usePasswordGenerator(open)
 
-  // 字符比例控制
-  const [useCharacterDistribution, setUseCharacterDistribution] =
-    useState(false)
-  const [uppercasePercentage, setUppercasePercentage] = useState(30)
-  const [lowercasePercentage, setLowercasePercentage] = useState(45)
-  const [numbersPercentage, setNumbersPercentage] = useState(20)
-  const [symbolsPercentage, setSymbolsPercentage] = useState(5)
-
-  const [generatedPassword, setGeneratedPassword] = useState('')
-  const [passwordStrength, setPasswordStrength] =
-    useState<PasswordStrength | null>(null)
-  const [isGenerating, setIsGenerating] = useState(false)
-
-  // 使用防抖：只有当用户停止调整滑块 500ms 后才触发生成
-  const debouncedLength = useDebounce(length, 500)
-  const debouncedUppercasePercentage = useDebounce(uppercasePercentage, 500)
-  const debouncedLowercasePercentage = useDebounce(lowercasePercentage, 500)
-  const debouncedNumbersPercentage = useDebounce(numbersPercentage, 500)
-  const debouncedSymbolsPercentage = useDebounce(symbolsPercentage, 500)
-
-  // 生成密码
-  const generatePassword = async () => {
-    setIsGenerating(true)
-
-    try {
-      const request: GeneratePasswordRequest = {
-        length,
-        includeUppercase,
-        includeLowercase,
-        includeNumbers,
-        includeSymbols,
-        excludeAmbiguous,
-        uppercasePercentage,
-        lowercasePercentage,
-        numbersPercentage,
-        symbolsPercentage,
-        useCharacterDistribution,
-      }
-
-      const response = await passwordGeneratorService.generate(request)
-
-      if (response.success && response.data) {
-        setGeneratedPassword(response.data.password)
-        setPasswordStrength(response.data.strength)
-      }
-    } catch (error) {
-      console.error('生成密码失败:', error)
-    } finally {
-      setIsGenerating(false)
-    }
-  }
-
-  // 接受密码
   const handleAccept = () => {
-    if (generatedPassword) {
-      onAccept(generatedPassword)
+    if (generator.generatedPassword) {
+      onAccept(generator.generatedPassword)
       onOpenChange(false)
     }
   }
-
-  // 对话框打开时自动生成一次密码
-  useEffect(() => {
-    if (open) {
-      generatePassword()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
-
-  // 配置改变时自动重新生成（使用防抖后的值）
-  useEffect(() => {
-    if (open && generatedPassword) {
-      generatePassword()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    debouncedLength, // 使用防抖后的长度
-    includeUppercase,
-    includeLowercase,
-    includeNumbers,
-    includeSymbols,
-    excludeAmbiguous,
-    useCharacterDistribution,
-    debouncedUppercasePercentage, // 使用防抖后的百分比
-    debouncedLowercasePercentage,
-    debouncedNumbersPercentage,
-    debouncedSymbolsPercentage,
-  ])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -140,255 +48,54 @@ export function PasswordGeneratorDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-3 overflow-y-auto flex-1">
-          {/* 生成的密码显示 */}
-          <div className="space-y-2">
-            <Label>生成的密码</Label>
-            <div className="flex gap-2">
-              <div className="flex-1 rounded-md border px-3 py-2 font-mono text-sm break-all">
-                {generatedPassword || '...'}
-              </div>
-              <CopyButton
-                text={generatedPassword}
-                variant="outline"
-                size="icon"
-                successMessage="密码已复制到剪贴板"
-                title="复制密码"
-              />
-            </div>
-          </div>
+          <GeneratedPasswordPreview password={generator.generatedPassword} />
 
-          {/* 强度指示器 */}
-          {passwordStrength && (
-            <PasswordStrengthIndicator strength={passwordStrength} />
+          {generator.passwordStrength && (
+            <PasswordStrengthIndicator strength={generator.passwordStrength} />
           )}
 
-          {/* 长度配置 */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>密码长度</Label>
-              <span className="text-sm font-medium">{length}</span>
-            </div>
-            <Slider
-              value={[length]}
-              onValueChange={(values) => setLength(values[0])}
-              min={8}
-              max={128}
-              step={1}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>8</span>
-              <span>128</span>
-            </div>
-          </div>
+          <PasswordLengthSection
+            length={generator.length}
+            onLengthChange={generator.setLength}
+          />
 
-          {/* 字符集配置 */}
-          <div className="space-y-2">
-            <Label>字符类型</Label>
+          <CharacterTypeSection
+            includeUppercase={generator.includeUppercase}
+            includeLowercase={generator.includeLowercase}
+            includeNumbers={generator.includeNumbers}
+            includeSymbols={generator.includeSymbols}
+            excludeAmbiguous={generator.excludeAmbiguous}
+            onIncludeUppercaseChange={generator.setIncludeUppercase}
+            onIncludeLowercaseChange={generator.setIncludeLowercase}
+            onIncludeNumbersChange={generator.setIncludeNumbers}
+            onIncludeSymbolsChange={generator.setIncludeSymbols}
+            onExcludeAmbiguousChange={generator.setExcludeAmbiguous}
+          />
 
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="uppercase"
-                checked={includeUppercase}
-                onCheckedChange={(checked) =>
-                  setIncludeUppercase(checked as boolean)
-                }
-              />
-              <label
-                htmlFor="uppercase"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                大写字母 (A-Z)
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="lowercase"
-                checked={includeLowercase}
-                onCheckedChange={(checked) =>
-                  setIncludeLowercase(checked as boolean)
-                }
-              />
-              <label
-                htmlFor="lowercase"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                小写字母 (a-z)
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="numbers"
-                checked={includeNumbers}
-                onCheckedChange={(checked) =>
-                  setIncludeNumbers(checked as boolean)
-                }
-              />
-              <label
-                htmlFor="numbers"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                数字 (0-9)
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="symbols"
-                checked={includeSymbols}
-                onCheckedChange={(checked) =>
-                  setIncludeSymbols(checked as boolean)
-                }
-              />
-              <label
-                htmlFor="symbols"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                符号 (!@#$%^&*...)
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="excludeAmbiguous"
-                checked={excludeAmbiguous}
-                onCheckedChange={(checked) =>
-                  setExcludeAmbiguous(checked as boolean)
-                }
-              />
-              <label
-                htmlFor="excludeAmbiguous"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                排除易混淆字符 (0O1lI)
-              </label>
-            </div>
-          </div>
-
-          {/* 字符比例控制 */}
-          <div className="space-y-2 border-t pt-2">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="useDistribution"
-                checked={useCharacterDistribution}
-                onCheckedChange={(checked) =>
-                  setUseCharacterDistribution(checked as boolean)
-                }
-              />
-              <label
-                htmlFor="useDistribution"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                启用字符比例控制
-              </label>
-            </div>
-
-            {useCharacterDistribution && (
-              <div className="space-y-2 pl-6">
-                {/* 大写字母比例 */}
-                {includeUppercase && (
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs">大写字母</Label>
-                      <span className="text-xs font-medium">
-                        {uppercasePercentage}%
-                      </span>
-                    </div>
-                    <Slider
-                      value={[uppercasePercentage]}
-                      onValueChange={(values) =>
-                        setUppercasePercentage(values[0])
-                      }
-                      min={0}
-                      max={100}
-                      step={5}
-                      className="w-full"
-                    />
-                  </div>
-                )}
-
-                {/* 小写字母比例 */}
-                {includeLowercase && (
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs">小写字母</Label>
-                      <span className="text-xs font-medium">
-                        {lowercasePercentage}%
-                      </span>
-                    </div>
-                    <Slider
-                      value={[lowercasePercentage]}
-                      onValueChange={(values) =>
-                        setLowercasePercentage(values[0])
-                      }
-                      min={0}
-                      max={100}
-                      step={5}
-                      className="w-full"
-                    />
-                  </div>
-                )}
-
-                {/* 数字比例 */}
-                {includeNumbers && (
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs">数字</Label>
-                      <span className="text-xs font-medium">
-                        {numbersPercentage}%
-                      </span>
-                    </div>
-                    <Slider
-                      value={[numbersPercentage]}
-                      onValueChange={(values) =>
-                        setNumbersPercentage(values[0])
-                      }
-                      min={0}
-                      max={100}
-                      step={5}
-                      className="w-full"
-                    />
-                  </div>
-                )}
-
-                {/* 符号比例 */}
-                {includeSymbols && (
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs">符号</Label>
-                      <span className="text-xs font-medium">
-                        {symbolsPercentage}%
-                      </span>
-                    </div>
-                    <Slider
-                      value={[symbolsPercentage]}
-                      onValueChange={(values) =>
-                        setSymbolsPercentage(values[0])
-                      }
-                      min={0}
-                      max={100}
-                      step={5}
-                      className="w-full"
-                    />
-                  </div>
-                )}
-
-                <div className="text-xs text-muted-foreground">
-                  提示：比例会自动归一化，无需总和为 100%
-                </div>
-              </div>
-            )}
-          </div>
+          <CharacterDistributionSection
+            enabled={generator.useCharacterDistribution}
+            includeUppercase={generator.includeUppercase}
+            includeLowercase={generator.includeLowercase}
+            includeNumbers={generator.includeNumbers}
+            includeSymbols={generator.includeSymbols}
+            uppercasePercentage={generator.uppercasePercentage}
+            lowercasePercentage={generator.lowercasePercentage}
+            numbersPercentage={generator.numbersPercentage}
+            symbolsPercentage={generator.symbolsPercentage}
+            onEnabledChange={generator.setUseCharacterDistribution}
+            onUppercasePercentageChange={generator.setUppercasePercentage}
+            onLowercasePercentageChange={generator.setLowercasePercentage}
+            onNumbersPercentageChange={generator.setNumbersPercentage}
+            onSymbolsPercentageChange={generator.setSymbolsPercentage}
+          />
         </div>
 
         <DialogFooter className="flex-shrink-0">
           <Button
             type="button"
             variant="outline"
-            onClick={generatePassword}
-            disabled={isGenerating}
+            onClick={generator.generatePassword}
+            disabled={generator.isGenerating}
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             重新生成
@@ -396,7 +103,7 @@ export function PasswordGeneratorDialog({
           <Button
             type="button"
             onClick={handleAccept}
-            disabled={!generatedPassword}
+            disabled={!generator.generatedPassword}
           >
             使用此密码
           </Button>

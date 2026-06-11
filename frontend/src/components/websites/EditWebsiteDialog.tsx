@@ -3,7 +3,7 @@ import { websiteService } from '@/services/websiteService'
 import type {
   UpdateWebsiteRequest,
   WebsiteResponse,
-} from '@/services/websiteService'
+} from '@/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,9 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { WebsiteForm } from '@/components/websites/WebsiteForm'
 
 interface EditWebsiteDialogProps {
   open: boolean
@@ -104,52 +102,18 @@ export function EditWebsiteDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-domain">
-                域名 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="edit-domain"
-                placeholder="example.com"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-                disabled={isSubmitting}
-                autoFocus
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="edit-displayName">显示名称（可选）</Label>
-              <Input
-                id="edit-displayName"
-                placeholder="示例网站"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="edit-tags">标签（可选）</Label>
-              <Textarea
-                id="edit-tags"
-                placeholder="工作, 重要"
-                value={tags}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setTags(e.target.value)
-                }
-                disabled={isSubmitting}
-                rows={3}
-              />
-            </div>
-
-            {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-                {error}
-              </div>
-            )}
-          </div>
+          <WebsiteForm
+            idPrefix="edit-website"
+            domain={domain}
+            displayName={displayName}
+            tags={tags}
+            error={error}
+            disabled={isSubmitting}
+            autoFocus
+            onDomainChange={setDomain}
+            onDisplayNameChange={setDisplayName}
+            onTagsChange={setTags}
+          />
 
           <DialogFooter>
             <Button

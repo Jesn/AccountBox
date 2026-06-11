@@ -1,4 +1,4 @@
-import type { ErrorResponse } from '@/types/common'
+import type { ErrorResponse } from '@/types'
 
 /**
  * 错误处理工具类

@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import type { WebsiteResponse } from '@/services/websiteService'
+import type { WebsiteResponse } from '@/types'
 import { Plus } from 'lucide-react'
 
 interface WebsiteListProps {

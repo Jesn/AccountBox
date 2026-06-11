@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { accountService } from '@/services/accountService'
-import type { CreateAccountRequest } from '@/services/accountService'
+import type { CreateAccountRequest } from '@/types'
 import { passwordGeneratorService } from '@/services/passwordGeneratorService'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,13 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { PasswordGeneratorDialog } from '@/components/password-generator/PasswordGeneratorDialog'
-import { ExtendedFieldsEditor } from '@/components/accounts/ExtendedFieldsEditor'
-import { CopyButton } from '@/components/common/CopyButton'
-import { Eye, EyeOff, Zap, Settings2 } from 'lucide-react'
+import { AccountForm } from '@/components/accounts/AccountForm'
 
 interface CreateAccountDialogProps {
   open: boolean
@@ -135,123 +130,26 @@ export function CreateAccountDialog({
               <DialogDescription>为该网站添加新的账号信息</DialogDescription>
             </DialogHeader>
 
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="username">
-                  用户名 <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="username"
-                  placeholder="用户名或邮箱"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={isSubmitting}
-                  autoFocus
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="password">
-                  密码 <span className="text-red-500">*</span>
-                </Label>
-                <div className="flex gap-2 items-start">
-                  <div className="flex-1 min-w-0">
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="密码"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <CopyButton
-                    text={password}
-                    successMessage="密码已复制到剪贴板"
-                    size="icon"
-                    variant="outline"
-                    title="复制密码"
-                    className="flex-shrink-0"
-                    disabled={!password || isSubmitting}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={handleQuickGenerate}
-                    disabled={isSubmitting || isGeneratingPassword}
-                    title="快速生成密码"
-                    className="flex-shrink-0"
-                  >
-                    <Zap className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setShowPasswordGenerator(true)}
-                    disabled={isSubmitting}
-                    title="高级生成"
-                    className="flex-shrink-0"
-                  >
-                    <Settings2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={isSubmitting}
-                    className="flex-shrink-0"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="notes">备注（可选）</Label>
-                <Textarea
-                  id="notes"
-                  placeholder="添加备注信息..."
-                  value={notes}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setNotes(e.target.value)
-                  }
-                  disabled={isSubmitting}
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="tags">标签（可选）</Label>
-                <Input
-                  id="tags"
-                  placeholder="重要, 工作"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <div className="border-t pt-4">
-                <ExtendedFieldsEditor
-                  value={extendedData}
-                  onChange={setExtendedData}
-                  maxSizeKB={10}
-                />
-              </div>
-
-              {error && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-                  {error}
-                </div>
-              )}
-            </div>
+            <AccountForm
+              username={username}
+              password={password}
+              showPassword={showPassword}
+              notes={notes}
+              tags={tags}
+              extendedData={extendedData}
+              error={error}
+              disabled={isSubmitting}
+              isGeneratingPassword={isGeneratingPassword}
+              autoFocus
+              onUsernameChange={setUsername}
+              onPasswordChange={setPassword}
+              onShowPasswordChange={setShowPassword}
+              onNotesChange={setNotes}
+              onTagsChange={setTags}
+              onExtendedDataChange={setExtendedData}
+              onQuickGeneratePassword={handleQuickGenerate}
+              onOpenPasswordGenerator={() => setShowPasswordGenerator(true)}
+            />
 
             <DialogFooter>
               <Button

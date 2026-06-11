@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { ApiKey } from '@/types/ApiKey'
-import type { WebsiteResponse } from '@/services/websiteService'
+import type { ApiKey } from '@/types'
+import type { WebsiteResponse } from '@/types'
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/common/CopyButton'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Eye, EyeOff, Trash2 } from 'lucide-react'
+import { formatDateTime } from '@/lib/formatters'
 
 interface ApiKeyListProps {
   apiKeys: ApiKey[]
@@ -44,16 +45,6 @@ export function ApiKeyList({ apiKeys, websites, onDelete }: ApiKeyListProps) {
     })
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
   const maskKey = (key: string) => {
     // 显示前缀"sk_"和最后4个字符
     return `${key.substring(0, 3)}${'*'.repeat(28)}${key.substring(key.length - 4)}`
@@ -80,10 +71,10 @@ export function ApiKeyList({ apiKeys, websites, onDelete }: ApiKeyListProps) {
                 <div className="space-y-1 flex-1 min-w-0">
                   <CardTitle className="text-base sm:text-lg truncate">{apiKey.name}</CardTitle>
                   <CardDescription className="text-xs sm:text-sm">
-                    创建于 {formatDate(apiKey.createdAt)}
+                    创建于 {formatDateTime(apiKey.createdAt)}
                     {apiKey.lastUsedAt && (
                       <span className="ml-2 hidden sm:inline">
-                        · 最后使用: {formatDate(apiKey.lastUsedAt)}
+                        · 最后使用: {formatDateTime(apiKey.lastUsedAt)}
                       </span>
                     )}
                   </CardDescription>

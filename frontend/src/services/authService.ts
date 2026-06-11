@@ -1,15 +1,7 @@
 import { apiClient } from './apiClient';
 import { STORAGE_KEYS, API_ENDPOINTS } from '@/lib/constants';
 import { ErrorHandler, createError } from '@/lib/errorHandler';
-
-export interface LoginRequest {
-  masterPassword: string;
-}
-
-export interface LoginResponse {
-  token: string;
-  expiresAt: string;
-}
+import type { LoginRequest, LoginResponse } from '@/types';
 
 /**
  * 认证服务 - 处理登录、登出和Token管理

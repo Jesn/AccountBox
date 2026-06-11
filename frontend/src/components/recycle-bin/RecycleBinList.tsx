@@ -1,7 +1,8 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import type { DeletedAccountResponse } from '@/services/recycleBinService'
+import type { DeletedAccountResponse } from '@/types'
 import { RotateCcw, Trash2 } from 'lucide-react'
+import { formatDateTime } from '@/lib/formatters'
 
 interface RecycleBinListProps {
   deletedAccounts: DeletedAccountResponse[]
@@ -20,19 +21,6 @@ export function RecycleBinList({
   onRestore,
   onPermanentlyDelete,
 }: RecycleBinListProps) {
-  // 格式化删除时间
-  const formatDeletedAt = (deletedAt?: string) => {
-    if (!deletedAt) return '未知'
-    const date = new Date(deletedAt)
-    return date.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
   // 加载状态
   if (isLoading) {
     return (
@@ -69,7 +57,7 @@ export function RecycleBinList({
                   {account.websiteDisplayName || account.websiteDomain}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  {formatDeletedAt(account.deletedAt)}
+                  {formatDateTime(account.deletedAt)}
                 </p>
                 {account.tags && (
                   <p className="text-xs text-gray-500 mt-1 truncate">

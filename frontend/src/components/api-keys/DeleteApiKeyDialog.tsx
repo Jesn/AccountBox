@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { apiKeyService } from '@/services/apiKeyService'
-import type { ApiKey } from '@/types/ApiKey'
+import type { ApiKey } from '@/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

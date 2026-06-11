@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { websiteService } from '@/services/websiteService'
-import type { WebsiteResponse } from '@/services/websiteService'
+import type { WebsiteResponse } from '@/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

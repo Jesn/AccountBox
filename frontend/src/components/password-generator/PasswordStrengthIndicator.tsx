@@ -1,4 +1,4 @@
-import type { PasswordStrength } from '@/services/passwordGeneratorService'
+import type { PasswordStrength } from '@/types'
 import { Progress } from '@/components/ui/progress'
 
 interface PasswordStrengthIndicatorProps {

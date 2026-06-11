@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { authService } from '@/services/authService'
-import type { ErrorResponse } from '@/types/common'
+import type { ErrorResponse } from '@/types'
 
 /**
  * 登录页面组件

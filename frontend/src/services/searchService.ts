@@ -1,20 +1,6 @@
 import apiClient from './apiClient'
 import { API_ENDPOINTS } from '@/lib/constants'
-import type { ApiResponse, PagedResult } from '../types/common'
-
-export interface SearchResultItem {
-  accountId: number
-  websiteId: number
-  websiteDomain: string
-  websiteDisplayName?: string
-  username: string
-  password: string
-  notes?: string
-  tags?: string
-  createdAt: string
-  updatedAt: string
-  matchedFields: string[]
-}
+import type { ApiResponse, PagedResult, SearchResultItem } from '@/types'
 
 class SearchService {
   private readonly baseUrl = API_ENDPOINTS.SEARCH

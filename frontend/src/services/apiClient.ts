@@ -1,6 +1,6 @@
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
-import type { ApiResponse, ErrorResponse } from '@/types/common'
+import type { ApiResponse, ErrorResponse } from '@/types'
 import { STORAGE_KEYS, API_ENDPOINTS } from '@/lib/constants'
 import { eventBus, AUTH_EVENTS } from '@/lib/eventBus'
 

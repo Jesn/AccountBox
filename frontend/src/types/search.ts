@@ -6,7 +6,7 @@
  * 搜索结果项
  */
 export interface SearchResultItem {
-  id: number
+  accountId: number
   websiteId: number
   websiteDomain: string
   websiteDisplayName?: string
@@ -14,7 +14,7 @@ export interface SearchResultItem {
   password: string
   notes?: string
   tags?: string
-  status: 'Active' | 'Disabled'
   createdAt: string
   updatedAt: string
+  matchedFields: string[]
 }

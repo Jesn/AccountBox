@@ -16,7 +16,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import type { AccountResponse } from '@/services/accountService'
+import { formatDateTime } from '@/lib/formatters'
+import type { AccountResponse } from '@/types'
 import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 
@@ -176,12 +177,12 @@ export function AccountList({
 
               {/* 创建时间 */}
               <TableCell className="hidden xl:table-cell text-sm text-gray-500 py-2 px-3 w-[140px]">
-                {new Date(account.createdAt).toLocaleString('zh-CN')}
+                {formatDateTime(account.createdAt)}
               </TableCell>
 
               {/* 更新时间 */}
               <TableCell className="hidden xl:table-cell text-sm text-gray-500 py-2 px-3 w-[140px]">
-                {new Date(account.updatedAt).toLocaleString('zh-CN')}
+                {formatDateTime(account.updatedAt)}
               </TableCell>
 
               {/* 操作 */}

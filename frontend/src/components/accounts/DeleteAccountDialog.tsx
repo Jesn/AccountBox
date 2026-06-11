@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { accountService } from '@/services/accountService'
-import type { AccountResponse } from '@/services/accountService'
+import type { AccountResponse } from '@/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

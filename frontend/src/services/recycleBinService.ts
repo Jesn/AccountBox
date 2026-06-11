@@ -1,20 +1,6 @@
 import apiClient from './apiClient'
 import { API_ENDPOINTS } from '@/lib/constants'
-import type { ApiResponse, PagedResult } from '../types/common'
-
-export interface DeletedAccountResponse {
-  id: number
-  websiteId: number
-  websiteDomain: string
-  websiteDisplayName?: string
-  username: string
-  password: string
-  notes?: string
-  tags?: string
-  createdAt: string
-  updatedAt: string
-  deletedAt?: string
-}
+import type { ApiResponse, PagedResult, DeletedAccountResponse } from '@/types'
 
 class RecycleBinService {
   private readonly baseUrl = API_ENDPOINTS.RECYCLE_BIN

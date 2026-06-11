@@ -1,6 +1,6 @@
 import apiClient from './apiClient'
 import { API_ENDPOINTS } from '@/lib/constants'
-import type { ApiKey, CreateApiKeyRequest } from '../types/ApiKey'
+import type { ApiKey, CreateApiKeyRequest } from '@/types'
 
 /**
  * API密钥服务

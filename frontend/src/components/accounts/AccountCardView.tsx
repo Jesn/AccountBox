@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import type { AccountResponse } from '@/services/accountService'
+import type { AccountResponse } from '@/types'
 import { Eye, EyeOff, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react'
 import { useState } from 'react'
 

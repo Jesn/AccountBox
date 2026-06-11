@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { websiteService } from '@/services/websiteService'
-import type { CreateWebsiteRequest } from '@/services/websiteService'
+import type { CreateWebsiteRequest } from '@/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -10,9 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { WebsiteForm } from '@/components/websites/WebsiteForm'
 
 interface CreateWebsiteDialogProps {
   open: boolean
@@ -92,52 +90,17 @@ export function CreateWebsiteDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="domain">
-                域名 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="domain"
-                placeholder="example.com"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-                disabled={isSubmitting}
-                autoFocus
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="displayName">显示名称（可选）</Label>
-              <Input
-                id="displayName"
-                placeholder="示例网站"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="tags">标签（可选）</Label>
-              <Textarea
-                id="tags"
-                placeholder="工作, 重要"
-                value={tags}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setTags(e.target.value)
-                }
-                disabled={isSubmitting}
-                rows={3}
-              />
-            </div>
-
-            {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-                {error}
-              </div>
-            )}
-          </div>
+          <WebsiteForm
+            domain={domain}
+            displayName={displayName}
+            tags={tags}
+            error={error}
+            disabled={isSubmitting}
+            autoFocus
+            onDomainChange={setDomain}
+            onDisplayNameChange={setDisplayName}
+            onTagsChange={setTags}
+          />
 
           <DialogFooter>
             <Button

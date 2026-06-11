@@ -29,16 +29,20 @@ export interface CalculateStrengthRequest {
 /**
  * 密码强度等级
  */
-export type PasswordStrengthLevel = 'Weak' | 'Fair' | 'Good' | 'Strong' | 'VeryStrong'
+export type PasswordStrengthLevel = 'Weak' | 'Medium' | 'Strong' | 'VeryStrong'
 
 /**
  * 密码强度信息
  */
 export interface PasswordStrength {
-  score: number // 0-100
+  score: number
   level: PasswordStrengthLevel
-  feedback: string[]
-  estimatedCrackTime: string
+  length: number
+  hasUppercase: boolean
+  hasLowercase: boolean
+  hasNumbers: boolean
+  hasSymbols: boolean
+  entropy: number
 }
 
 /**
