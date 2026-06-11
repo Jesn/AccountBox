@@ -364,6 +364,7 @@ export function AccountsPage() {
                   onDelete={handleDeleteAccount}
                   onEnable={handleEnableAccount}
                   onDisable={handleDisableAccount}
+                  minRows={pageSize}
                 />
               </div>
 

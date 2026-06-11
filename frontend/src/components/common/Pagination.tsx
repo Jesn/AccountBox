@@ -77,7 +77,6 @@ export default function Pagination({
     pageSizeOptions.length > 0 &&
     typeof onPageSizeChange === 'function'
   const showPageControls = safeTotalPages > 1
-  const showBottomControls = showPageControls || canChangePageSize
   const rangeStart = hasTotal && hasPageSize && totalCount > 0
     ? (safeCurrentPage - 1) * pageSize + 1
     : 0
@@ -147,140 +146,143 @@ export default function Pagination({
   }
 
   return (
-    <div className="mt-4 flex flex-col gap-3 rounded-lg border bg-white px-3 py-3 sm:px-4">
-      {showSummary && hasTotal && (
-        <div className="text-center text-xs text-gray-600 sm:text-sm">
-          共 <span className="font-semibold text-gray-900">{totalCount}</span> 条
-          {hasPageSize && totalCount > 0 && (
-            <>
-              ，当前显示第{' '}
-              <span className="font-semibold text-gray-900">{rangeStart}</span>
-              {' - '}
-              <span className="font-semibold text-gray-900">{rangeEnd}</span> 条
-            </>
+    <div className="mt-4 flex flex-col items-center gap-2 rounded-lg border bg-white px-3 py-2 sm:px-4 sm:py-3">
+      {(showSummary && hasTotal) || canChangePageSize ? (
+        <div className="flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-gray-600 sm:text-sm">
+          {showSummary && hasTotal && (
+            <span className="text-center">
+              共 <span className="font-semibold text-gray-900">{totalCount}</span> 条
+              {hasPageSize && totalCount > 0 && (
+                <span className="hidden text-gray-500 sm:inline">
+                  {' '}· {rangeStart}-{rangeEnd}
+                </span>
+              )}
+            </span>
           )}
+
+          {canChangePageSize && (
+            <div className="flex items-center justify-center gap-1.5">
+              <span>每页</span>
+              <Select
+                value={pageSize.toString()}
+                onValueChange={(value) => onPageSizeChange(Number(value))}
+                disabled={disabled}
+              >
+                <SelectTrigger className="h-7 w-[78px] px-2 text-xs sm:h-8 sm:w-[86px] sm:text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {pageSizeOptions.map((option) => (
+                    <SelectItem key={option} value={option.toString()}>
+                      {option} 条
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {showPageControls && (
+        <div className="flex w-full items-center justify-center gap-2 sm:w-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => changePage(1)}
+            disabled={disabled || safeCurrentPage === 1}
+            className="hidden h-8 flex-shrink-0 lg:inline-flex"
+          >
+            首页
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => changePage(safeCurrentPage - 1)}
+            disabled={disabled || safeCurrentPage === 1}
+            className="h-8 min-w-9 flex-shrink-0 px-2 sm:h-9 sm:px-3"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span className="hidden sm:ml-1 sm:inline">上一页</span>
+          </Button>
+
+          <div className="flex h-8 min-w-[88px] items-center justify-center rounded-md border bg-gray-50 px-3 text-xs font-medium text-gray-700 sm:hidden">
+            {safeCurrentPage} / {safeTotalPages}
+          </div>
+
+          <div className="hidden min-w-0 gap-1 sm:flex">
+            {getPageNumbers().map((page) =>
+              typeof page === 'number' ? (
+                <Button
+                  key={page}
+                  variant={page === safeCurrentPage ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => changePage(page)}
+                  disabled={disabled}
+                  className="h-9 min-w-10 px-3 text-sm"
+                >
+                  {page}
+                </Button>
+              ) : (
+                <span
+                  key={page}
+                  className="flex h-9 min-w-8 items-center justify-center text-sm text-gray-500"
+                >
+                  ...
+                </span>
+              )
+            )}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => changePage(safeCurrentPage + 1)}
+            disabled={disabled || safeCurrentPage === safeTotalPages}
+            className="h-8 min-w-9 flex-shrink-0 px-2 sm:h-9 sm:px-3"
+          >
+            <span className="hidden sm:mr-1 sm:inline">下一页</span>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => changePage(safeTotalPages)}
+            disabled={disabled || safeCurrentPage === safeTotalPages}
+            className="hidden h-8 flex-shrink-0 lg:inline-flex"
+          >
+            末页
+          </Button>
         </div>
       )}
 
-      {showBottomControls && (
-        <div className="flex flex-col items-center justify-between gap-3 lg:flex-row">
-          {showPageControls && (
-            <div className="flex items-center justify-center gap-1 sm:gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => changePage(1)}
-                disabled={safeCurrentPage === 1}
-                className="hidden h-8 flex-shrink-0 sm:inline-flex sm:h-9"
-              >
-                首页
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => changePage(safeCurrentPage - 1)}
-                disabled={safeCurrentPage === 1}
-                className="h-8 flex-shrink-0 sm:h-9"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                <span className="hidden sm:inline ml-1">上一页</span>
-              </Button>
-
-              <div className="flex min-w-0 gap-1">
-                {getPageNumbers().map((page) =>
-                  typeof page === 'number' ? (
-                    <Button
-                      key={page}
-                      variant={page === safeCurrentPage ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => changePage(page)}
-                      className="h-8 min-w-8 px-2 text-xs sm:h-9 sm:min-w-10 sm:px-3 sm:text-sm"
-                    >
-                      {page}
-                    </Button>
-                  ) : (
-                    <span
-                      key={page}
-                      className="flex h-8 min-w-6 items-center justify-center text-sm text-gray-500 sm:h-9 sm:min-w-8"
-                    >
-                      ...
-                    </span>
-                  )
-                )}
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => changePage(safeCurrentPage + 1)}
-                disabled={safeCurrentPage === safeTotalPages}
-                className="h-8 flex-shrink-0 sm:h-9"
-              >
-                <span className="hidden sm:inline mr-1">下一页</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => changePage(safeTotalPages)}
-                disabled={safeCurrentPage === safeTotalPages}
-                className="hidden h-8 flex-shrink-0 sm:inline-flex sm:h-9"
-              >
-                末页
-              </Button>
-            </div>
-          )}
-
-          <div className="flex flex-col items-center justify-center gap-2 text-xs text-gray-600 sm:flex-row sm:text-sm lg:ml-auto">
-            {canChangePageSize && (
-              <div className="flex items-center justify-center gap-2">
-                <span>每页</span>
-                <Select
-                  value={pageSize.toString()}
-                  onValueChange={(value) => onPageSizeChange(Number(value))}
-                >
-                  <SelectTrigger className="h-8 w-[86px] sm:h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {pageSizeOptions.map((option) => (
-                      <SelectItem key={option} value={option.toString()}>
-                        {option} 条
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {showJump && showPageControls && (
-              <div className="flex items-center justify-center gap-2">
-                <span>跳至</span>
-                <Input
-                  value={jumpPage}
-                  onChange={(event) => setJumpPage(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      handleJump()
-                    }
-                  }}
-                  inputMode="numeric"
-                  className="h-8 w-16 text-center sm:h-9"
-                />
-                <span>页</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleJump}
-                  className="h-8 sm:h-9"
-                >
-                  跳转
-                </Button>
-              </div>
-            )}
-          </div>
+      {showJump && showPageControls && (
+        <div className="hidden items-center justify-center gap-2 text-sm text-gray-600 sm:flex">
+          <span>跳至</span>
+          <Input
+            value={jumpPage}
+            onChange={(event) => setJumpPage(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                handleJump()
+              }
+            }}
+            inputMode="numeric"
+            disabled={disabled}
+            className="h-8 w-16 text-center sm:h-9"
+          />
+          <span>页</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleJump}
+            disabled={disabled}
+            className="h-8 sm:h-9"
+          >
+            跳转
+          </Button>
         </div>
       )}
     </div>

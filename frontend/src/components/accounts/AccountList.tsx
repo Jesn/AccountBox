@@ -26,6 +26,7 @@ interface AccountListProps {
   onDelete: (account: AccountResponse) => void
   onEnable?: (account: AccountResponse) => void
   onDisable?: (account: AccountResponse) => void
+  minRows?: number
 }
 
 /**
@@ -38,6 +39,7 @@ export function AccountList({
   onDelete,
   onEnable,
   onDisable,
+  minRows = 0,
 }: AccountListProps) {
   const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(
     new Set()
@@ -54,6 +56,8 @@ export function AccountList({
       return newSet
     })
   }
+
+  const emptyRows = Math.max(0, minRows - accounts.length)
 
   if (accounts.length === 0) {
     return (
@@ -222,6 +226,13 @@ export function AccountList({
                     删除
                   </Button>
                 </div>
+              </TableCell>
+            </TableRow>
+          ))}
+          {Array.from({ length: emptyRows }).map((_, index) => (
+            <TableRow key={`empty-${index}`} aria-hidden="true">
+              <TableCell className="h-[53px] py-2 px-3" colSpan={8}>
+                &nbsp;
               </TableCell>
             </TableRow>
           ))}
