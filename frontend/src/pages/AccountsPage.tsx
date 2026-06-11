@@ -85,7 +85,6 @@ export function AccountsPage() {
   const hasLoadedCurrentWebsiteAccounts = loadedAccountsWebsiteId === websiteId
   const isInitialLoading = isLoading && !hasLoadedCurrentWebsiteAccounts
   const isRefreshingAccounts = isLoading && hasLoadedCurrentWebsiteAccounts
-  const listMinHeight = pageSize >= 50 ? '960px' : pageSize >= 30 ? '760px' : '620px'
 
   useEffect(() => {
     const nextSearchParams = new URLSearchParams()
@@ -351,7 +350,7 @@ export function AccountsPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="relative" style={{ minHeight: listMinHeight }}>
+          <div className="relative">
             <div
               className={isRefreshingAccounts ? 'pointer-events-none' : undefined}
               aria-busy={isRefreshingAccounts}
@@ -364,7 +363,6 @@ export function AccountsPage() {
                   onDelete={handleDeleteAccount}
                   onEnable={handleEnableAccount}
                   onDisable={handleDisableAccount}
-                  minRows={pageSize}
                 />
               </div>
 
