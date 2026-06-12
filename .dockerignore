@@ -57,5 +57,4 @@ Augment-Memories.md
 密码问题说明.md
 tailwind问题处理.md
 
-# Scripts
-*.sh
+# Scripts (exclude shell scripts except docker-entrypoint)
