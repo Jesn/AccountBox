@@ -75,6 +75,11 @@ RUN mkdir -p /app/data && chown -R accountbox:accountbox /app/data
 # 切换到非 root 用户
 USER accountbox
 
+# 运行时默认配置
+ENV ASPNETCORE_URLS=http://+:5093 \
+    ASPNETCORE_ENVIRONMENT=Production \
+    DATABASE_PATH=/app/data/accountbox.db
+
 # 暴露端口
 EXPOSE 5093
 

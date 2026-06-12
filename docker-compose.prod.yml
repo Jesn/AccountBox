@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     image: docker.cnb.cool/rich/public/accountbox:latest
@@ -12,7 +10,7 @@ services:
     environment:
       DB_PROVIDER: ${DB_PROVIDER:-postgresql}
       CONNECTION_STRING: ${CONNECTION_STRING}
-      MASTER_PASSWORD: ${MASTER_PASSWORD}
+      MASTER_PASSWORD: ${MASTER_PASSWORD:-}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s

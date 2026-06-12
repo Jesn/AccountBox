@@ -1,7 +1,9 @@
 using System.Security.Cryptography;
 using System.Text.Json;
+using AccountBox.Core.Configuration;
 using AccountBox.Core.Interfaces;
 using AccountBox.Core.Models.Auth;
+using AccountBox.Core.Models.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AccountBox.Security;
@@ -13,44 +15,25 @@ namespace AccountBox.Security;
 public class JwtKeyRotationService : IJwtKeyRotationService
 {
     private readonly ILogger<JwtKeyRotationService> _logger;
-    private readonly string _keyStorePath;
-    private readonly string _secretsDirectory;
+    private readonly SecurityStorageOptions _storageOptions;
     private readonly SemaphoreSlim _fileLock = new(1, 1);
     private JwtKeyStore? _cachedKeyStore;
     private DateTime _lastCacheTime;
     private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(5);
+    private static readonly JsonSerializerOptions KeyStoreJsonOptions = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true
+    };
 
-    public JwtKeyRotationService(ILogger<JwtKeyRotationService> logger)
+    public JwtKeyRotationService(
+        ILogger<JwtKeyRotationService> logger,
+        SecurityStorageOptions storageOptions)
     {
         _logger = logger;
-
-        // 密钥存储路径（与SecretsManager一致）
-        var dataPath = Environment.GetEnvironmentVariable("DATA_PATH")
-                       ?? Path.Combine(Directory.GetCurrentDirectory(), "data");
-        _secretsDirectory = Path.Combine(dataPath, ".secrets");
-
-        // 确保目录存在
-        if (!Directory.Exists(_secretsDirectory))
-        {
-            Directory.CreateDirectory(_secretsDirectory);
-            _logger.LogInformation("创建密钥存储目录: {Path}", _secretsDirectory);
-
-            // 设置目录权限（仅限 Unix 系统）
-            if (!OperatingSystem.IsWindows())
-            {
-                try
-                {
-                    File.SetUnixFileMode(_secretsDirectory,
-                        UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "设置密钥目录权限失败");
-                }
-            }
-        }
-
-        _keyStorePath = Path.Combine(_secretsDirectory, "jwt_keys.json");
+        _storageOptions = storageOptions;
+        EnsureSecretsDirectoryExists();
     }
 
     /// <summary>
@@ -273,7 +256,7 @@ public class JwtKeyRotationService : IJwtKeyRotationService
         }
 
         // 检查环境变量（优先级最高）
-        var envKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+        var envKey = Environment.GetEnvironmentVariable(AccountBoxEnvironment.JwtSecretKey);
         if (!string.IsNullOrWhiteSpace(envKey))
         {
             _logger.LogInformation("使用环境变量中的JWT密钥（单密钥模式）");
@@ -298,15 +281,15 @@ public class JwtKeyRotationService : IJwtKeyRotationService
         }
 
         // 从文件加载
-        if (File.Exists(_keyStorePath))
+        if (File.Exists(_storageOptions.JwtKeyStorePath))
         {
             try
             {
-                var json = File.ReadAllText(_keyStorePath);
-                var keyStore = JsonSerializer.Deserialize<JwtKeyStore>(json);
+                var json = File.ReadAllText(_storageOptions.JwtKeyStorePath);
+                var keyStore = JsonSerializer.Deserialize<JwtKeyStore>(json, KeyStoreJsonOptions);
                 if (keyStore != null && keyStore.Keys.Any())
                 {
-                    _logger.LogDebug("从文件加载密钥存储: {Path}", _keyStorePath);
+                    _logger.LogDebug("从文件加载密钥存储: {Path}", _storageOptions.JwtKeyStorePath);
                     _cachedKeyStore = keyStore;
                     _lastCacheTime = DateTime.UtcNow;
                     return keyStore;
@@ -341,21 +324,15 @@ public class JwtKeyRotationService : IJwtKeyRotationService
     {
         try
         {
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-
-            var json = JsonSerializer.Serialize(keyStore, options);
-            await File.WriteAllTextAsync(_keyStorePath, json);
+            var json = JsonSerializer.Serialize(keyStore, KeyStoreJsonOptions);
+            await File.WriteAllTextAsync(_storageOptions.JwtKeyStorePath, json);
 
             // 设置文件权限（仅限 Unix 系统）
             if (!OperatingSystem.IsWindows())
             {
                 try
                 {
-                    File.SetUnixFileMode(_keyStorePath,
+                    File.SetUnixFileMode(_storageOptions.JwtKeyStorePath,
                         UnixFileMode.UserRead | UnixFileMode.UserWrite);
                 }
                 catch (Exception ex)
@@ -367,7 +344,7 @@ public class JwtKeyRotationService : IJwtKeyRotationService
             // 清除缓存，下次读取时重新加载
             _cachedKeyStore = null;
 
-            _logger.LogDebug("密钥存储已保存: {Path}", _keyStorePath);
+            _logger.LogDebug("密钥存储已保存: {Path}", _storageOptions.JwtKeyStorePath);
         }
         catch (Exception ex)
         {
@@ -393,12 +370,11 @@ public class JwtKeyRotationService : IJwtKeyRotationService
         };
 
         // 尝试从现有的 jwt.key 文件导入密钥
-        var oldJwtKeyPath = Path.Combine(_secretsDirectory, "jwt.key");
-        if (File.Exists(oldJwtKeyPath))
+        if (File.Exists(_storageOptions.LegacyJwtKeyPath))
         {
             try
             {
-                var existingKey = File.ReadAllText(oldJwtKeyPath);
+                var existingKey = File.ReadAllText(_storageOptions.LegacyJwtKeyPath).Trim();
                 _logger.LogInformation("从现有 jwt.key 文件导入密钥");
                 initialKey.Key = existingKey;
                 _logger.LogWarning("初始密钥 v1 已从 jwt.key 导入");
@@ -417,6 +393,39 @@ public class JwtKeyRotationService : IJwtKeyRotationService
         }
 
         return initialKey;
+    }
+
+    private void EnsureSecretsDirectoryExists()
+    {
+        try
+        {
+            if (Directory.Exists(_storageOptions.SecretsDirectory))
+            {
+                return;
+            }
+
+            Directory.CreateDirectory(_storageOptions.SecretsDirectory);
+            _logger.LogInformation("创建密钥存储目录: {Path}", _storageOptions.SecretsDirectory);
+
+            if (OperatingSystem.IsWindows())
+            {
+                return;
+            }
+
+            try
+            {
+                File.SetUnixFileMode(_storageOptions.SecretsDirectory,
+                    UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "设置密钥目录权限失败");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "创建密钥存储目录失败: {Path}", _storageOptions.SecretsDirectory);
+        }
     }
 
     /// <summary>
