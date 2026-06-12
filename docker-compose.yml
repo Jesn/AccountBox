@@ -22,7 +22,7 @@ services:
     container_name: accountbox-all-in-one
     restart: unless-stopped
     ports:
-      - "5095:5093"  # API 和前端都通过这个端口访问
+      - "5095:8080"  # API 和前端都通过这个端口访问
     volumes:
       - accountbox-data:/app/data
     environment:
@@ -34,7 +34,7 @@ services:
       # 如需固定主密码，请取消注释以下行：
       # - MASTER_PASSWORD=${MASTER_PASSWORD}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5093/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 3s
       retries: 3

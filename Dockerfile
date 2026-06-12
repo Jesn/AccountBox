@@ -54,8 +54,8 @@ RUN dotnet publish ./AccountBox.Api/AccountBox.Api.csproj \
 # ============================================
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 
-# 安装 curl（用于健康检查）
-RUN apk add --no-cache curl
+# 安装 curl（用于健康检查）和 su-exec（用于降权启动）
+RUN apk add --no-cache curl su-exec
 
 WORKDIR /app
 
@@ -72,20 +72,19 @@ COPY --chown=accountbox:accountbox --from=frontend-builder /app/frontend/dist ./
 # 为 SQLite 数据库准备数据目录（首次挂载命名卷时会复制权限）
 RUN mkdir -p /app/data && chown -R accountbox:accountbox /app/data
 
-# 切换到非 root 用户
-USER accountbox
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 # 运行时默认配置
-ENV ASPNETCORE_URLS=http://+:5093 \
-    ASPNETCORE_ENVIRONMENT=Production \
+ENV ASPNETCORE_ENVIRONMENT=Production \
     DATABASE_PATH=/app/data/accountbox.db
 
 # 暴露端口
-EXPOSE 5093
+EXPOSE 8080
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:5093/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # 启动应用
-ENTRYPOINT ["dotnet", "AccountBox.Api.dll"]
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["dotnet", "AccountBox.Api.dll"]
