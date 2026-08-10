@@ -140,8 +140,8 @@ export const API_ENDPOINT_DOCS: ApiEndpointDoc[] = [
     method: 'GET',
     path: '/api/external/websites/{websiteId}/accounts',
     description:
-      '获取指定网站的分页账号列表。可选参数 status=Active 或 status=Disabled 进行状态过滤；pageNumber 从 1 开始，pageSize 默认 10，最大 100。',
-    curlExample: `curl -X GET 'http://localhost:5093/api/external/websites/1/accounts?status=Active&pageNumber=1&pageSize=10' \\
+      '获取指定网站的分页账号列表。可选参数：status=Active|Disabled 状态过滤；username 对用户名做不区分大小写的模糊匹配；pageNumber 从 1 开始，pageSize 默认 10，最大 100。',
+    curlExample: `curl -X GET 'http://localhost:5093/api/external/websites/1/accounts?status=Active&username=user&pageNumber=1&pageSize=10' \\
   -H 'X-API-Key: YOUR_API_KEY'`,
     successResponse: `{
   "success": true,

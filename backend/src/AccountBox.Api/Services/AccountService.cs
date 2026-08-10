@@ -37,9 +37,11 @@ public class AccountService : IAccountService
         int pageSize,
         int? websiteId,
         string? searchTerm = null,
-        string? status = null)
+        string? status = null,
+        string? username = null)
     {
-        var (items, totalCount) = await _accountRepository.GetPagedAsync(pageNumber, pageSize, websiteId, searchTerm, status);
+        var (items, totalCount) = await _accountRepository.GetPagedAsync(
+            pageNumber, pageSize, websiteId, searchTerm, status, username);
 
         var accountResponses = items.Select(MapToResponse).ToList();
 

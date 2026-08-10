@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-INPUT_DIR="${INPUT_DIR:-/Users/darren/Downloads/grok_register (3)/output}"
+INPUT_DIR="${INPUT_DIR:-/Users/darren/Downloads/grok_register (2)/output}"
 API_URL="${API_URL:-http://192.168.2.200:5095/api/external/accounts}"
 WEBSITE_ID="${WEBSITE_ID:-6}"
 TAGS="${TAGS:-}"

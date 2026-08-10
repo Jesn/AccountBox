@@ -253,11 +253,12 @@ public class ExternalApiController : ControllerBase
     }
 
     /// <summary>
-    /// 获取指定网站的分页账号列表（支持状态过滤）
-    /// GET /api/external/websites/{websiteId}/accounts?status=Active&amp;pageNumber=1&amp;pageSize=10
+    /// 获取指定网站的分页账号列表（支持状态、用户名过滤）
+    /// GET /api/external/websites/{websiteId}/accounts?status=Active&amp;username=user&amp;pageNumber=1&amp;pageSize=10
     /// </summary>
     /// <param name="websiteId">网站 ID。</param>
     /// <param name="status">账号状态，支持 Active / Disabled；留空表示不过滤。</param>
+    /// <param name="username">用户名关键字，对 Username 字段做不区分大小写的模糊匹配；留空表示不过滤。</param>
     /// <param name="pageNumber">页码，从 1 开始，默认值为 1。</param>
     /// <param name="pageSize">每页数量，默认值为 10，范围 1 到 100。</param>
     /// <returns>包含分页信息和当前页账号列表的响应。</returns>
@@ -271,6 +272,7 @@ public class ExternalApiController : ControllerBase
     public async Task<ActionResult<ApiResponse<ExternalAccountsPagedResponse>>> GetAccountsByWebsite(
         int websiteId,
         [FromQuery] string? status = null,
+        [FromQuery] string? username = null,
         [FromQuery] int pageNumber = PaginationConstants.DefaultPageNumber,
         [FromQuery] int pageSize = PaginationConstants.DefaultPageSize)
     {
@@ -322,11 +324,14 @@ public class ExternalApiController : ControllerBase
                     "API密钥无权访问该网站"));
             }
 
+            var normalizedUsername = string.IsNullOrWhiteSpace(username) ? null : username.Trim();
+
             var pagedResult = await _accountService.GetPagedAsync(
                 pageNumber: pageNumber,
                 pageSize: pageSize,
                 websiteId: websiteId,
-                status: normalizedStatus);
+                status: normalizedStatus,
+                username: normalizedUsername);
 
             var accounts = pagedResult.Items.Select(a => new ExternalAccountResponse
             {

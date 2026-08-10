@@ -17,7 +17,8 @@ public interface IAccountService
         int pageSize,
         int? websiteId,
         string? searchTerm = null,
-        string? status = null);
+        string? status = null,
+        string? username = null);
 
     /// <summary>
     /// 根据 ID 获取账号

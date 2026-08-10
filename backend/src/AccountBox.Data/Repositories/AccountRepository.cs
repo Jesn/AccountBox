@@ -28,7 +28,8 @@ public class AccountRepository : IAccountRepository
         int pageSize,
         int? websiteId = null,
         string? searchTerm = null,
-        string? status = null)
+        string? status = null,
+        string? username = null)
     {
         if (pageNumber < PaginationConstants.DefaultPageNumber)
         {
@@ -59,6 +60,13 @@ public class AccountRepository : IAccountRepository
                 (a.Tags != null && a.Tags.ToLower().Contains(term)) ||
                 (a.Notes != null && a.Notes.ToLower().Contains(term))
             );
+        }
+
+        // 按用户名模糊过滤（仅匹配 Username 字段）
+        if (!string.IsNullOrWhiteSpace(username))
+        {
+            var uname = username.Trim().ToLower();
+            query = query.Where(a => a.Username.ToLower().Contains(uname));
         }
 
         // 状态过滤

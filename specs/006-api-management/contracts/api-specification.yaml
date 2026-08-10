@@ -177,7 +177,7 @@ paths:
     get:
       tags: [External API]
       summary: 获取账号列表
-      description: 获取指定网站的账号列表，支持按状态过滤
+      description: 获取指定网站的账号列表，支持按状态、用户名过滤
       security:
         - ApiKeyAuth: []
       parameters:
@@ -193,6 +193,26 @@ paths:
           schema:
             type: string
             enum: [Active, Disabled]
+        - name: username
+          in: query
+          required: false
+          description: 按用户名模糊过滤（不区分大小写）
+          schema:
+            type: string
+        - name: pageNumber
+          in: query
+          required: false
+          description: 页码，从 1 开始
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: 每页数量，默认 10，最大 100
+          schema:
+            type: integer
+            default: 10
       responses:
         '200':
           description: 成功获取列表
