@@ -110,6 +110,43 @@ paths:
           $ref: '#/components/responses/Forbidden'
 
   /api/external/accounts/{id}:
+    put:
+      tags: [External API]
+      summary: 更新账号信息
+      description: |
+        更新指定账号的信息，支持部分更新。
+        所有字段均为可选，仅更新传入的字段，未传入的字段保持原值。
+        至少需要提供一个要更新的字段。
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccountRequest'
+      responses:
+        '200':
+          description: 成功更新账号信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_Account'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
     delete:
       tags: [External API]
       summary: 删除账号
@@ -625,6 +662,37 @@ components:
         notes:
           type: string
           example: "通过API创建的账号"
+
+    UpdateAccountRequest:
+      type: object
+      description: |
+        更新账号信息请求。所有字段可选，仅更新传入的字段。
+        至少需要提供一个要更新的字段。
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: 新用户名（可选）
+          example: "newuser@example.com"
+        password:
+          type: string
+          minLength: 1
+          description: 新密码（可选，不能为空字符串）
+          example: "NewPassword456"
+        tags:
+          type: array
+          items:
+            type: string
+          description: 标签（可选）
+          example: ["已更新"]
+        notes:
+          type: string
+          description: 备注（可选）
+          example: "通过API更新的备注"
+        extend:
+          type: string
+          description: 扩展字段（可选，JSON字符串）
+          example: '{"phone": "13900139000"}'
 
   responses:
     BadRequest:

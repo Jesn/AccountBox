@@ -9,6 +9,7 @@ using AccountBox.Data.Entities;
 using AccountBox.Data.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using InternalCreateAccountRequest = AccountBox.Core.Models.Account.CreateAccountRequest;
+using InternalUpdateAccountRequest = AccountBox.Core.Models.Account.UpdateAccountRequest;
 
 namespace AccountBox.Api.Controllers;
 
@@ -249,6 +250,107 @@ public class ExternalApiController : ControllerBase
             return StatusCode(500, ApiResponse<object>.Fail(
                 "INTERNAL_ERROR",
                 $"更新账号状态失败: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// 更新账号信息（部分更新）
+    /// PUT /api/external/accounts/{id}
+    /// 所有字段可选，仅更新传入的字段
+    /// </summary>
+    [HttpPut("accounts/{id}")]
+    public async Task<ActionResult<ApiResponse<object>>> UpdateAccount(
+        int id,
+        [FromBody] ExternalUpdateAccountRequest request)
+    {
+        try
+        {
+            var apiKey = GetApiKeyFromContext();
+            if (apiKey == null)
+            {
+                return Unauthorized(ApiResponse<object>.Fail("API_KEY_MISSING", "API密钥缺失"));
+            }
+
+            var account = await _accountService.GetByIdAsync(id);
+            if (account == null)
+            {
+                return NotFound(ApiResponse<object>.Fail("ACCOUNT_NOT_FOUND", "账号不存在"));
+            }
+
+            if (!CanAccessWebsite(apiKey, account.WebsiteId))
+            {
+                return StatusCode(403, ApiResponse<object>.Fail(
+                    "ACCESS_DENIED",
+                    "API密钥无权访问该网站"));
+            }
+
+            // 至少需要提供一个要更新的字段
+            var hasUpdate = !string.IsNullOrEmpty(request.Username)
+                || !string.IsNullOrEmpty(request.Password)
+                || request.Tags != null
+                || request.Notes != null
+                || !string.IsNullOrEmpty(request.Extend);
+
+            if (!hasUpdate)
+            {
+                return BadRequest(ApiResponse<object>.Fail(
+                    "NO_FIELDS_TO_UPDATE",
+                    "至少需要提供一个要更新的字段"));
+            }
+
+            // 密码如果传入则不能为空字符串
+            if (request.Password != null && string.IsNullOrWhiteSpace(request.Password))
+            {
+                return BadRequest(ApiResponse<object>.Fail(
+                    "PASSWORD_EMPTY",
+                    "密码不能为空"));
+            }
+
+            // 验证并解析扩展字段
+            Dictionary<string, object>? extendedData = null;
+            if (!string.IsNullOrEmpty(request.Extend))
+            {
+                try
+                {
+                    extendedData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(request.Extend);
+                }
+                catch
+                {
+                    return BadRequest(ApiResponse<object>.Fail(
+                        "INVALID_JSON",
+                        "扩展字段必须是有效的JSON格式"));
+                }
+            }
+
+            // 合并：未提供的字段使用现有值
+            var internalRequest = new InternalUpdateAccountRequest
+            {
+                Username = string.IsNullOrEmpty(request.Username) ? account.Username : request.Username.Trim(),
+                Password = string.IsNullOrEmpty(request.Password) ? account.Password : request.Password,
+                Tags = request.Tags ?? account.Tags,
+                Notes = request.Notes ?? account.Notes,
+                ExtendedData = extendedData ?? account.ExtendedData
+            };
+
+            var updatedAccount = await _accountService.UpdateAsync(id, internalRequest);
+
+            return Ok(ApiResponse<object>.Ok(new
+            {
+                id = updatedAccount.Id,
+                websiteId = updatedAccount.WebsiteId,
+                username = updatedAccount.Username,
+                tags = updatedAccount.Tags,
+                notes = updatedAccount.Notes,
+                status = updatedAccount.Status,
+                extend = updatedAccount.ExtendedData,
+                updatedAt = updatedAccount.UpdatedAt
+            }));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.Fail(
+                "INTERNAL_ERROR",
+                $"更新账号信息失败: {ex.Message}"));
         }
     }
 

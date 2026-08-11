@@ -135,6 +135,53 @@ export const API_ENDPOINT_DOCS: ApiEndpointDoc[] = [
 }`,
   },
   {
+    id: 'update-account',
+    title: '更新账号信息',
+    method: 'PUT',
+    path: '/api/external/accounts/{id}',
+    description:
+      '更新指定账号的信息，支持部分更新。所有字段均为可选，仅更新传入的字段，未传入的字段保持原值。extend 为扩展字段，需要是有效的 JSON 字符串。',
+    curlExample: `curl -X PUT 'http://localhost:5093/api/external/accounts/123' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-API-Key: YOUR_API_KEY' \\
+  -d '{
+    "username": "newuser@example.com",
+    "password": "NewPassword456",
+    "tags": "已更新标签",
+    "notes": "通过API更新的备注",
+    "extend": "{\\"phone\\": \\"13900139000\\"}"
+  }'`,
+    requestBody: `{
+  "username": "newuser@example.com",  // 可选: 新用户名
+  "password": "NewPassword456",       // 可选: 新密码（不能为空字符串）
+  "tags": "已更新标签",         // 可选: 标签
+  "notes": "备注信息",          // 可选: 备注
+  "extend": "{\\"key\\": \\"value\\"}"  // 可选: 扩展字段(JSON字符串)
+}`,
+    successResponse: `{
+  "success": true,
+  "data": {
+    "id": 123,
+    "websiteId": 1,
+    "username": "newuser@example.com",
+    "tags": "已更新标签",
+    "notes": "通过API更新的备注",
+    "status": "Active",
+    "extend": {
+      "phone": "13900139000"
+    },
+    "updatedAt": "2025-10-17T11:00:00Z"
+  }
+}`,
+    errorResponse: `{
+  "success": false,
+  "error": {
+    "errorCode": "NO_FIELDS_TO_UPDATE",
+    "message": "至少需要提供一个要更新的字段"
+  }
+}`,
+  },
+  {
     id: 'list-accounts',
     title: '获取账号列表',
     method: 'GET',
