@@ -1,3 +1,5 @@
+using AccountBox.Core.Time;
+
 namespace AccountBox.Data.Entities;
 
 /// <summary>
@@ -16,9 +18,9 @@ public class LoginAttempt
     public required string IPAddress { get; set; }
 
     /// <summary>
-    /// 登录尝试时间（UTC）
+    /// 登录尝试时间（应用配置时区墙钟时间）
     /// </summary>
-    public DateTime AttemptTime { get; set; } = DateTime.UtcNow;
+    public DateTime AttemptTime { get; set; } = AppTime.Now;
 
     /// <summary>
     /// 是否成功

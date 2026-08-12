@@ -4,6 +4,7 @@ using AccountBox.Core.Configuration;
 using AccountBox.Core.Interfaces;
 using AccountBox.Core.Models.Auth;
 using AccountBox.Core.Models.Configuration;
+using AccountBox.Core.Time;
 using Microsoft.Extensions.Logging;
 
 namespace AccountBox.Security;
@@ -59,7 +60,7 @@ public class JwtKeyRotationService : IJwtKeyRotationService
     public List<JwtKeyVersion> GetValidationKeys()
     {
         var keyStore = LoadKeyStore();
-        var now = DateTime.UtcNow;
+        var now = AppTime.Now;
 
         // 返回所有活跃状态和未过期的密钥
         return keyStore.Keys
@@ -81,7 +82,7 @@ public class JwtKeyRotationService : IJwtKeyRotationService
             _logger.LogWarning("开始JWT密钥轮换...");
 
             var keyStore = LoadKeyStore();
-            var now = DateTime.UtcNow;
+            var now = AppTime.Now;
 
             // 获取旧的主密钥
             var oldKey = keyStore.Keys.FirstOrDefault(k => k.Id == keyStore.CurrentKeyId);
@@ -165,7 +166,7 @@ public class JwtKeyRotationService : IJwtKeyRotationService
             }
 
             key.Status = JwtKeyStatus.Revoked;
-            key.ExpiresAt = DateTime.UtcNow; // 立即过期
+            key.ExpiresAt = AppTime.Now; // 立即过期
 
             await SaveKeyStoreAsync(keyStore);
 
@@ -186,7 +187,7 @@ public class JwtKeyRotationService : IJwtKeyRotationService
         try
         {
             var keyStore = LoadKeyStore();
-            var now = DateTime.UtcNow;
+            var now = AppTime.Now;
 
             // 将过期的VerifyOnly密钥标记为Expired
             var expiredKeys = keyStore.Keys
@@ -241,7 +242,7 @@ public class JwtKeyRotationService : IJwtKeyRotationService
         }
 
         var nextRotationDate = keyStore.LastRotationAt.Value.AddDays(rotationDays);
-        return DateTime.UtcNow >= nextRotationDate;
+        return AppTime.Now >= nextRotationDate;
     }
 
     /// <summary>
@@ -250,7 +251,7 @@ public class JwtKeyRotationService : IJwtKeyRotationService
     private JwtKeyStore LoadKeyStore()
     {
         // 使用缓存避免频繁读文件
-        if (_cachedKeyStore != null && DateTime.UtcNow - _lastCacheTime < CacheExpiration)
+        if (_cachedKeyStore != null && AppTime.Now - _lastCacheTime < CacheExpiration)
         {
             return _cachedKeyStore;
         }
@@ -269,14 +270,14 @@ public class JwtKeyRotationService : IJwtKeyRotationService
                     {
                         Id = "env",
                         Key = envKey,
-                        CreatedAt = DateTime.UtcNow,
+                        CreatedAt = AppTime.Now,
                         ExpiresAt = null,
                         Status = JwtKeyStatus.Active
                     }
                 }
             };
             _cachedKeyStore = keyStore;
-            _lastCacheTime = DateTime.UtcNow;
+            _lastCacheTime = AppTime.Now;
             return keyStore;
         }
 
@@ -291,7 +292,7 @@ public class JwtKeyRotationService : IJwtKeyRotationService
                 {
                     _logger.LogDebug("从文件加载密钥存储: {Path}", _storageOptions.JwtKeyStorePath);
                     _cachedKeyStore = keyStore;
-                    _lastCacheTime = DateTime.UtcNow;
+                    _lastCacheTime = AppTime.Now;
                     return keyStore;
                 }
             }
@@ -308,12 +309,12 @@ public class JwtKeyRotationService : IJwtKeyRotationService
         {
             CurrentKeyId = newKey.Id,
             Keys = new List<JwtKeyVersion> { newKey },
-            LastRotationAt = DateTime.UtcNow
+            LastRotationAt = AppTime.Now
         };
 
         SaveKeyStoreAsync(newStore).Wait();
         _cachedKeyStore = newStore;
-        _lastCacheTime = DateTime.UtcNow;
+        _lastCacheTime = AppTime.Now;
         return newStore;
     }
 
@@ -360,7 +361,7 @@ public class JwtKeyRotationService : IJwtKeyRotationService
     {
         _logger.LogWarning("初始化JWT密钥存储...");
 
-        var now = DateTime.UtcNow;
+        var now = AppTime.Now;
         var initialKey = new JwtKeyVersion
         {
             Id = "v1",

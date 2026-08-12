@@ -70,6 +70,7 @@ services:
     environment:
       - DB_PROVIDER=mysql
       - CONNECTION_STRING=Server=mysql;Port=3306;Database=accountbox;User=accountbox;Password=accountbox123
+      - TZ=Asia/Shanghai
       # 如需固定主密码，请取消注释以下行：
       # - MASTER_PASSWORD=${MASTER_PASSWORD}
     depends_on:

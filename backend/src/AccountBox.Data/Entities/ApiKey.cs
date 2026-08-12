@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using AccountBox.Core.Enums;
+using AccountBox.Core.Time;
 
 namespace AccountBox.Data.Entities;
 
@@ -45,13 +46,13 @@ public class ApiKey
     /// 创建时间
     /// </summary>
     [Required]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = AppTime.Now;
 
     /// <summary>
     /// 更新时间
     /// </summary>
     [Required]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = AppTime.Now;
 
     /// <summary>
     /// 最后使用时间

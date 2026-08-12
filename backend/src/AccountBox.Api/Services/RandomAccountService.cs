@@ -1,5 +1,6 @@
 using AccountBox.Core.Enums;
 using AccountBox.Core.Models.Account;
+using AccountBox.Core.Time;
 using AccountBox.Data.DbContext;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
@@ -41,7 +42,7 @@ public class RandomAccountService : IRandomAccountService
         {
             if (_accountCache.TryGetValue(cacheKey, out var cached))
             {
-                if (cached.ExpireAt > DateTime.UtcNow)
+                if (cached.ExpireAt > AppTime.Now)
                 {
                     // 缓存未过期，返回缓存的账号
                     var cachedAccount = _context.Accounts
@@ -85,7 +86,7 @@ public class RandomAccountService : IRandomAccountService
             foreach (var kvp in _accountCache)
             {
                 // 只排除同网站的其他API Key占用的账号
-                if (kvp.Key != cacheKey && kvp.Key.EndsWith($"_{websiteId}") && kvp.Value.ExpireAt > DateTime.UtcNow)
+                if (kvp.Key != cacheKey && kvp.Key.EndsWith($"_{websiteId}") && kvp.Value.ExpireAt > AppTime.Now)
                 {
                     occupiedAccountIds.Add(kvp.Value.AccountId);
                 }
@@ -123,7 +124,7 @@ public class RandomAccountService : IRandomAccountService
         // 将选中的账号加入缓存（24小时）
         lock (_cacheLock)
         {
-            _accountCache[cacheKey] = (account.Id, DateTime.UtcNow.AddHours(24));
+            _accountCache[cacheKey] = (account.Id, AppTime.Now.AddHours(24));
         }
 
         return MapToResponse(account);
@@ -136,7 +137,7 @@ public class RandomAccountService : IRandomAccountService
     {
         lock (_cacheLock)
         {
-            var now = DateTime.UtcNow;
+            var now = AppTime.Now;
             var expiredKeys = _accountCache
                 .Where(kvp => kvp.Value.ExpireAt <= now)
                 .Select(kvp => kvp.Key)

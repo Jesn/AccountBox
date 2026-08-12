@@ -1,6 +1,7 @@
 using AccountBox.Core.Interfaces;
 using AccountBox.Core.Models;
 using AccountBox.Core.Models.Auth;
+using AccountBox.Core.Time;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -93,7 +94,7 @@ public class JwtKeyManagementController : ControllerBase
                 NewKeyId = newKey.Id,
                 CreatedAt = newKey.CreatedAt,
                 TransitionPeriodDays = transitionDays,
-                TransitionEndsAt = DateTime.UtcNow.AddDays(transitionDays),
+                TransitionEndsAt = AppTime.Now.AddDays(transitionDays),
                 Message = $"密钥轮换成功。新密钥 {newKey.Id} 已激活，过渡期 {transitionDays} 天。"
             };
 
@@ -176,7 +177,7 @@ public class JwtKeyManagementController : ControllerBase
                 NextRotationAt = keyStore.LastRotationAt?.AddDays(rotationDays),
                 Message = shouldRotate
                     ? "建议立即轮换密钥"
-                    : $"距离下次建议轮换还有 {(keyStore.LastRotationAt?.AddDays(rotationDays) - DateTime.UtcNow)?.Days ?? 0} 天"
+                    : $"距离下次建议轮换还有 {(keyStore.LastRotationAt?.AddDays(rotationDays) - AppTime.Now)?.Days ?? 0} 天"
             };
 
             return Ok(ApiResponse<ShouldRotateResponse>.Ok(response));

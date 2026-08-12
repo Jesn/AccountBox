@@ -74,6 +74,7 @@ services:
     environment:
       - DB_PROVIDER=postgresql
       - CONNECTION_STRING=Host=postgres;Port=5432;Database=accountbox;Username=accountbox;Password=accountbox123
+      - TZ=Asia/Shanghai
       # 如需固定主密码，请取消注释以下行：
       # - MASTER_PASSWORD=${MASTER_PASSWORD}
     depends_on:

@@ -1,3 +1,4 @@
+using AccountBox.Core.Time;
 using AccountBox.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -165,7 +166,7 @@ public class AccountBoxDbContext : Microsoft.EntityFrameworkCore.DbContext
 
         foreach (var entry in entries)
         {
-            var now = DateTime.UtcNow;
+            var now = AppTime.Now;
 
             // 尝试设置 CreatedAt（仅对新增实体）
             if (entry.State == EntityState.Added)

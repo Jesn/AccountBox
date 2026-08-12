@@ -1,6 +1,13 @@
 using AccountBox.Api.Extensions;
 using AccountBox.Api.Middleware;
+using AccountBox.Core.Time;
 using Microsoft.Extensions.FileProviders;
+
+// PostgreSQL timestamptz 兼容：允许 Unspecified 墙钟时间写入
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+// 统一应用时区（读取 TZ / APP_TIMEZONE，默认系统本地时区）
+AppTime.ConfigureFromEnvironment();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,7 +50,12 @@ app.UseWhen(
 
 app.MapControllers();
 
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
+app.MapGet("/health", () => Results.Ok(new
+    {
+        status = "healthy",
+        timestamp = AppTime.Now,
+        timeZone = AppTime.TimeZoneId
+    }))
     .WithName("HealthCheck")
     .WithOpenApi();
 

@@ -2,19 +2,73 @@
 # AccountBox - Single Image Deployment
 # ============================================
 # 单镜像部署 - 前端和后端打包在一个镜像中
-# 包含 SQLite 数据库支持
+# 默认使用 SQLite，也支持 MySQL
 #
-# 启动方式:
-#   docker-compose up
+# 启动方式 (SQLite 默认):
+#   docker-compose up -d
+#
+# 启动方式 (MySQL):
+#   1. 将 accountbox 服务的环境变量从 sqlite 切换为 mysql（见下方注释）
+#   2. docker-compose --profile mysql up -d
 #
 # 访问方式:
 #   - 应用: http://localhost:5095
 #   - API: http://localhost:5095/api
 #   - Swagger: http://localhost:5095/swagger
+#   - phpMyAdmin (MySQL 模式): http://localhost:8080
 # ============================================
 
 services:
+  # ============================================
+  # MySQL 数据库服务（使用 --profile mysql 启用）
+  # ============================================
+  mysql:
+    image: mysql:8.0
+    container_name: accountbox-mysql
+    restart: unless-stopped
+    profiles:
+      - mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: accountbox
+      MYSQL_USER: accountbox
+      MYSQL_PASSWORD: accountbox123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - accountbox-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "accountbox", "-paccountbox123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # phpMyAdmin 数据库管理工具（使用 --profile mysql 启用）
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: accountbox-phpmyadmin
+    restart: unless-stopped
+    profiles:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: accountbox
+      PMA_PASSWORD: accountbox123
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - accountbox-network
+
+  # ============================================
   # 单镜像应用 - 包含前端和后端
+  # ============================================
   accountbox:
     build:
       context: .
@@ -26,20 +80,36 @@ services:
     volumes:
       - accountbox-data:/app/data
     environment:
-      # 数据库配置
+      # ====== SQLite 配置（默认） ======
       - DB_PROVIDER=sqlite
+
+      # ====== 时区（业务创建/更新时间统一使用此墙钟时间） ======
+      - TZ=Asia/Shanghai
+      # 也可写 APP_TIMEZONE=Asia/Shanghai（与 TZ 等价）
+
+      # ====== MySQL 配置（使用 --profile mysql 启动时取消注释下方两行，并注释掉上方 sqlite 配置） ======
+      # - DB_PROVIDER=mysql
+      # - CONNECTION_STRING=Server=mysql;Port=3306;Database=accountbox;User=accountbox;Password=accountbox123
 
       # 安全配置（可选 - 如果不设置将自动生成）
       # JWT 密钥和主密码将在首次启动时自动生成并保存到 /app/data/.secrets/
       # 如需固定主密码，请取消注释以下行：
       # - MASTER_PASSWORD=${MASTER_PASSWORD}
+    networks:
+      - accountbox-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 3s
       retries: 3
-      start_period: 10s
+      start_period: 40s  # MySQL 模式下需等待数据库就绪，应用会自动重试连接
+
+networks:
+  accountbox-network:
+    driver: bridge
 
 volumes:
   accountbox-data:
+    driver: local
+  mysql-data:
     driver: local

@@ -11,6 +11,7 @@ services:
       DB_PROVIDER: ${DB_PROVIDER:-postgresql}
       CONNECTION_STRING: ${CONNECTION_STRING}
       MASTER_PASSWORD: ${MASTER_PASSWORD:-}
+      TZ: ${TZ:-Asia/Shanghai}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s

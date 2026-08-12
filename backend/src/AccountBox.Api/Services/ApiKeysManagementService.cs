@@ -2,6 +2,7 @@ using AccountBox.Core.Enums;
 using AccountBox.Core.Models;
 using AccountBox.Core.Models.ApiKey;
 using AccountBox.Core.Services;
+using AccountBox.Core.Time;
 using AccountBox.Data.DbContext;
 using AccountBox.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -62,7 +63,7 @@ public class ApiKeysManagementService : IApiKeysManagementService
             KeyPlaintext = keyPlaintext,
             KeyHash = keyHash,
             ScopeType = scopeType,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = AppTime.Now
         };
 
         _context.ApiKeys.Add(apiKey);

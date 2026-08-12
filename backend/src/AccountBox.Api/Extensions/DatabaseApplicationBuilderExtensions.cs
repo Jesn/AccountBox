@@ -1,4 +1,6 @@
 using AccountBox.Core.Models.Configuration;
+using AccountBox.Core.Time;
+using AccountBox.Data.DataMigrations;
 using AccountBox.Data.DbContext;
 using Microsoft.EntityFrameworkCore;
 
@@ -97,15 +99,18 @@ public static class DatabaseApplicationBuilderExtensions
                 }
                 dbLogger.LogInformation("----------------------------------------");
 
-                var startTime = DateTime.UtcNow;
+                var startTime = AppTime.Now;
                 db.Database.Migrate();
-                var duration = DateTime.UtcNow - startTime;
+                var duration = AppTime.Now - startTime;
                 dbLogger.LogInformation("✓ 数据库迁移成功完成（耗时: {Duration:F2} 秒）", duration.TotalSeconds);
             }
             else
             {
                 dbLogger.LogInformation("✓ 数据库已是最新版本，无需迁移");
             }
+
+            // schema 就绪后执行一次性业务数据迁移（UTC 墙钟 → 应用时区墙钟）
+            UtcWallClockToAppTimeMigrator.Apply(db, dbLogger);
 
             dbLogger.LogInformation("========================================");
             dbLogger.LogInformation("数据库迁移检查完成");

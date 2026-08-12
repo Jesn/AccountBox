@@ -1,4 +1,5 @@
 using AccountBox.Core.Interfaces;
+using AccountBox.Core.Time;
 using AccountBox.Data.DbContext;
 using AccountBox.Data.Entities;
 
@@ -28,7 +29,7 @@ public class LoginAttemptService : ILoginAttemptService
             var loginAttempt = new LoginAttempt
             {
                 IPAddress = ipAddress,
-                AttemptTime = DateTime.UtcNow,
+                AttemptTime = AppTime.Now,
                 IsSuccessful = isSuccessful,
                 FailureReason = failureReason,
                 UserAgent = userAgent

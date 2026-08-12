@@ -1,3 +1,4 @@
+using AccountBox.Core.Time;
 using AccountBox.Data.DbContext;
 using AccountBox.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -79,10 +80,10 @@ public class ApiKeyAuthMiddleware
             context.Request.Method,
             context.Request.Path,
             context.Connection.RemoteIpAddress,
-            DateTime.UtcNow);
+            AppTime.Now);
 
         // 更新最后使用时间
-        apiKey.LastUsedAt = DateTime.UtcNow;
+        apiKey.LastUsedAt = AppTime.Now;
         await dbContext.SaveChangesAsync();
 
         // 将API密钥信息存入HttpContext，供后续使用

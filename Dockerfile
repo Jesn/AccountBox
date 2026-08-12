@@ -54,8 +54,8 @@ RUN dotnet publish ./AccountBox.Api/AccountBox.Api.csproj \
 # ============================================
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 
-# 安装 curl（用于健康检查）和 su-exec（用于降权启动）
-RUN apk add --no-cache curl su-exec
+# 安装 curl（健康检查）、su-exec（降权）、tzdata（TZ 时区生效必需）
+RUN apk add --no-cache curl su-exec tzdata
 
 WORKDIR /app
 
@@ -74,9 +74,10 @@ RUN mkdir -p /app/data && chown -R accountbox:accountbox /app/data
 
 COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-# 运行时默认配置
+# 运行时默认配置（TZ 决定业务时间墙钟，默认中国时区）
 ENV ASPNETCORE_ENVIRONMENT=Production \
-    DATABASE_PATH=/app/data/accountbox.db
+    DATABASE_PATH=/app/data/accountbox.db \
+    TZ=Asia/Shanghai
 
 # 暴露端口
 EXPOSE 8080

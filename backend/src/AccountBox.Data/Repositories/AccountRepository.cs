@@ -1,5 +1,6 @@
 using AccountBox.Core.Constants;
 using AccountBox.Core.Enums;
+using AccountBox.Core.Time;
 using AccountBox.Data.DbContext;
 using AccountBox.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -151,7 +152,7 @@ public class AccountRepository : IAccountRepository
         }
 
         account.IsDeleted = true;
-        account.DeletedAt = DateTime.UtcNow;
+        account.DeletedAt = AppTime.Now;
 
         await _context.SaveChangesAsync();
     }

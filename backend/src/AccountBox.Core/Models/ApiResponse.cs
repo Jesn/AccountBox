@@ -1,3 +1,5 @@
+using AccountBox.Core.Time;
+
 namespace AccountBox.Core.Models;
 
 /// <summary>
@@ -35,7 +37,7 @@ public class ApiResponse<T>
         {
             Success = true,
             Data = data,
-            Timestamp = DateTime.UtcNow
+            Timestamp = AppTime.Now
         };
     }
 
@@ -53,7 +55,7 @@ public class ApiResponse<T>
                 Message = message,
                 Details = details
             },
-            Timestamp = DateTime.UtcNow
+            Timestamp = AppTime.Now
         };
     }
 }
