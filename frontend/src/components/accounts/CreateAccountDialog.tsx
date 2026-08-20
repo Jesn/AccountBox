@@ -124,32 +124,34 @@ export function CreateAccountDialog({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-[95vw] sm:w-full sm:max-w-[600px]">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="flex flex-1 flex-col min-h-0">
             <DialogHeader>
               <DialogTitle>添加账号</DialogTitle>
               <DialogDescription>为该网站添加新的账号信息</DialogDescription>
             </DialogHeader>
 
-            <AccountForm
-              username={username}
-              password={password}
-              showPassword={showPassword}
-              notes={notes}
-              tags={tags}
-              extendedData={extendedData}
-              error={error}
-              disabled={isSubmitting}
-              isGeneratingPassword={isGeneratingPassword}
-              autoFocus
-              onUsernameChange={setUsername}
-              onPasswordChange={setPassword}
-              onShowPasswordChange={setShowPassword}
-              onNotesChange={setNotes}
-              onTagsChange={setTags}
-              onExtendedDataChange={setExtendedData}
-              onQuickGeneratePassword={handleQuickGenerate}
-              onOpenPasswordGenerator={() => setShowPasswordGenerator(true)}
-            />
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <AccountForm
+                username={username}
+                password={password}
+                showPassword={showPassword}
+                notes={notes}
+                tags={tags}
+                extendedData={extendedData}
+                error={error}
+                disabled={isSubmitting}
+                isGeneratingPassword={isGeneratingPassword}
+                autoFocus
+                onUsernameChange={setUsername}
+                onPasswordChange={setPassword}
+                onShowPasswordChange={setShowPassword}
+                onNotesChange={setNotes}
+                onTagsChange={setTags}
+                onExtendedDataChange={setExtendedData}
+                onQuickGeneratePassword={handleQuickGenerate}
+                onOpenPasswordGenerator={() => setShowPasswordGenerator(true)}
+              />
+            </div>
 
             <DialogFooter>
               <Button
